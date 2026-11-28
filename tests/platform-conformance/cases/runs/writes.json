@@ -1,0 +1,1181 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "runs",
+  "about": "Runs (conversations): create, send (idempotent), cancel, interrupt, continue, retry, fork, rate, delete.",
+  "cases": [
+    {
+      "id": "runs.create.ok",
+      "title": "Start a run on an agent; the answer names the run and its first message",
+      "sdk": {
+        "family": "runs",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "body": {
+          "input": "conformance run ${run.short}",
+          "agentId": "${own.agent}"
+        }
+      },
+      "args": {
+        "agentId": "${own.agent}",
+        "input": "conformance run ${run.short}"
+      },
+      "expect": {
+        "status": 201,
+        "contract": true,
+        "fields": {
+          "conversation.id": "string",
+          "firstMessage.id": "string"
+        }
+      },
+      "capture": {
+        "conv": "conversation.id"
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller"
+        }
+      ]
+    },
+    {
+      "id": "runs.create.missing-input",
+      "title": "A run without input is a typed 400",
+      "sdk": {
+        "family": "runs",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "title": "no input"
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.create.malformed-json",
+      "title": "A body that is not JSON is a typed 400",
+      "sdk": {
+        "family": "runs",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "rawBody": "{\"input\": "
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.create.bad-mode",
+      "title": "An unknown mode is a typed 400",
+      "sdk": {
+        "family": "runs",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "input": "x",
+          "mode": "swarm"
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      },
+      "capture": {
+        "conv": "conversation.id"
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller"
+        }
+      ]
+    },
+    {
+      "id": "runs.create.unknown-agent",
+      "title": "Starting a run on an agent that does not exist answers 404",
+      "sdk": {
+        "family": "runs",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "input": "x",
+          "agentId": "agent-conformance-missing"
+        }
+      },
+      "expect": {
+        "status": [
+          404,
+          400
+        ],
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.create.cross-tenant-agent",
+      "title": "Org B cannot start a run on org A's agent",
+      "sdk": {
+        "family": "runs",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "body": {
+          "input": "hijack",
+          "agentId": "${res.agent}"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": [
+          404,
+          400
+        ],
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.send.ok",
+      "title": "Send a follow-up message with an idempotency key",
+      "sdk": {
+        "family": "runs",
+        "method": "send"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/messages"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/conversations"
+          },
+          "body": {
+            "input": "conformance setup ${run.short}",
+            "agentId": "${own.agent}"
+          },
+          "capture": {
+            "conv": "conversation.id"
+          },
+          "expectStatus": 201,
+          "as": "caller",
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/conversations/{id}"
+            },
+            "params": {
+              "id": "${cap.conv}"
+            },
+            "field": "conversation.status",
+            "in": [
+              "done",
+              "error",
+              "waiting_approval",
+              "canceled"
+            ],
+            "timeoutMs": 120000
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.conv}"
+        },
+        "body": {
+          "input": "second turn"
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          202
+        ],
+        "contract": true,
+        "fields": {
+          "message.id": "string",
+          "duplicate": {
+            "equals": false
+          }
+        }
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller"
+        }
+      ]
+    },
+    {
+      "id": "runs.send.replay",
+      "title": "The same idempotency key and body replays the first answer (duplicate: true)",
+      "sdk": {
+        "family": "runs",
+        "method": "send"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/messages"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/conversations"
+          },
+          "body": {
+            "input": "conformance setup ${run.short}",
+            "agentId": "${own.agent}"
+          },
+          "capture": {
+            "conv": "conversation.id"
+          },
+          "expectStatus": 201,
+          "as": "caller",
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/conversations/{id}"
+            },
+            "params": {
+              "id": "${cap.conv}"
+            },
+            "field": "conversation.status",
+            "in": [
+              "done",
+              "error",
+              "waiting_approval",
+              "canceled"
+            ],
+            "timeoutMs": 120000
+          }
+        },
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/conversations/{id}/messages"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "body": {
+            "input": "replayed turn"
+          },
+          "idempotencyKey": "conf-replay-${run.short}",
+          "as": "caller",
+          "capture": {
+            "firstMessage": "message.id"
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.conv}"
+        },
+        "body": {
+          "input": "replayed turn"
+        },
+        "idempotencyKey": "conf-replay-${run.short}"
+      },
+      "expect": {
+        "status": [
+          200,
+          202
+        ],
+        "fields": {
+          "duplicate": {
+            "equals": true
+          },
+          "message.id": {
+            "equals": "${cap.firstMessage}"
+          }
+        }
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller"
+        }
+      ]
+    },
+    {
+      "id": "runs.send.missing-key",
+      "title": "A message without an Idempotency-Key is a typed 400",
+      "sdk": {
+        "family": "runs",
+        "method": "send"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/messages"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        },
+        "body": {
+          "input": "no key"
+        },
+        "noIdempotencyKey": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.send.cross-tenant",
+      "title": "Org B cannot post into org A's run",
+      "sdk": {
+        "family": "runs",
+        "method": "send"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/messages"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        },
+        "body": {
+          "input": "hijack"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.cancel.ok",
+      "title": "Cancel a run",
+      "sdk": {
+        "family": "runs",
+        "method": "cancel"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/cancel"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/conversations"
+          },
+          "body": {
+            "input": "conformance setup ${run.short}",
+            "agentId": "${own.agent}"
+          },
+          "capture": {
+            "conv": "conversation.id"
+          },
+          "expectStatus": 201,
+          "as": "caller"
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.conv}"
+        },
+        "body": {}
+      },
+      "expect": {
+        "status": [
+          202,
+          409
+        ]
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller"
+        }
+      ]
+    },
+    {
+      "id": "runs.interrupt.ok",
+      "title": "Interrupt a run (409 when nothing is running)",
+      "sdk": {
+        "family": "runs",
+        "method": "interrupt"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/interrupt"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/conversations"
+          },
+          "body": {
+            "input": "conformance setup ${run.short}",
+            "agentId": "${own.agent}"
+          },
+          "capture": {
+            "conv": "conversation.id"
+          },
+          "expectStatus": 201,
+          "as": "caller"
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.conv}"
+        },
+        "body": {}
+      },
+      "expect": {
+        "status": [
+          202,
+          409
+        ]
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller"
+        }
+      ]
+    },
+    {
+      "id": "runs.continue.ok",
+      "title": "Continue a run (409 when it cannot continue)",
+      "sdk": {
+        "family": "runs",
+        "method": "continue"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/continue"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/conversations"
+          },
+          "body": {
+            "input": "conformance setup ${run.short}",
+            "agentId": "${own.agent}"
+          },
+          "capture": {
+            "conv": "conversation.id"
+          },
+          "expectStatus": 201,
+          "as": "caller",
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/conversations/{id}"
+            },
+            "params": {
+              "id": "${cap.conv}"
+            },
+            "field": "conversation.status",
+            "in": [
+              "done",
+              "error",
+              "waiting_approval",
+              "canceled"
+            ],
+            "timeoutMs": 120000
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.conv}"
+        },
+        "body": {}
+      },
+      "expect": {
+        "status": [
+          202,
+          409
+        ]
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller"
+        }
+      ]
+    },
+    {
+      "id": "runs.retry.ok",
+      "title": "Retry a run's last turn (409/422 when there is nothing to retry)",
+      "sdk": {
+        "family": "runs",
+        "method": "retry"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/retry"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/conversations"
+          },
+          "body": {
+            "input": "conformance setup ${run.short}",
+            "agentId": "${own.agent}"
+          },
+          "capture": {
+            "conv": "conversation.id"
+          },
+          "expectStatus": 201,
+          "as": "caller",
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/conversations/{id}"
+            },
+            "params": {
+              "id": "${cap.conv}"
+            },
+            "field": "conversation.status",
+            "in": [
+              "done",
+              "error",
+              "waiting_approval",
+              "canceled"
+            ],
+            "timeoutMs": 120000
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.conv}"
+        },
+        "body": {
+          "reason": "conformance retry"
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          409,
+          422
+        ]
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller"
+        }
+      ]
+    },
+    {
+      "id": "runs.fork.ok",
+      "title": "Fork a run's transcript into a new run",
+      "sdk": {
+        "family": "runs",
+        "method": "fork"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/fork"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/conversations"
+          },
+          "body": {
+            "input": "conformance setup ${run.short}",
+            "agentId": "${own.agent}"
+          },
+          "capture": {
+            "conv": "conversation.id"
+          },
+          "expectStatus": 201,
+          "as": "caller",
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/conversations/{id}"
+            },
+            "params": {
+              "id": "${cap.conv}"
+            },
+            "field": "conversation.status",
+            "in": [
+              "done",
+              "error",
+              "waiting_approval",
+              "canceled"
+            ],
+            "timeoutMs": 120000
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.conv}"
+        },
+        "body": {}
+      },
+      "expect": {
+        "status": 201,
+        "contract": true,
+        "fields": {
+          "conversation.id": "string"
+        }
+      },
+      "capture": {
+        "fork": "conversation.id"
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller"
+        },
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.fork}"
+          },
+          "as": "caller"
+        }
+      ]
+    },
+    {
+      "id": "runs.rating.up",
+      "title": "Rate a run up",
+      "sdk": {
+        "family": "runs",
+        "method": "rating.set"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/rating"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        },
+        "body": {
+          "rating": "up"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "recorded": {
+            "equals": true
+          }
+        }
+      }
+    },
+    {
+      "id": "runs.rating.bad-value",
+      "title": "An unknown rating value is a typed 400",
+      "sdk": {
+        "family": "runs",
+        "method": "rating.set"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations/{id}/rating"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        },
+        "body": {
+          "rating": "meh"
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.delete.ok",
+      "title": "Delete a run",
+      "sdk": {
+        "family": "runs",
+        "method": "delete"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/conversations/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/conversations"
+          },
+          "body": {
+            "input": "conformance setup ${run.short}",
+            "agentId": "${own.agent}"
+          },
+          "capture": {
+            "conv": "conversation.id"
+          },
+          "expectStatus": 201,
+          "as": "caller",
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/conversations/{id}"
+            },
+            "params": {
+              "id": "${cap.conv}"
+            },
+            "field": "conversation.status",
+            "in": [
+              "done",
+              "error",
+              "waiting_approval",
+              "canceled"
+            ],
+            "timeoutMs": 120000
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.conv}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "deleted": {
+            "equals": true
+          }
+        }
+      },
+      "verify": [
+        {
+          "op": {
+            "method": "GET",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${cap.conv}"
+          },
+          "as": "caller",
+          "expectStatus": 404
+        }
+      ]
+    },
+    {
+      "id": "runs.delete.cross-tenant",
+      "title": "Org B cannot delete org A's run, and it is still there afterwards",
+      "sdk": {
+        "family": "runs",
+        "method": "delete"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/conversations/{id}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "repeat": 3,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      },
+      "verify": [
+        {
+          "op": {
+            "method": "GET",
+            "path": "/workspace/conversations/{id}"
+          },
+          "params": {
+            "id": "${res.conversation}"
+          },
+          "expectStatus": 200
+        }
+      ]
+    }
+  ]
+}

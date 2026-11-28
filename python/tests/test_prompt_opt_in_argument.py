@@ -1,32 +1,26 @@
-"""The ``allow_insecure_http`` argument on the ``fi.prompt`` classmethods that build their own keyed client.
+"""Plain-HTTP policy for prompt entry points that build their own keyed client.
 
-``Prompt.list_templates``, ``Prompt.delete_template_by_name``, ``Prompt.get_template_by_name`` and the label
-classmethods (``assign_label_to_template_version``, ``remove_label_from_template_version``,
-``set_default_version``, ``get_template_labels``) each build a client that sends ``X-Api-Key`` and ``X-Secret-Key``.
-They take ``allow_insecure_http`` like every other client: ``True`` sends plain http to a host that is not loopback
-directly, through no proxy; ``False`` refuses it even with ``FI_ALLOW_INSECURE_HTTP=1``; the default (``None``) reads
-the environment.
-
-Listeners run on the loopback interface; ``api.futureagi.com`` resolves to them through the lookup shim of
-``test_plain_http_key_guards`` (its ``net`` fixture applies here too), so no case reaches a real host. Each case
-reads the connection count and the number of bytes holding the marker key at the target and at the proxy listener.
+The prompt classmethods accept an explicit opt-in or read the environment. Future AGI
+hosts are excluded, and requests for opted-in custom hosts use a direct route.
+The lookup shim resolves the named test hosts to the loopback listeners, which
+record connections and planted marker bytes at the target and proxy.
 """
 
 from __future__ import annotations
 
-import inspect
 import secrets
 
 import pytest
 
+from fi.errors import ConfigurationError, InsecureHttpRefusedError
 from fi.prompt import Prompt, PromptTemplate
-from tests.test_plain_http_key_guards import CODE, KEY, SECRET, _attempt, net, refused, use_proxy  # noqa: F401
+from tests.test_plain_http_key_guards import KEY, PLAIN, SECRET, _attempt, net, use_proxy  # noqa: F401
 
 HOST = "api.futureagi.com"
 
 
 def _name() -> str:
-    # A fresh name per call, so the prompt cache never answers in place of a request.
+    # Distinct names cause each lookup to reach the transport rather than the prompt cache.
     return "tpl-" + secrets.token_hex(6)
 
 
@@ -52,67 +46,56 @@ CALLS = {
     ),
     "get-template-labels": lambda base, **kw: Prompt.get_template_labels(template_name=_name(), **_keys(base), **kw),
 }
-METHODS = {
-    "list-templates": Prompt.list_templates,
-    "delete-template-by-name": Prompt.delete_template_by_name,
-    "get-template-by-name": Prompt.get_template_by_name,
-    "assign-label-to-template-version": Prompt.assign_label_to_template_version,
-    "remove-label-from-template-version": Prompt.remove_label_from_template_version,
-    "set-default-version": Prompt.set_default_version,
-    "get-template-labels": Prompt.get_template_labels,
-}
 
 
-def _base(net) -> str:
-    return f"http://{HOST}:{net.target.port}"
+def _base(net, host=HOST) -> str:
+    return f"http://{host}:{net.target.port}"
 
 
-def _not_refused(exc: BaseException | None) -> None:
-    # The listener answers ``{}``, which a method may fail to parse; only a refusal or a rejected argument counts.
-    assert not isinstance(exc, TypeError), f"TypeError: {exc}"
-    assert getattr(exc, "code", None) != CODE, f"refused: {exc}"
-
-
-@pytest.mark.parametrize("method", list(METHODS), ids=list(METHODS))
-def test_classmethod_takes_the_opt_in_argument_defaulting_to_none(method):
-    parameter = inspect.signature(METHODS[method]).parameters.get("allow_insecure_http")
-    assert parameter is not None, "no allow_insecure_http parameter"
-    assert parameter.default is None
-    assert parameter.kind in (parameter.KEYWORD_ONLY, parameter.POSITIONAL_OR_KEYWORD)
+def _origin_refused(exc):
+    assert isinstance(exc, InsecureHttpRefusedError), repr(exc)
+    assert exc.code == "INSECURE_HTTP_REFUSED"
+    assert KEY not in str(exc) and SECRET not in str(exc)
 
 
 @pytest.mark.parametrize("call", list(CALLS), ids=list(CALLS))
-def test_opt_in_argument_sends_directly_past_environment_proxy(monkeypatch, net, call):
+def test_opt_in_argument_sends_directly_with_environment_proxy(monkeypatch, net, call):
     use_proxy(monkeypatch, net)
-    exc = _attempt(lambda: CALLS[call](_base(net), allow_insecure_http=True))
-    _not_refused(exc)
+    exc = _attempt(lambda: CALLS[call](_base(net, PLAIN), allow_insecure_http=True))
     net.delivered_direct()
+    assert not isinstance(exc, (TypeError, ConfigurationError)), repr(exc)
 
 
 @pytest.mark.parametrize("call", list(CALLS), ids=list(CALLS))
-def test_opt_in_argument_false_wins_over_environment(monkeypatch, net, call):
+def test_opt_in_argument_false_overrides_environment_opt_in(monkeypatch, net, call):
     use_proxy(monkeypatch, net)
     monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
-    exc = _attempt(lambda: CALLS[call](_base(net), allow_insecure_http=False))
-    refused(exc, ValueError)
+    exc = _attempt(lambda: CALLS[call](_base(net, PLAIN), allow_insecure_http=False))
     net.nothing_sent()
+    assert isinstance(exc, ConfigurationError), repr(exc)
+    assert exc.code == "insecure_http_origin"
 
 
 @pytest.mark.parametrize("call", list(CALLS), ids=list(CALLS))
 def test_without_opt_in_keyed_plain_http_is_refused(monkeypatch, net, call):
     use_proxy(monkeypatch, net)
     exc = _attempt(lambda: CALLS[call](_base(net)))
-    refused(exc, ValueError)
     net.nothing_sent()
+    _origin_refused(exc)
 
 
 @pytest.mark.parametrize("call", list(CALLS), ids=list(CALLS))
-def test_opt_in_by_environment_still_sends_directly(monkeypatch, net, call):
+@pytest.mark.parametrize("host", [HOST, PLAIN])
+def test_environment_opt_in_is_limited_to_custom_hosts(monkeypatch, net, call, host):
     use_proxy(monkeypatch, net)
     monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
-    exc = _attempt(lambda: CALLS[call](_base(net)))
-    _not_refused(exc)
-    net.delivered_direct()
+    exc = _attempt(lambda: CALLS[call](_base(net, host)))
+    if host == HOST:
+        net.nothing_sent()
+        _origin_refused(exc)
+    else:
+        net.delivered_direct()
+        assert not isinstance(exc, (TypeError, ConfigurationError)), repr(exc)
 
 
 # ``Prompt(template=...)`` without an id fetches the template by name in ``__init__`` and logs a warning in place of
@@ -123,10 +106,11 @@ def _construct(base: str, **kw):
     return Prompt(template=PromptTemplate(name=_name()), **_keys(base), **kw)
 
 
-def test_constructor_with_opt_in_argument_sends_directly_past_environment_proxy(monkeypatch, net):
+def test_constructor_with_opt_in_argument_sends_nothing_to_future_agi_host(monkeypatch, net):
     use_proxy(monkeypatch, net)
-    _not_refused(_attempt(lambda: _construct(_base(net), allow_insecure_http=True)))
-    net.delivered_direct()
+    error = _attempt(lambda: _construct(_base(net), allow_insecure_http=True))
+    net.nothing_sent()
+    assert error is None  # The constructor handles the failed lookup internally.
 
 
 @pytest.mark.parametrize(

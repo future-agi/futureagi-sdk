@@ -7,18 +7,18 @@ copied in so the gateway client ships inside `futureagi`.
 Changes from upstream:
 - imports rewritten from `agentcc` to `fi.gateway` (logger names stay `agentcc` so existing logging config keeps working);
 - `_fi.py` adds `Gateway` / `AsyncGateway` (Future AGI env vars, hosted default URL, tolerant of a trailing `/v1`).
-- bugs fixed after running against a real gateway with real providers (regression tests in
+- corrections found by running against a real gateway with real providers (regression tests in
   `tests/gateway/test_live_fixes.py`):
-  - `audio.transcriptions` / `audio.translations` sent the file inside a JSON body; they now upload
+  - `audio.transcriptions` / `audio.translations` sent the file inside a JSON body; they upload
     `multipart/form-data` (`RequestOptions.files`);
   - `Usage.completion_tokens` was required, so every embeddings response failed to parse;
   - `Session.request_count` / `total_cost` / `total_tokens` stayed 0: nothing called `track_request`.
 - bugs found in code review (regression tests in `tests/gateway/test_review_fixes.py`):
   - the SSE parsers split each network chunk on its own, so a line straddling two chunks was torn
-    (truncated JSON, or a multibyte character replaced); they now buffer partial lines and decode
+    (truncated JSON, or a multibyte character replaced); they buffer partial lines and decode
     UTF-8 incrementally;
   - a cache hit on `stream=True` called `response.json()` on an unread streamed response;
-  - a streamed error response was never closed, leaking a pooled connection; a 246 guardrail
+  - a streamed error response was not closed, so its pooled connection stayed open; a 246 guardrail
     warning on a stream was not raised;
   - `{"error": "<string>"}` bodies crashed error parsing instead of giving a typed error;
   - `on_request_end` callbacks got the parsed model instead of a `CallbackResponse`, so the built-in
@@ -31,45 +31,42 @@ Changes from upstream:
   - `with_options()` shared the parent's base client, so timeout, retries, headers, session and
     metadata overrides were ignored once the parent had made a request; `trace_id` was accepted
     and dropped;
-  - `FI_GATEWAY_API_KEY` / `FI_GATEWAY_URL` (and the `/v1` fix) now apply to every entry point
+  - `FI_GATEWAY_API_KEY` / `FI_GATEWAY_URL` (and the `/v1` handling) apply to every entry point
     (`AgentCC`, `health_check`, `validate_environment`, `patch_openai`), through `_env.py`.
 - bugs found in the security / correctness review of futureagi-sdk#35 (regression tests in
   `tests/gateway/test_security_review_fixes.py`):
-  - `redact_messages=True` was stored and never applied: callbacks (and so `RequestRecorder`)
-    received the full message body. Callbacks now get a redacted copy (`messages[].content`,
+  - `redact_messages=True` was stored and not applied: callbacks (and so `RequestRecorder`)
+    received the full message body. Callbacks get a redacted copy (`messages[].content`,
     `prompt`, `input`, `instructions` replaced by `[REDACTED]`); the request to the provider is
     untouched;
   - the active session was one attribute on the client, so two threads or asyncio tasks sharing a
     client overwrote each other's session, a request could be credited to another task's session,
-    and leaving a nested session dropped the outer one. It is a `ContextVar` now, restored on exit,
+    and leaving a nested session dropped the outer one. It is a `ContextVar`, restored on exit,
     and a request is credited to the session it started in;
   - `to_response_format()` sent Pydantic's schema with `strict: true`, which OpenAI rejects
     (`additionalProperties`, `required`, `default`). The schema is converted (`strict_schema`):
     every object closed, every property required, defaulted fields made nullable, `$defs` too;
   - `responses.create(stream=True)` and `completions.create(stream=True)` decoded every event as
-    a chat chunk and failed on the first one; each endpoint now has its own event model
+    a chat chunk and failed on the first one; each endpoint has its own event model
     (`ResponseStreamEvent` with a string `delta`, `Completion`);
-  - a stream that ended normally (or with an error) never closed its HTTP response, holding a
-    pooled connection until the caller remembered `close()`; both streams close themselves when
-    they end (closing is idempotent);
+  - both streams close their HTTP responses on normal completion or on error. Closing is idempotent;
   - `AsyncStream` built a new parser on every `async for`, so breaking out of a loop and then
     calling `get_final_completion()` hit httpx's `StreamConsumed`; one iterator is shared;
   - `create_mock_client()` returned an ordinary network client that ignored its fixture mapping
-    (a reachable gateway would have made billable calls); it now installs an httpx mock transport
+    (a reachable gateway would have made billable calls); it installs an httpx mock transport
     that serves the mapping and answers 404 for anything else;
   - `Embedding.embedding` only accepted `list[float]`, so `encoding_format="base64"` responses
     failed validation; the base64 string is accepted and `decode_base64_embedding()` unpacks it;
   - `close()` / `aclose()` skipped every client made by `with_options()`, so a copy made before
-    the parent's first request could never close the pool it owns; closing is delegated to the
+    the parent's first request could not close the pool it owns; closing is delegated to the
     base client, which already knows whether its pool is owned, shared or injected;
-  - (review 2, 2026-11-03) a streaming call went straight to `_stream_request` and so was never
-    counted in the session nor reported to the callbacks; `_open_stream` wraps it with the same
-    `on_request_start` / `on_request_end` / `on_error` as a plain call plus the stream callbacks,
-    and credits the session captured when the request started once the stream closes (tokens
-    from the last usage event, cost from the response headers; a stream closed early counts the
-    request with no tokens; a failed one is an error, not a request);
+  - `_open_stream` invokes `on_request_start`, `on_request_end`, and `on_error` as for a plain
+    call, plus the stream callbacks. When the stream closes, it credits the session captured at
+    request start, with tokens from the last usage event and cost from the response headers.
+    A stream closed early counts as a request with no tokens; a failed stream counts as an error,
+    not a request;
   - `strict_schema()` removed every dictionary key named `default`, so a user model with a field
-    called `default` lost that property; it now walks schema nodes only and leaves the name maps
+    called `default` lost that property; it walks schema nodes only and leaves the name maps
     (`properties`, `$defs`, ...) alone;
   - redaction left `messages[].tool_calls[].function.arguments` (and `function_call.arguments`)
     in the copy callbacks get; they are `[REDACTED]` too (`callbacks.base.redact_body`).

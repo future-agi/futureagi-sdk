@@ -1,0 +1,377 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "platform",
+  "about": "Environments.",
+  "cases": [
+    {
+      "id": "platform.environments.list",
+      "title": "List environments",
+      "sdk": {
+        "family": "platform",
+        "method": "environments.list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/environments"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "environments": "array"
+        }
+      }
+    },
+    {
+      "id": "platform.environments.create",
+      "title": "Create an environment",
+      "sdk": {
+        "family": "platform",
+        "method": "environments.create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/environments"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "call": {
+        "body": {
+          "name": "conf-env-create-${run.short}",
+          "sandboxKind": "local",
+          "resourcePreset": "runtime-default",
+          "browserOrigins": [],
+          "credentialBindingIds": [],
+          "pinnedImageDigest": null
+        }
+      },
+      "expect": {
+        "status": 201,
+        "contract": true,
+        "fields": {
+          "environment.id": "string"
+        }
+      }
+    },
+    {
+      "id": "platform.environments.create.bad-kind",
+      "title": "An unknown sandbox kind is a typed 400",
+      "sdk": {
+        "family": "platform",
+        "method": "environments.create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/environments"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "name": "conf-env-bad",
+          "sandboxKind": "vm",
+          "resourcePreset": "small",
+          "browserOrigins": [],
+          "credentialBindingIds": [],
+          "pinnedImageDigest": null
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "platform.environments.get",
+      "title": "Get one environment",
+      "sdk": {
+        "family": "platform",
+        "method": "environments.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/environments/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "environment"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.environment}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.environments.get.cross-tenant",
+      "title": "Org B cannot read org A's environment",
+      "sdk": {
+        "family": "platform",
+        "method": "environments.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/environments/{id}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "environment"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.environment}"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "platform.environments.revisions",
+      "title": "List an environment's revisions",
+      "sdk": {
+        "family": "platform",
+        "method": "environments.revisions"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/environments/{id}/revisions"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "environment"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.environment}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.environments.revision.get",
+      "title": "Get revision 1 of an environment",
+      "sdk": {
+        "family": "platform",
+        "method": "environments.getRevision"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/environments/{id}/revisions/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "environment"
+      ],
+      "call": {
+        "params": [
+          "${res.environment}",
+          "1"
+        ]
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.environments.revise",
+      "title": "Revise an environment from revision 1",
+      "sdk": {
+        "family": "platform",
+        "method": "environments.revise"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/environments/{id}/revisions"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/environments"
+          },
+          "body": {
+            "name": "conf-env-rev-${run.short}",
+            "sandboxKind": "local",
+            "resourcePreset": "runtime-default",
+            "browserOrigins": [],
+            "credentialBindingIds": [],
+            "pinnedImageDigest": null
+          },
+          "capture": {
+            "env": "environment.id"
+          },
+          "expectStatus": 201
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.env}"
+        },
+        "body": {
+          "name": "conf-env-revised-${run.short}",
+          "sandboxKind": "local",
+          "resourcePreset": "small",
+          "browserOrigins": [],
+          "credentialBindingIds": [],
+          "pinnedImageDigest": null,
+          "baseRevision": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.environments.control.stale",
+      "title": "Controlling an environment at a stale revision is a typed 409",
+      "sdk": {
+        "family": "platform",
+        "method": "environments.control"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/environments/{id}/control"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "environment"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.environment}"
+        },
+        "body": {
+          "action": "pause",
+          "expectedRevision": 999
+        }
+      },
+      "expect": {
+        "status": [
+          409,
+          400
+        ],
+        "codePresent": true
+      }
+    }
+  ]
+}

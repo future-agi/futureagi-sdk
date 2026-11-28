@@ -1,16 +1,15 @@
 """The dataset-config cache of ``Dataset.get_dataset_config`` and the keyed requests sent after it.
 
 ``Dataset.get_dataset_config`` keeps the dataset config it looks up, so a later call for the same dataset name
-with the same keys, base URL and plain http opt-in can reuse it; each call gets a ``Dataset`` built from its own
+with the same keys, base URL and effective headers can reuse it; each call gets a ``Dataset`` built from its own
 arguments and environment. These cases read what reached loopback listeners, through the lookup shim of
 ``test_plain_http_key_guards`` (``api.futureagi.com`` and ``plain.example.test`` resolve to the loopback
 interface), to check that:
 
-* a call that does not opt in to plain http is refused before a connection is made, even after an opted-in call
-  for the same dataset;
+* a keyed send without the plain HTTP opt-in is refused even when configuration was cached by an opted-in call;
 * a call with other keys sends its own request with its own keys and gets its own config;
 * a call with another base URL sends its own request to its own base URL;
-* a repeated call with the same keys, base URL and opt-in is still served without a new request.
+* a repeated call with the same settings is served without a new request.
 """
 
 from __future__ import annotations
@@ -25,7 +24,9 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 
 from fi.datasets.dataset import Dataset, LRUCache
-from tests.test_plain_http_key_guards import CODE, KEY, SECRET, Sink, _marker_forms, net, use_proxy  # noqa: F401
+from fi.errors import ConfigurationError, InsecureHttpRefusedError
+from fi.utils.errors import DatasetError
+from tests.test_plain_http_key_guards import KEY, SECRET, Sink, _marker_forms, net, use_proxy  # noqa: F401
 
 KEY_B = "fikey-tenant-b-" + secrets.token_hex(6)
 SECRET_B = "fisec-tenant-b-" + secrets.token_hex(6)
@@ -123,7 +124,7 @@ def one(net, monkeypatch):
 
 @pytest.fixture
 def two(net, monkeypatch):
-    """Two dataset listeners, behind ``api.futureagi.com`` and ``plain.example.test``, and an environment proxy."""
+    """Two dataset listeners on different ports and an environment proxy."""
     first, second = DatasetSink(), DatasetSink()
     use_proxy(monkeypatch, net)
     yield first, second
@@ -140,6 +141,22 @@ def _attempt(call):
         return call(), None
     except Exception as exc:  # the refusal, or a failure after a request, is what is read
         return None, exc
+
+
+def _assert_refusal(error, cls, code, *, wrapped=False):
+    if wrapped:
+        assert type(error) is DatasetError, repr(error)
+        assert error.get_error_code() == "DATASET_OPERATION_INVALID"
+        while type(error) is DatasetError:
+            assert error.__context__ is not None, str(error)
+            error = error.__context__
+    assert type(error) is cls, repr(error)
+    assert error.code == error.get_error_code() == code
+
+
+@pytest.fixture
+def opted_in(monkeypatch):
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
 
 
 def _counts(sink: DatasetSink, proxy: Sink, api_key: str = KEY, secret_key: str = SECRET):
@@ -179,25 +196,38 @@ second_opt = pytest.mark.parametrize(
 
 @operations
 @second_opt
-def test_call_without_opt_in_after_opted_in_call_is_refused(net, one, operation, opt):
-    base = _base("api.futureagi.com", one)
-    first, error = _attempt(lambda: _get_config(base, KEY, SECRET, allow_insecure_http=True))
+def test_call_without_opt_in_after_opted_in_call_is_refused(net, one, operation, opt, opted_in, monkeypatch):
+    base = _base("plain.example.test", one)
+    first, error = _attempt(lambda: _get_config(base, KEY, SECRET))
     assert error is None and first.dataset_config.id == one.default_id, (error, _report(one, net.proxy))
     before = _counts(one, net.proxy)
     assert before[0] == 1 and before[1] > 0 and before[2:] == (0, 0), _report(one, net.proxy)
 
-    _, error = _attempt(lambda: OPERATIONS[operation](base, KEY, SECRET, **opt))
+    monkeypatch.delenv("FI_ALLOW_INSECURE_HTTP")
+    client, error = _attempt(lambda: OPERATIONS[operation](base, KEY, SECRET, **opt))
+    if operation == "get-dataset-config":
+        assert _counts(one, net.proxy) == before, _report(one, net.proxy)
+        assert error is None and client.dataset_config.id == one.default_id, repr(error)
+        _, error = _attempt(client.delete)
 
     assert _counts(one, net.proxy) == before, _report(one, net.proxy)
-    assert getattr(error, "code", None) == CODE, repr(error)
+    _assert_refusal(error, ConfigurationError, "insecure_http_origin")
 
 
 @second_opt
-def test_call_without_opt_in_is_refused_with_the_plain_http_code(net, one, opt):
-    _, error = _attempt(lambda: _get_config(_base("api.futureagi.com", one), KEY, SECRET, **opt))
+@pytest.mark.parametrize(
+    "host, cls, code",
+    [
+        ("api.futureagi.com", InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED"),
+        ("plain.example.test", ConfigurationError, "insecure_http_origin"),
+    ],
+    ids=["future-agi-host", "custom-host"],
+)
+def test_call_without_opt_in_is_refused_with_the_plain_http_code(net, one, opt, host, cls, code):
+    _, error = _attempt(lambda: _get_config(_base(host, one), KEY, SECRET, **opt))
 
     assert _counts(one, net.proxy) == (0, 0, 0, 0), _report(one, net.proxy)
-    assert getattr(error, "code", None) == CODE, repr(error)
+    _assert_refusal(error, cls, code, wrapped=True)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -213,18 +243,18 @@ key_pairs = pytest.mark.parametrize("pair", list(KEY_PAIRS), ids=list(KEY_PAIRS)
 
 
 @key_pairs
-def test_call_with_other_keys_sends_its_own_lookup_and_gets_its_own_config(net, pair):
+def test_call_with_other_keys_sends_its_own_lookup_and_gets_its_own_config(net, pair, opted_in):
     api_b, secret_b = KEY_PAIRS[pair]
     id_a, id_b = uuid.uuid4(), uuid.uuid4()
     sink = DatasetSink(ids={(KEY, SECRET): id_a, (api_b, secret_b): id_b})
     try:
-        base = _base("api.futureagi.com", sink)
-        a, error = _attempt(lambda: _get_config(base, KEY, SECRET, allow_insecure_http=True))
+        base = _base("plain.example.test", sink)
+        a, error = _attempt(lambda: _get_config(base, KEY, SECRET))
         assert error is None and a.dataset_config.id == id_a, (error, _report(sink, net.proxy))
         only_a = [value for value in (KEY, SECRET) if value not in (api_b, secret_b)]
         before = {value: sink.key_bytes(value) for value in {KEY, SECRET, api_b, secret_b}}
 
-        b, error = _attempt(lambda: _get_config(base, api_b, secret_b, allow_insecure_http=True))
+        b, error = _attempt(lambda: _get_config(base, api_b, secret_b))
 
         assert error is None, repr(error)
         assert (sink.connections, sink.names_requests) == (2, 2), _report(sink, net.proxy)
@@ -237,16 +267,16 @@ def test_call_with_other_keys_sends_its_own_lookup_and_gets_its_own_config(net, 
         sink.close()
 
 
-def test_other_tenant_delete_carries_only_its_own_keys(net):
+def test_other_tenant_delete_carries_only_its_own_keys(net, opted_in):
     id_a, id_b = uuid.uuid4(), uuid.uuid4()
     sink = DatasetSink(ids={(KEY, SECRET): id_a, (KEY_B, SECRET_B): id_b})
     try:
-        base = _base("api.futureagi.com", sink)
-        _, error = _attempt(lambda: _get_config(base, KEY, SECRET, allow_insecure_http=True))
+        base = _base("plain.example.test", sink)
+        _, error = _attempt(lambda: _get_config(base, KEY, SECRET))
         assert error is None, repr(error)
         a_bytes = sink.key_bytes(KEY, SECRET)
 
-        _, error = _attempt(lambda: _delete_dataset(base, KEY_B, SECRET_B, allow_insecure_http=True))
+        _, error = _attempt(lambda: _delete_dataset(base, KEY_B, SECRET_B))
 
         assert error is None, repr(error)
         assert sink.key_bytes(KEY, SECRET) == a_bytes, _report(sink, net.proxy)
@@ -264,14 +294,14 @@ def test_other_tenant_delete_carries_only_its_own_keys(net):
 
 
 @operations
-def test_call_with_other_base_url_sends_to_its_own_base_url(net, two, operation):
+def test_call_with_other_base_url_sends_to_its_own_base_url(net, two, operation, opted_in):
     first, second = two
-    base_1, base_2 = _base("api.futureagi.com", first), _base("plain.example.test", second)
-    a, error = _attempt(lambda: _get_config(base_1, KEY, SECRET, allow_insecure_http=True))
+    base_1, base_2 = _base("plain.example.test", first), _base("plain.example.test", second)
+    a, error = _attempt(lambda: _get_config(base_1, KEY, SECRET))
     assert error is None and a.dataset_config.id == first.default_id, (error, _report(first, net.proxy))
     first_before = _counts(first, net.proxy)
 
-    b, error = _attempt(lambda: OPERATIONS[operation](base_2, KEY, SECRET, allow_insecure_http=True))
+    b, error = _attempt(lambda: OPERATIONS[operation](base_2, KEY, SECRET))
 
     assert error is None, repr(error)
     assert _counts(first, net.proxy) == first_before, _report(first, net.proxy)
@@ -290,16 +320,16 @@ def test_call_with_other_base_url_sends_to_its_own_base_url(net, two, operation)
 
 
 @pytest.mark.parametrize("excluded", [None, ["other"]], ids=["no-exclusions", "with-exclusions"])
-def test_repeated_call_with_same_client_settings_is_served_from_the_cache(net, one, excluded):
-    base = _base("api.futureagi.com", one)
+def test_repeated_call_with_same_client_settings_is_served_from_the_cache(net, one, excluded, opted_in):
+    base = _base("plain.example.test", one)
     a, error = _attempt(lambda: Dataset.get_dataset_config(
-        NAME, excluded, fi_api_key=KEY, fi_secret_key=SECRET, fi_base_url=base, allow_insecure_http=True,
+        NAME, excluded, fi_api_key=KEY, fi_secret_key=SECRET, fi_base_url=base,
     ))
     assert error is None, repr(error)
     before = _counts(one, net.proxy)
 
     b, error = _attempt(lambda: Dataset.get_dataset_config(
-        NAME, excluded, fi_api_key=KEY, fi_secret_key=SECRET, fi_base_url=base, allow_insecure_http=True,
+        NAME, excluded, fi_api_key=KEY, fi_secret_key=SECRET, fi_base_url=base,
     ))
 
     assert error is None, repr(error)
@@ -308,14 +338,22 @@ def test_repeated_call_with_same_client_settings_is_served_from_the_cache(net, o
 
 
 @pytest.mark.parametrize("excluded", [None, ["other"]], ids=["no-exclusions", "with-exclusions"])
-def test_opted_in_lookup_is_sent_directly_past_the_environment_proxy(net, one, excluded):
+@pytest.mark.parametrize("host", ["api.futureagi.com", "plain.example.test"], ids=["future-agi-host", "custom-host"])
+def test_opted_in_lookup_route_with_an_environment_proxy(net, one, excluded, host, monkeypatch):
+    if host == "plain.example.test":
+        monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     a, error = _attempt(
         lambda: Dataset.get_dataset_config(
             NAME, excluded, fi_api_key=KEY, fi_secret_key=SECRET,
-            fi_base_url=_base("api.futureagi.com", one), allow_insecure_http=True,
+            fi_base_url=_base(host, one), allow_insecure_http=True,
         )
     )
 
-    assert error is None and a.dataset_config.id == one.default_id, repr(error)
-    assert one.connections == 1 and one.key_bytes(KEY, SECRET) > 0, _report(one, net.proxy)
-    assert (net.proxy.connections, net.proxy.marker_bytes()) == (0, 0), _report(one, net.proxy)
+    if host == "api.futureagi.com":
+        assert _counts(one, net.proxy) == (0, 0, 0, 0), _report(one, net.proxy)
+        net.nothing_sent()
+        _assert_refusal(error, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED", wrapped=True)
+    else:
+        assert error is None and a.dataset_config.id == one.default_id, repr(error)
+        assert one.connections == 1 and one.key_bytes(KEY, SECRET) > 0, _report(one, net.proxy)
+        assert (net.proxy.connections, net.proxy.marker_bytes()) == (0, 0), _report(one, net.proxy)

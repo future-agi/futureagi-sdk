@@ -1,55 +1,42 @@
-"""Internal utility functions for the AgentCC SDK."""
+"""Timeout/header helpers, no-send inspection and explicit-origin health checks."""
 
 from __future__ import annotations
 
 import json
 import time
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 import httpx
 
-from fi.gateway._constants import DEFAULT_TIMEOUT
+from fi.gateway._constants import DEFAULT_TIMEOUT, is_credential_name
+from fi.gateway._env import KEY_ENV, URL_ENV, from_env, guard_fi_key_pair, normalize_base_url
+from fi.gateway._exceptions import AgentCCError
 
 
 def parse_timeout(timeout: float | Any | None) -> httpx.Timeout:
-    """Convert a user-supplied timeout value to an httpx.Timeout.
-
-    Args:
-        timeout: A float (applied uniformly), a Timeout dataclass, or None for default.
-    """
+    """Convert a scalar, Timeout dataclass or httpx.Timeout to an HTTP timeout."""
     if timeout is None:
         return httpx.Timeout(DEFAULT_TIMEOUT)
     if isinstance(timeout, (int, float)):
         return httpx.Timeout(float(timeout))
-    # Timeout dataclass from _base_client
     if hasattr(timeout, "connect"):
         return httpx.Timeout(
-            connect=timeout.connect,
-            read=timeout.read,
-            write=timeout.write,
-            pool=timeout.pool,
+            connect=timeout.connect, read=timeout.read,
+            write=timeout.write, pool=timeout.pool,
         )
     return httpx.Timeout(DEFAULT_TIMEOUT)
 
 
 def redact_headers(headers: Mapping[str, str]) -> dict[str, str]:
-    """Return a copy of *headers* with the Authorization value redacted."""
-    result: dict[str, str] = {}
-    for key, value in headers.items():
-        if key.lower() == "authorization":
-            # Show "Bearer sk-...XXXX" pattern
-            if len(value) > 14:
-                result[key] = value[:10] + "..." + value[-4:]
-            else:
-                result[key] = "***"
-        else:
-            result[key] = value
-    return result
+    """Copy headers without disclosing authentication material."""
+    return {
+        key: "[REDACTED]" if is_credential_name(key)
+        else value for key, value in headers.items()
+    }
 
 
 def serialize_agentcc_param(key: str, value: Any) -> str:
-    """Serialize a AgentCC parameter value to a header string."""
     if key == "request_metadata" and isinstance(value, dict):
         return json.dumps(value, separators=(",", ":"))
     if key == "cache_force_refresh" and isinstance(value, bool):
@@ -57,131 +44,153 @@ def serialize_agentcc_param(key: str, value: Any) -> str:
     return str(value)
 
 
+from fi.gateway._deprecation import deprecated
+
+
+@deprecated
 def return_raw_request(
-    *,
-    model: str,
-    messages: list[dict[str, Any]],
-    base_url: str = "https://gateway.futureagi.com",
-    **kwargs: Any,
+    *, model: str, messages: list[dict[str, Any]],
+    base_url: str | None = None, api_key: str | None = None, **kwargs: Any,
 ) -> dict[str, Any]:
-    """Return the raw HTTP request that would be sent, without sending it.
+    """Build the wrapper's request without a client or any network traffic.
 
-    Useful for debugging and inspecting what the SDK will send.
-
-    Returns:
-        Dict with ``method``, ``url``, ``headers`` (redacted), and ``body``.
+    ``body`` retains the released decoded mapping; ``body_bytes`` is the exact
+    HTTPX-encoded payload. Headers include the resolved key for wire parity:
+    treat the result as sensitive, not as a safe logging snapshot. With no key
+    supplied or configured, legacy inspection uses the ``[REDACTED]`` placeholder.
+    The wrapper applies the same validation to argument, environment and service default origins.
     """
-    from fi.gateway._constants import NOT_GIVEN, __version__
+    from fi.gateway._env import resolve_wrapper_settings
+    from fi.gateway._transport._request import RequestBuilder
+    from fi.gateway.resources.chat._params import _prepare
 
-    body: dict[str, Any] = {"model": model, "messages": messages}
-    body.update({k: v for k, v in kwargs.items() if v is not NOT_GIVEN})
-
+    key, origin = resolve_wrapper_settings(api_key, base_url)
+    builder = RequestBuilder(api_key=key or "[REDACTED]", base_url=origin)
+    options, params = _prepare(builder, {"model": model, "messages": messages, **kwargs})
+    request = builder._build_request(options, params)
     return {
-        "method": "POST",
-        "url": f"{base_url.rstrip('/')}/v1/chat/completions",
-        "headers": {
-            "Content-Type": "application/json",
-            "User-Agent": f"agentcc-python/{__version__}",
-            "Authorization": "Bearer [REDACTED]",
-        },
-        "body": body,
+        "method": request.method, "url": str(request.url),
+        "headers": {k.decode("ascii"): v.decode("latin-1") for k, v in request.headers.raw},
+        "body": options.body,
+        "body_bytes": request.content,
     }
 
 
-def _direct_kwargs(url: str, headers: Mapping[str, str]) -> dict[str, Any]:
-    """Extra ``httpx`` arguments for a request to ``url``: none, or the one that sends a keyed plain-http request
-    without a proxy. Raises when a keyed request to ``url`` is refused."""
-    from fi.gateway._exceptions import AgentCCError
-    from fi.utils._http_guard import carries_key, requires_direct
+_DIRECT_METHODS = {httpx.get: "GET", httpx.post: "POST"}
 
-    return {"trust_env": False} if requires_direct(url, carries_key(headers), None, AgentCCError) else {}
+
+def _send_utility(send: Callable[..., httpx.Response], url: str, **kwargs: Any) -> httpx.Response:
+    """Send one utility request with ``send`` (``httpx.get`` / ``httpx.post`` or a callable with their signature).
+
+    An ``https`` request to a host that is not loopback goes through the ``send`` that was passed, whatever callable it
+    is, so the environment proxy and ``NO_PROXY`` apply as ``send`` applies them (a proxy carries the tunnel). A plain
+    ``http`` request, and a loopback host (the one rule, :func:`fi._core.loopback.is_loopback_host`), go through the
+    gateway clients' own client class (``LoopbackDirectClient``) when ``send`` is ``httpx.get`` or ``httpx.post``: the
+    request goes straight to its host, whatever the proxy variables say, and ``SSL_CERT_FILE`` and ``SSL_CERT_DIR`` stay in effect. That client is built on httpx and
+    does not read ``.netrc``; ``.netrc`` applies on the ``requests``-based paths. Any other callable, such as a
+    replacement installed for a test, is called for loopback hosts too.
+    """
+    from fi._core.loopback import is_loopback_host
+
+    method = _DIRECT_METHODS.get(send)
+    parsed = httpx.URL(url)
+    if method is None or (parsed.scheme != "http" and not is_loopback_host(parsed.host)):
+        return send(url, **kwargs)
+    from fi.gateway._transport._direct import LoopbackDirectClient
+
+    timeout = kwargs.pop("timeout", httpx.Timeout(5.0))
+    follow_redirects = kwargs.pop("follow_redirects", False)
+    with LoopbackDirectClient(timeout=timeout, follow_redirects=follow_redirects) as client:
+        return client.request(method, url, **kwargs)
+
+
+def _utility_exchange(send: Callable[..., httpx.Response], url: str, **kwargs: Any) -> httpx.Response:
+    """Use the same finally boundary for each independent utility exchange. A loopback host's
+    request skips an environment proxy (:func:`_send_utility`)."""
+    from fi.gateway._transport._scrub import (
+        composed_credential_values, scrub_error_text, scrub_sent_request,
+    )
+
+    names = frozenset(name.lower() for name in kwargs.get("headers", {}))
+    credentials = composed_credential_values(kwargs.get("headers", {}), names)
+    response = None
+    error = None
+    try:
+        response = _send_utility(send, url, **kwargs)
+        return response
+    except BaseException as exc:
+        error = exc
+        scrub_error_text(exc, credentials)
+        raise
+    finally:
+        scrub_sent_request(None, response, error, names)
 
 
 def health_check(
-    model: str | None = None,
-    api_key: str | None = None,
-    base_url: str | None = None,
-    timeout: float = 10.0,
+    model: str | None = None, api_key: str | None = None,
+    base_url: str | None = None, timeout: float = 10.0,
 ) -> dict[str, Any]:
-    """Quick validation that the gateway/model endpoint is reachable.
+    """Check /healthz, falling back to /health only on HTTP 404.
 
-    Args:
-        model: If provided, send a minimal completion request to verify the model works.
-        api_key: API key. Falls back to ``AGENTCC_API_KEY`` env var.
-        base_url: Base URL. Falls back to ``AGENTCC_BASE_URL`` env var.
-        timeout: Request timeout in seconds (default 10).
-
-    Returns:
-        Dict with ``status`` ('ok' or 'error'), ``latency_ms``, and optionally ``error``.
-
-    Raises:
-        AgentCCError: code ``insecure_http_origin``, when the key may not be sent to ``base_url`` over plain http;
-            ``FI_ALLOW_INSECURE_HTTP=1`` allows it.
+    Model probes use the completions endpoint and do not take the health fallback.
+    The same key/origin policy applies to clients and to both health endpoints.
     """
-    import os
+    from fi.gateway._http_security import validate_destination
 
-    resolved_key = api_key or os.environ.get("AGENTCC_API_KEY", "")
-    resolved_url = base_url or os.environ.get("AGENTCC_BASE_URL", "")
+    resolved_key = api_key or from_env(KEY_ENV)
+    resolved_url = normalize_base_url(base_url or from_env(URL_ENV))
     if not resolved_url:
         return {"status": "error", "error": "base_url is required"}
-
-    headers: dict[str, str] = {}
-    if resolved_key:
-        headers["Authorization"] = f"Bearer {resolved_key}"
-
-    direct = _direct_kwargs(resolved_url, headers)
+    try:
+        if resolved_key:
+            guard_fi_key_pair(resolved_key)
+        validate_destination(resolved_url, resolved_url, warn_plain_http=bool(resolved_key))
+    except (AgentCCError, httpx.InvalidURL) as exc:
+        return {"status": "error", "error": str(exc)}
+    headers = {"Authorization": f"Bearer {resolved_key}"} if resolved_key else {}
     try:
         start = time.monotonic()
         if model is None:
-            # Just check /health endpoint
-            response = httpx.get(
-                f"{resolved_url.rstrip('/')}/health",
-                headers=headers,
-                timeout=timeout,
-                **direct,
+            response = _utility_exchange(httpx.get,
+                f"{resolved_url}/healthz", headers=headers, timeout=timeout,
+                follow_redirects=False,
             )
+            if response.status_code == 404:
+                response = _utility_exchange(httpx.get,
+                    f"{resolved_url}/health", headers=headers, timeout=timeout,
+                    follow_redirects=False,
+                )
         else:
-            # Send a minimal completion request
-            response = httpx.post(
-                f"{resolved_url.rstrip('/')}/v1/chat/completions",
+            response = _utility_exchange(httpx.post,
+                f"{resolved_url}/v1/chat/completions",
                 headers={**headers, "Content-Type": "application/json"},
-                json={
-                    "model": model,
-                    "messages": [{"role": "user", "content": "hi"}],
-                    "max_tokens": 1,
-                },
-                timeout=timeout,
-                **direct,
+                json={"model": model, "messages": [{"role": "user", "content": "hi"}], "max_tokens": 1},
+                timeout=timeout, follow_redirects=False,
             )
         elapsed_ms = (time.monotonic() - start) * 1000
-
-        if response.status_code < 400:
-            return {"status": "ok", "latency_ms": round(elapsed_ms, 1)}
-        else:
-            return {
-                "status": "error",
-                "error": f"HTTP {response.status_code}",
-                "latency_ms": round(elapsed_ms, 1),
-            }
+        result = {"status": "ok" if response.status_code < 300 else "error", "latency_ms": round(elapsed_ms, 1)}
+        if response.status_code >= 300:
+            result["error"] = f"HTTP {response.status_code}"
+        return result
     except Exception as exc:
         return {"status": "error", "error": str(exc)}
 
 
 def check_valid_key(api_key: str, base_url: str) -> bool:
-    """Check if an API key is valid by hitting the gateway models endpoint.
+    """Check authentication; refuse platform keys and unsafe origins before sending."""
+    from fi.gateway._http_security import validate_destination
 
-    Returns ``True`` if the key authenticates successfully, ``False`` otherwise. Raises ``AgentCCError`` (code
-    ``insecure_http_origin``) when the key may not be sent to ``base_url`` over plain http; ``FI_ALLOW_INSECURE_HTTP=1``
-    allows it.
-    """
-    headers = {"Authorization": f"Bearer {api_key}"}
-    direct = _direct_kwargs(base_url, headers)
+    guard_fi_key_pair(api_key)
+    base_url = normalize_base_url(base_url)
     try:
-        response = httpx.get(
-            f"{base_url.rstrip('/')}/v1/models",
-            headers=headers,
-            timeout=10.0,
-            **direct,
+        validate_destination(base_url, base_url)
+    except (AgentCCError, httpx.InvalidURL):
+        return False  # a destination the SDK will not send keys to gives False
+    try:
+        response = _utility_exchange(httpx.get,
+            f"{base_url}/v1/models",
+            headers={"Authorization": f"Bearer {api_key}"}, timeout=10.0,
+            follow_redirects=False,
         )
         return response.status_code == 200
     except Exception:

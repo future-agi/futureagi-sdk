@@ -7,7 +7,7 @@ The first request carries no key, so it is not refused on its own. A key is adde
 * ``session-hook``: the same send again from ``session.hooks["response"]``;
 * ``adapter``: a mounted ``HTTPAdapter`` subclass whose ``send`` adds ``X-Api-Key``.
 
-Each case goes through ``HttpClient`` (``fi.api.auth``) and through ``_send_prepared``, the send used by the
+Each case goes through ``HttpClient`` (``fi.api.auth``); 0.8.1 also drove ``_send_prepared``, the send used by the
 knowledge base upload (``fi.kb.client``). Listeners run on the loopback interface and answer 401 to a request
 without the marker key; ``plain.example.test`` resolves to them through the lookup shim of
 ``test_plain_http_key_guards`` (its ``net`` fixture applies here too), so no case reaches a real host. Each case
@@ -24,7 +24,8 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests_futures.sessions import FuturesSession
 
-from fi.api.auth import HttpClient, _prepare, _send_prepared
+from fi.api.auth import HttpClient
+from fi.errors import KeyedProxyRefusedError
 from fi.api.types import HttpMethod, RequestConfig
 from tests.test_plain_http_key_guards import CODE, KEY, SECRET, Net, Sink, _attempt, _marker_forms, net, refused  # noqa: F401
 
@@ -88,6 +89,16 @@ class Sinks(Net):
     def delivered_direct(self) -> None:
         assert self.target.keyed_connections >= 1 and self.target.marker_bytes() > 0, self.report()
         self.no_key_through_proxy()
+
+
+def _sent_or_refused_for_adapter(sinks, variant: str, exc) -> None:
+    """0.9.0 treats a mounted adapter that is not ``requests``' own as one that may route anywhere: a request that
+    may carry a key through it is refused before any connection. The other variants send directly."""
+    if variant == "adapter" and isinstance(exc, KeyedProxyRefusedError):
+        sinks.nothing_sent()
+        return
+    assert exc is None, repr(exc)
+    sinks.delivered_direct()
 
 
 @pytest.fixture
@@ -159,20 +170,11 @@ def via_http_client(base: str, variant: str, *, allow_insecure_http=None, **sess
     return _attempt(lambda: client.request(config))
 
 
-def via_send_prepared(base: str, variant: str, *, allow_insecure_http=None, **session_kwargs):
-    url = base + "/v1/ping"
-
-    def send():
-        with _session(requests.Session, variant, **session_kwargs) as session:
-            prepared = _prepare(session, requests.Request(method="GET", url=url, headers={}), allow_insecure_http)
-            _send_prepared(session, prepared, 3, allow_insecure_http, url=url)
-
-    return _attempt(send)
 
 
 SENDERS = [
     pytest.param(via_http_client, id="http-client"),
-    pytest.param(via_send_prepared, id="send-prepared"),
+    # 0.9.0 has no _prepare/_send_prepared send: HttpClient is the requests sender the session reaches.
 ]
 
 PROXY_MODES = [
@@ -234,16 +236,14 @@ def test_send_again_to_loopback_never_carries_the_key_through_a_proxy(monkeypatc
 @pytest.mark.parametrize("sender", SENDERS)
 def test_key_added_after_judgement_to_loopback_is_sent_directly(sinks, sender, variant):
     exc = sender(f"http://127.0.0.1:{sinks.target.port}", variant)
-    assert exc is None, repr(exc)
-    sinks.delivered_direct()
+    _sent_or_refused_for_adapter(sinks, variant, exc)
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
 @pytest.mark.parametrize("sender", SENDERS)
 def test_key_added_after_judgement_with_the_opt_in_is_sent_directly(sinks, sender, variant):
     exc = sender(f"http://{PLAIN}:{sinks.target.port}", variant, allow_insecure_http=True)
-    assert exc is None, repr(exc)
-    sinks.delivered_direct()
+    _sent_or_refused_for_adapter(sinks, variant, exc)
 
 
 @pytest.mark.parametrize("variant", RESEND_VARIANTS)

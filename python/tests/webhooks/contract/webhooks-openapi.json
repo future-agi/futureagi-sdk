@@ -1,0 +1,2746 @@
+{
+ "definitions": {
+  "BulkRedeliverOut": {
+   "properties": {
+    "count": {
+     "title": "Count",
+     "type": "integer"
+    },
+    "dry_run": {
+     "title": "Dry run",
+     "type": "boolean"
+    },
+    "expired": {
+     "title": "Expired",
+     "type": "integer"
+    },
+    "queued": {
+     "title": "Queued",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "count",
+    "queued",
+    "expired",
+    "dry_run"
+   ],
+   "type": "object"
+  },
+  "BulkRedeliverRequest": {
+   "properties": {
+    "dry_run": {
+     "default": false,
+     "title": "Dry run",
+     "type": "boolean"
+    },
+    "endpoint": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Endpoint",
+     "type": "string"
+    },
+    "event_type": {
+     "enum": [
+      "prompt.version.created",
+      "prompt.label.changed",
+      "deployment.run.completed",
+      "deployment.run.failed"
+     ],
+     "title": "Event type",
+     "type": "string"
+    },
+    "since": {
+     "format": "date-time",
+     "title": "Since",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "failed",
+      "succeeded",
+      "skipped"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "until": {
+     "format": "date-time",
+     "title": "Until",
+     "type": "string"
+    }
+   },
+   "required": [
+    "endpoint",
+    "status"
+   ],
+   "type": "object"
+  },
+  "DeliveryDetailOut": {
+   "properties": {
+    "attempts": {
+     "items": {
+      "additionalProperties": {
+       "type": "string",
+       "x-nullable": true
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "attempts_count": {
+     "title": "Attempts count",
+     "type": "integer"
+    },
+    "body": {
+     "minLength": 1,
+     "title": "Body",
+     "type": "string",
+     "x-nullable": true
+    },
+    "endpoint_id": {
+     "minLength": 1,
+     "title": "Endpoint id",
+     "type": "string"
+    },
+    "event_id": {
+     "minLength": 1,
+     "title": "Event id",
+     "type": "string"
+    },
+    "event_type": {
+     "minLength": 1,
+     "title": "Event type",
+     "type": "string"
+    },
+    "id": {
+     "minLength": 1,
+     "title": "Id",
+     "type": "string"
+    },
+    "is_test": {
+     "title": "Is test",
+     "type": "boolean"
+    },
+    "last_attempt": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Last attempt",
+     "type": "object",
+     "x-nullable": true
+    },
+    "request_headers": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Request headers",
+     "type": "object"
+    },
+    "seq": {
+     "title": "Seq",
+     "type": "integer",
+     "x-nullable": true
+    },
+    "status": {
+     "minLength": 1,
+     "title": "Status",
+     "type": "string"
+    },
+    "subject": {
+     "minLength": 1,
+     "title": "Subject",
+     "type": "string",
+     "x-nullable": true
+    }
+   },
+   "required": [
+    "id",
+    "event_id",
+    "event_type",
+    "subject",
+    "endpoint_id",
+    "seq",
+    "status",
+    "attempts_count",
+    "is_test",
+    "last_attempt",
+    "request_headers",
+    "attempts"
+   ],
+   "type": "object"
+  },
+  "DeliveryOut": {
+   "properties": {
+    "attempts_count": {
+     "title": "Attempts count",
+     "type": "integer"
+    },
+    "body": {
+     "minLength": 1,
+     "title": "Body",
+     "type": "string",
+     "x-nullable": true
+    },
+    "endpoint_id": {
+     "minLength": 1,
+     "title": "Endpoint id",
+     "type": "string"
+    },
+    "event_id": {
+     "minLength": 1,
+     "title": "Event id",
+     "type": "string"
+    },
+    "event_type": {
+     "minLength": 1,
+     "title": "Event type",
+     "type": "string"
+    },
+    "id": {
+     "minLength": 1,
+     "title": "Id",
+     "type": "string"
+    },
+    "is_test": {
+     "title": "Is test",
+     "type": "boolean"
+    },
+    "last_attempt": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Last attempt",
+     "type": "object",
+     "x-nullable": true
+    },
+    "seq": {
+     "title": "Seq",
+     "type": "integer",
+     "x-nullable": true
+    },
+    "status": {
+     "minLength": 1,
+     "title": "Status",
+     "type": "string"
+    },
+    "subject": {
+     "minLength": 1,
+     "title": "Subject",
+     "type": "string",
+     "x-nullable": true
+    }
+   },
+   "required": [
+    "id",
+    "event_id",
+    "event_type",
+    "subject",
+    "endpoint_id",
+    "seq",
+    "status",
+    "attempts_count",
+    "is_test",
+    "last_attempt"
+   ],
+   "type": "object"
+  },
+  "DeliveryPageOut": {
+   "properties": {
+    "next_cursor": {
+     "minLength": 1,
+     "title": "Next cursor",
+     "type": "string",
+     "x-nullable": true
+    },
+    "results": {
+     "items": {
+      "$ref": "#/definitions/DeliveryOut"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "results",
+    "next_cursor"
+   ],
+   "type": "object"
+  },
+  "EgressOut": {
+   "properties": {
+    "hosted": {
+     "title": "Hosted",
+     "type": "boolean"
+    },
+    "regions": {
+     "items": {
+      "additionalProperties": {
+       "type": "string",
+       "x-nullable": true
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "hosted",
+    "regions"
+   ],
+   "type": "object"
+  },
+  "EndpointCreateRequest": {
+   "properties": {
+    "accepts_run_targeting": {
+     "title": "Accepts run targeting",
+     "type": "boolean"
+    },
+    "description": {
+     "maxLength": 2000,
+     "title": "Description",
+     "type": "string"
+    },
+    "headers": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Headers",
+     "type": "object"
+    },
+    "include_people_names": {
+     "title": "Include people names",
+     "type": "boolean"
+    },
+    "kind": {
+     "enum": [
+      "http"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "max_age_s": {
+     "maximum": 259200,
+     "minimum": 3600,
+     "title": "Max age s",
+     "type": "integer"
+    },
+    "max_in_flight": {
+     "maximum": 16,
+     "minimum": 1,
+     "title": "Max in flight",
+     "type": "integer"
+    },
+    "name": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Name",
+     "type": "string"
+    },
+    "payload_mode": {
+     "enum": [
+      "thin",
+      "full"
+     ],
+     "title": "Payload mode",
+     "type": "string"
+    },
+    "rate_limit_per_s": {
+     "maximum": 100,
+     "minimum": 1,
+     "title": "Rate limit per s",
+     "type": "integer"
+    },
+    "secret": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Secret",
+     "type": "string"
+    },
+    "subscriptions": {
+     "items": {
+      "$ref": "#/definitions/SubscriptionInput"
+     },
+     "type": "array"
+    },
+    "timeout_ms": {
+     "maximum": 30000,
+     "minimum": 5000,
+     "title": "Timeout ms",
+     "type": "integer"
+    },
+    "url": {
+     "maxLength": 4096,
+     "minLength": 1,
+     "title": "Url",
+     "type": "string"
+    },
+    "workspace_id": {
+     "description": "Absent: the current workspace. Null: org-wide (org admins).",
+     "format": "uuid",
+     "title": "Workspace id",
+     "type": "string",
+     "x-nullable": true
+    }
+   },
+   "required": [
+    "name",
+    "url",
+    "subscriptions"
+   ],
+   "type": "object"
+  },
+  "EndpointCreatedOut": {
+   "properties": {
+    "endpoint": {
+     "$ref": "#/definitions/EndpointOut"
+    },
+    "secret": {
+     "description": "whsec_\u2026, shown once",
+     "minLength": 1,
+     "title": "Secret",
+     "type": "string"
+    },
+    "warnings": {
+     "items": {
+      "additionalProperties": {
+       "type": "string",
+       "x-nullable": true
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "endpoint",
+    "secret",
+    "warnings"
+   ],
+   "type": "object"
+  },
+  "EndpointListOut": {
+   "properties": {
+    "results": {
+     "items": {
+      "$ref": "#/definitions/EndpointOut"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "results"
+   ],
+   "type": "object"
+  },
+  "EndpointOut": {
+   "properties": {
+    "accepts_run_targeting": {
+     "title": "Accepts run targeting",
+     "type": "boolean"
+    },
+    "api_version": {
+     "minLength": 1,
+     "title": "Api version",
+     "type": "string"
+    },
+    "backlog": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Backlog",
+     "type": "object"
+    },
+    "can_manage": {
+     "title": "Can manage",
+     "type": "boolean"
+    },
+    "created_at": {
+     "format": "date-time",
+     "title": "Created at",
+     "type": "string"
+    },
+    "description": {
+     "title": "Description",
+     "type": "string"
+    },
+    "disabled_at": {
+     "format": "date-time",
+     "title": "Disabled at",
+     "type": "string",
+     "x-nullable": true
+    },
+    "disabled_reason": {
+     "minLength": 1,
+     "title": "Disabled reason",
+     "type": "string",
+     "x-nullable": true
+    },
+    "header_names": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array",
+     "x-nullable": true
+    },
+    "health": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Health",
+     "type": "object",
+     "x-nullable": true
+    },
+    "id": {
+     "minLength": 1,
+     "title": "Id",
+     "type": "string"
+    },
+    "include_people_names": {
+     "title": "Include people names",
+     "type": "boolean"
+    },
+    "kind": {
+     "minLength": 1,
+     "title": "Kind",
+     "type": "string"
+    },
+    "max_age_s": {
+     "title": "Max age s",
+     "type": "integer"
+    },
+    "max_in_flight": {
+     "title": "Max in flight",
+     "type": "integer"
+    },
+    "name": {
+     "minLength": 1,
+     "title": "Name",
+     "type": "string"
+    },
+    "org_wide": {
+     "title": "Org wide",
+     "type": "boolean"
+    },
+    "owner_id": {
+     "minLength": 1,
+     "title": "Owner id",
+     "type": "string",
+     "x-nullable": true
+    },
+    "payload_mode": {
+     "minLength": 1,
+     "title": "Payload mode",
+     "type": "string"
+    },
+    "rate_limit_per_s": {
+     "title": "Rate limit per s",
+     "type": "integer"
+    },
+    "secrets": {
+     "items": {
+      "additionalProperties": {
+       "type": "string",
+       "x-nullable": true
+      },
+      "type": "object"
+     },
+     "type": "array",
+     "x-nullable": true
+    },
+    "status": {
+     "minLength": 1,
+     "title": "Status",
+     "type": "string"
+    },
+    "subscriptions": {
+     "items": {
+      "$ref": "#/definitions/SubscriptionOut"
+     },
+     "type": "array"
+    },
+    "timeout_ms": {
+     "title": "Timeout ms",
+     "type": "integer"
+    },
+    "updated_at": {
+     "format": "date-time",
+     "title": "Updated at",
+     "type": "string"
+    },
+    "url": {
+     "description": "Query values masked; admins only",
+     "minLength": 1,
+     "title": "Url",
+     "type": "string",
+     "x-nullable": true
+    },
+    "url_host": {
+     "title": "Url host",
+     "type": "string"
+    },
+    "workspace_id": {
+     "minLength": 1,
+     "title": "Workspace id",
+     "type": "string",
+     "x-nullable": true
+    }
+   },
+   "required": [
+    "id",
+    "kind",
+    "name",
+    "description",
+    "workspace_id",
+    "org_wide",
+    "url_host",
+    "url",
+    "header_names",
+    "subscriptions",
+    "status",
+    "disabled_reason",
+    "disabled_at",
+    "payload_mode",
+    "include_people_names",
+    "accepts_run_targeting",
+    "api_version",
+    "timeout_ms",
+    "rate_limit_per_s",
+    "max_in_flight",
+    "max_age_s",
+    "owner_id",
+    "created_at",
+    "updated_at",
+    "can_manage",
+    "health"
+   ],
+   "type": "object"
+  },
+  "EndpointUpdateRequest": {
+   "properties": {
+    "accepts_run_targeting": {
+     "title": "Accepts run targeting",
+     "type": "boolean"
+    },
+    "description": {
+     "maxLength": 2000,
+     "title": "Description",
+     "type": "string"
+    },
+    "headers": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Headers",
+     "type": "object",
+     "x-nullable": true
+    },
+    "include_people_names": {
+     "title": "Include people names",
+     "type": "boolean"
+    },
+    "max_age_s": {
+     "maximum": 259200,
+     "minimum": 3600,
+     "title": "Max age s",
+     "type": "integer"
+    },
+    "max_in_flight": {
+     "maximum": 16,
+     "minimum": 1,
+     "title": "Max in flight",
+     "type": "integer"
+    },
+    "name": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Name",
+     "type": "string"
+    },
+    "payload_mode": {
+     "enum": [
+      "thin",
+      "full"
+     ],
+     "title": "Payload mode",
+     "type": "string"
+    },
+    "rate_limit_per_s": {
+     "maximum": 100,
+     "minimum": 1,
+     "title": "Rate limit per s",
+     "type": "integer"
+    },
+    "subscriptions": {
+     "items": {
+      "$ref": "#/definitions/SubscriptionInput"
+     },
+     "type": "array"
+    },
+    "timeout_ms": {
+     "maximum": 30000,
+     "minimum": 5000,
+     "title": "Timeout ms",
+     "type": "integer"
+    },
+    "url": {
+     "maxLength": 4096,
+     "minLength": 1,
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "EventOut": {
+   "properties": {
+    "api_version": {
+     "minLength": 1,
+     "title": "Api version",
+     "type": "string"
+    },
+    "data": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Data",
+     "type": "object"
+    },
+    "delivery_count": {
+     "title": "Delivery count",
+     "type": "integer"
+    },
+    "id": {
+     "minLength": 1,
+     "title": "Id",
+     "type": "string"
+    },
+    "subject": {
+     "minLength": 1,
+     "title": "Subject",
+     "type": "string",
+     "x-nullable": true
+    },
+    "timestamp": {
+     "format": "date-time",
+     "title": "Timestamp",
+     "type": "string"
+    },
+    "type": {
+     "minLength": 1,
+     "title": "Type",
+     "type": "string"
+    },
+    "workspace_id": {
+     "minLength": 1,
+     "title": "Workspace id",
+     "type": "string",
+     "x-nullable": true
+    }
+   },
+   "required": [
+    "id",
+    "type",
+    "api_version",
+    "timestamp",
+    "workspace_id",
+    "subject",
+    "data",
+    "delivery_count"
+   ],
+   "type": "object"
+  },
+  "EventPageOut": {
+   "properties": {
+    "next_cursor": {
+     "minLength": 1,
+     "title": "Next cursor",
+     "type": "string",
+     "x-nullable": true
+    },
+    "results": {
+     "items": {
+      "$ref": "#/definitions/EventOut"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "results",
+    "next_cursor"
+   ],
+   "type": "object"
+  },
+  "EventTypeOut": {
+   "properties": {
+    "description": {
+     "minLength": 1,
+     "title": "Description",
+     "type": "string"
+    },
+    "filters": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "group": {
+     "minLength": 1,
+     "title": "Group",
+     "type": "string"
+    },
+    "schema": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Schema",
+     "type": "object"
+    },
+    "type": {
+     "minLength": 1,
+     "title": "Type",
+     "type": "string"
+    }
+   },
+   "required": [
+    "type",
+    "group",
+    "description",
+    "filters",
+    "schema"
+   ],
+   "type": "object"
+  },
+  "EventTypesOut": {
+   "properties": {
+    "groups": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "results": {
+     "items": {
+      "$ref": "#/definitions/EventTypeOut"
+     },
+     "type": "array"
+    },
+    "shared_schemas": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "description": "The schemas the per-type schemas refer to by $id (the envelope, deployment.run)",
+     "title": "Shared schemas",
+     "type": "object"
+    }
+   },
+   "required": [
+    "results",
+    "groups",
+    "shared_schemas"
+   ],
+   "type": "object"
+  },
+  "ManagementAPIErrorResponse": {
+   "properties": {
+    "attr": {
+     "title": "Attr",
+     "type": "string",
+     "x-nullable": true
+    },
+    "code": {
+     "title": "Code",
+     "type": "string",
+     "x-nullable": true
+    },
+    "detail": {
+     "title": "Detail",
+     "type": "string",
+     "x-nullable": true
+    },
+    "details": {
+     "additionalProperties": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "title": "Details",
+     "type": "object"
+    },
+    "error": {
+     "title": "Error",
+     "type": "string",
+     "x-nullable": true
+    },
+    "message": {
+     "title": "Message",
+     "type": "string",
+     "x-nullable": true
+    },
+    "result": {
+     "title": "Result",
+     "type": "string",
+     "x-nullable": true
+    },
+    "status": {
+     "default": false,
+     "title": "Status",
+     "type": "boolean"
+    },
+    "type": {
+     "enum": [
+      "validation_error",
+      "authentication_error",
+      "payment_required",
+      "entitlement_error",
+      "permission_error",
+      "not_found",
+      "conflict",
+      "client_error",
+      "rate_limit",
+      "server_error",
+      "service_unavailable",
+      "timeout",
+      "api_error"
+     ],
+     "title": "Type",
+     "type": "string",
+     "x-nullable": true
+    }
+   },
+   "type": "object"
+  },
+  "PolicyOut": {
+   "properties": {
+    "allowed_hosts": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "blocked_endpoint_ids": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "downgraded_endpoint_ids": {
+     "description": "Full-mode endpoints moved to thin because full_payload_allowed is off.",
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "effective": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Effective",
+     "type": "object"
+    },
+    "members_can_manage": {
+     "title": "Members can manage",
+     "type": "boolean"
+    },
+    "scope": {
+     "minLength": 1,
+     "title": "Scope",
+     "type": "string"
+    },
+    "workspace_id": {
+     "minLength": 1,
+     "title": "Workspace id",
+     "type": "string",
+     "x-nullable": true
+    }
+   },
+   "required": [
+    "scope",
+    "workspace_id",
+    "allowed_hosts",
+    "members_can_manage",
+    "effective"
+   ],
+   "type": "object"
+  },
+  "PolicyRequest": {
+   "properties": {
+    "allowed_hosts": {
+     "items": {
+      "maxLength": 260,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "full_payload_allowed": {
+     "title": "Full payload allowed",
+     "type": "boolean"
+    },
+    "log_retention_days": {
+     "maximum": 365,
+     "minimum": 7,
+     "title": "Log retention days",
+     "type": "integer"
+    },
+    "max_endpoints_per_workspace": {
+     "maximum": 200,
+     "minimum": 1,
+     "title": "Max endpoints per workspace",
+     "type": "integer"
+    },
+    "members_can_manage": {
+     "title": "Members can manage",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "PreviewOut": {
+   "properties": {
+    "body": {
+     "minLength": 1,
+     "title": "Body",
+     "type": "string"
+    },
+    "body_bytes": {
+     "title": "Body bytes",
+     "type": "integer"
+    },
+    "headers": {
+     "items": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "type": "array"
+    },
+    "method": {
+     "minLength": 1,
+     "title": "Method",
+     "type": "string"
+    }
+   },
+   "required": [
+    "method",
+    "headers",
+    "body",
+    "body_bytes"
+   ],
+   "type": "object"
+  },
+  "PreviewRequest": {
+   "properties": {
+    "event_type": {
+     "maxLength": 100,
+     "minLength": 1,
+     "title": "Event type",
+     "type": "string"
+    },
+    "headers": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Headers",
+     "type": "object"
+    },
+    "include_people_names": {
+     "title": "Include people names",
+     "type": "boolean"
+    },
+    "payload_mode": {
+     "enum": [
+      "thin",
+      "full"
+     ],
+     "title": "Payload mode",
+     "type": "string"
+    }
+   },
+   "required": [
+    "event_type"
+   ],
+   "type": "object"
+  },
+  "RedeliverOut": {
+   "properties": {
+    "attempt": {
+     "title": "Attempt",
+     "type": "integer"
+    },
+    "delivery_id": {
+     "minLength": 1,
+     "title": "Delivery id",
+     "type": "string"
+    },
+    "queued": {
+     "title": "Queued",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "delivery_id",
+    "queued",
+    "attempt"
+   ],
+   "type": "object"
+  },
+  "ResumeOut": {
+   "properties": {
+    "backlog_capped": {
+     "title": "Backlog capped",
+     "type": "integer"
+    },
+    "mode": {
+     "minLength": 1,
+     "title": "Mode",
+     "type": "string"
+    },
+    "past_max_age": {
+     "title": "Past max age",
+     "type": "integer"
+    },
+    "sent": {
+     "title": "Sent",
+     "type": "integer"
+    },
+    "skipped": {
+     "title": "Skipped",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "mode",
+    "sent",
+    "skipped",
+    "past_max_age",
+    "backlog_capped"
+   ],
+   "type": "object"
+  },
+  "ResumeRequest": {
+   "properties": {
+    "mode": {
+     "enum": [
+      "send",
+      "skip"
+     ],
+     "title": "Mode",
+     "type": "string"
+    }
+   },
+   "required": [
+    "mode"
+   ],
+   "type": "object"
+  },
+  "RevokeOut": {
+   "properties": {
+    "revoked_tails": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "revoked_tails"
+   ],
+   "type": "object"
+  },
+  "RotateOut": {
+   "properties": {
+    "id": {
+     "minLength": 1,
+     "title": "Id",
+     "type": "string"
+    },
+    "previous": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Previous",
+     "type": "object",
+     "x-nullable": true
+    },
+    "revoked_tails": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "secret": {
+     "minLength": 1,
+     "title": "Secret",
+     "type": "string"
+    },
+    "tail": {
+     "minLength": 1,
+     "title": "Tail",
+     "type": "string"
+    }
+   },
+   "required": [
+    "secret",
+    "id",
+    "tail",
+    "previous",
+    "revoked_tails"
+   ],
+   "type": "object"
+  },
+  "RotateRequest": {
+   "properties": {
+    "overlap_seconds": {
+     "maximum": 604800,
+     "minimum": 0,
+     "title": "Overlap seconds",
+     "type": "integer"
+    },
+    "secret": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Secret",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "SubscriptionInput": {
+   "properties": {
+    "event_type": {
+     "description": "A catalog type or prompt.* / deployment.run.*",
+     "maxLength": 100,
+     "minLength": 1,
+     "title": "Event type",
+     "type": "string"
+    },
+    "filters": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "default": {},
+     "title": "Filters",
+     "type": "object"
+    }
+   },
+   "required": [
+    "event_type"
+   ],
+   "type": "object"
+  },
+  "SubscriptionOut": {
+   "properties": {
+    "event_type": {
+     "minLength": 1,
+     "title": "Event type",
+     "type": "string"
+    },
+    "filters": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "title": "Filters",
+     "type": "object"
+    }
+   },
+   "required": [
+    "event_type",
+    "filters"
+   ],
+   "type": "object"
+  },
+  "TestOut": {
+   "properties": {
+    "delivery_id": {
+     "minLength": 1,
+     "title": "Delivery id",
+     "type": "string",
+     "x-nullable": true
+    },
+    "event_id": {
+     "minLength": 1,
+     "title": "Event id",
+     "type": "string"
+    },
+    "latency_ms": {
+     "title": "Latency ms",
+     "type": "integer",
+     "x-nullable": true
+    },
+    "outcome": {
+     "minLength": 1,
+     "title": "Outcome",
+     "type": "string"
+    },
+    "response_excerpt": {
+     "minLength": 1,
+     "title": "Response excerpt",
+     "type": "string",
+     "x-nullable": true
+    },
+    "status_code": {
+     "title": "Status code",
+     "type": "integer",
+     "x-nullable": true
+    }
+   },
+   "required": [
+    "event_id",
+    "delivery_id"
+   ],
+   "type": "object"
+  },
+  "TestRequest": {
+   "properties": {
+    "event_type": {
+     "maxLength": 100,
+     "minLength": 1,
+     "title": "Event type",
+     "type": "string"
+    }
+   },
+   "required": [
+    "event_type"
+   ],
+   "type": "object"
+  },
+  "ToggleRequest": {
+   "properties": {
+    "reason": {
+     "maxLength": 500,
+     "title": "Reason",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "WebhookBulkRedeliverResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/BulkRedeliverOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookDeliveryDetailResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/DeliveryDetailOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookDeliveryPageResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/DeliveryPageOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookEgressResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/EgressOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookEndpointCreatedResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/EndpointCreatedOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookEndpointDeletedResponse": {
+   "properties": {
+    "result": {
+     "additionalProperties": {
+      "type": "string",
+      "x-nullable": true
+     },
+     "description": "{deleted: true, cancelled_deliveries}",
+     "title": "Result",
+     "type": "object"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookEndpointListResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/EndpointListOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookEndpointResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/EndpointOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookEventPageResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/EventPageOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookEventTypesResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/EventTypesOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookPolicyResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/PolicyOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookPreviewResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/PreviewOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookRedeliverResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/RedeliverOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookResumeResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/ResumeOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookRevokePreviousResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/RevokeOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookRotateSecretResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/RotateOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WebhookTestResponse": {
+   "properties": {
+    "result": {
+     "$ref": "#/definitions/TestOut"
+    },
+    "status": {
+     "default": true,
+     "title": "Status",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "WorkspacePolicyRequest": {
+   "properties": {
+    "allowed_hosts": {
+     "items": {
+      "maxLength": 260,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "members_can_manage": {
+     "title": "Members can manage",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  }
+ },
+ "paths": {
+  "/webhooks/deliveries/": {
+   "get": {
+    "description": "",
+    "operationId": "webhooks_deliveries_list",
+    "parameters": [
+     {
+      "in": "query",
+      "maxLength": 40,
+      "minLength": 1,
+      "name": "endpoint",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "enum": [
+       "pending",
+       "sending",
+       "retrying",
+       "succeeded",
+       "failed",
+       "paused",
+       "skipped",
+       "cancelled"
+      ],
+      "in": "query",
+      "name": "status",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "enum": [
+       "prompt.version.created",
+       "prompt.label.changed",
+       "deployment.run.completed",
+       "deployment.run.failed"
+      ],
+      "in": "query",
+      "name": "event_type",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "maxLength": 40,
+      "minLength": 1,
+      "name": "event",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "maxLength": 200,
+      "minLength": 1,
+      "name": "subject",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "format": "date-time",
+      "in": "query",
+      "name": "since",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "format": "date-time",
+      "in": "query",
+      "name": "until",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "minimum": 1,
+      "name": "seq_from",
+      "required": false,
+      "type": "integer"
+     },
+     {
+      "in": "query",
+      "minimum": 1,
+      "name": "seq_to",
+      "required": false,
+      "type": "integer"
+     },
+     {
+      "in": "query",
+      "name": "include_body",
+      "required": false,
+      "type": "boolean"
+     },
+     {
+      "in": "query",
+      "maxLength": 40,
+      "minLength": 1,
+      "name": "cursor",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "maximum": 100,
+      "minimum": 1,
+      "name": "limit",
+      "required": false,
+      "type": "integer"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookDeliveryPageResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   },
+   "parameters": []
+  },
+  "/webhooks/deliveries/redeliver/": {
+   "parameters": [],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_deliveries_redeliver_bulk",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/BulkRedeliverRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookBulkRedeliverResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/deliveries/{delivery_id}/": {
+   "get": {
+    "description": "",
+    "operationId": "webhooks_deliveries_read",
+    "parameters": [],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookDeliveryDetailResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-response-validation": true
+   },
+   "parameters": [
+    {
+     "in": "path",
+     "name": "delivery_id",
+     "required": true,
+     "type": "string"
+    }
+   ]
+  },
+  "/webhooks/deliveries/{delivery_id}/redeliver/": {
+   "parameters": [
+    {
+     "in": "path",
+     "name": "delivery_id",
+     "required": true,
+     "type": "string"
+    }
+   ],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_deliveries_redeliver_one",
+    "parameters": [],
+    "responses": {
+     "202": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookRedeliverResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/egress-ips/": {
+   "get": {
+    "description": "The webhook NAT's published addresses per region (section 6.4): ``WEBHOOKS_EGRESS_IPS`` as\n``region=ip,ip;region=ip``, set by the hosted deployment (WH-1c). Empty where none are published.",
+    "operationId": "webhooks_egress-ips_list",
+    "parameters": [],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEgressResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-response-validation": true
+   },
+   "parameters": []
+  },
+  "/webhooks/endpoints/": {
+   "get": {
+    "description": "",
+    "operationId": "webhooks_endpoints_list",
+    "parameters": [
+     {
+      "format": "uuid",
+      "in": "query",
+      "name": "workspace",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "enum": [
+       "prompt.version.created",
+       "prompt.label.changed",
+       "prompt.*",
+       "deployment.run.completed",
+       "deployment.run.failed",
+       "deployment.run.*"
+      ],
+      "in": "query",
+      "name": "event_type",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "enum": [
+       "enabled",
+       "disabled_manual",
+       "disabled_auto",
+       "blocked_by_policy"
+      ],
+      "in": "query",
+      "name": "status",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "enum": [
+       "http",
+       "github_dispatch"
+      ],
+      "in": "query",
+      "name": "kind",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEndpointListResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   },
+   "parameters": [],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_endpoints_create",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/EndpointCreateRequest"
+      }
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEndpointCreatedResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/endpoints/{endpoint_id}/": {
+   "delete": {
+    "description": "",
+    "operationId": "webhooks_endpoints_delete",
+    "parameters": [],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEndpointDeletedResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-response-validation": true
+   },
+   "get": {
+    "description": "",
+    "operationId": "webhooks_endpoints_read",
+    "parameters": [],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEndpointResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-response-validation": true
+   },
+   "parameters": [
+    {
+     "in": "path",
+     "name": "endpoint_id",
+     "required": true,
+     "type": "string"
+    }
+   ],
+   "patch": {
+    "description": "",
+    "operationId": "webhooks_endpoints_partial_update",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/EndpointUpdateRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEndpointResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/endpoints/{endpoint_id}/deliveries/": {
+   "get": {
+    "description": "",
+    "operationId": "webhooks_endpoints_deliveries_list",
+    "parameters": [
+     {
+      "in": "query",
+      "maxLength": 40,
+      "minLength": 1,
+      "name": "endpoint",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "enum": [
+       "pending",
+       "sending",
+       "retrying",
+       "succeeded",
+       "failed",
+       "paused",
+       "skipped",
+       "cancelled"
+      ],
+      "in": "query",
+      "name": "status",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "enum": [
+       "prompt.version.created",
+       "prompt.label.changed",
+       "deployment.run.completed",
+       "deployment.run.failed"
+      ],
+      "in": "query",
+      "name": "event_type",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "maxLength": 40,
+      "minLength": 1,
+      "name": "event",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "maxLength": 200,
+      "minLength": 1,
+      "name": "subject",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "format": "date-time",
+      "in": "query",
+      "name": "since",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "format": "date-time",
+      "in": "query",
+      "name": "until",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "minimum": 1,
+      "name": "seq_from",
+      "required": false,
+      "type": "integer"
+     },
+     {
+      "in": "query",
+      "minimum": 1,
+      "name": "seq_to",
+      "required": false,
+      "type": "integer"
+     },
+     {
+      "in": "query",
+      "name": "include_body",
+      "required": false,
+      "type": "boolean"
+     },
+     {
+      "in": "query",
+      "maxLength": 40,
+      "minLength": 1,
+      "name": "cursor",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "maximum": 100,
+      "minimum": 1,
+      "name": "limit",
+      "required": false,
+      "type": "integer"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookDeliveryPageResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   },
+   "parameters": [
+    {
+     "in": "path",
+     "name": "endpoint_id",
+     "required": true,
+     "type": "string"
+    }
+   ]
+  },
+  "/webhooks/endpoints/{endpoint_id}/disable/": {
+   "parameters": [
+    {
+     "in": "path",
+     "name": "endpoint_id",
+     "required": true,
+     "type": "string"
+    }
+   ],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_endpoints_disable_create",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/ToggleRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEndpointResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/endpoints/{endpoint_id}/enable/": {
+   "parameters": [
+    {
+     "in": "path",
+     "name": "endpoint_id",
+     "required": true,
+     "type": "string"
+    }
+   ],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_endpoints_enable_create",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/ToggleRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEndpointResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/endpoints/{endpoint_id}/resume/": {
+   "parameters": [
+    {
+     "in": "path",
+     "name": "endpoint_id",
+     "required": true,
+     "type": "string"
+    }
+   ],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_endpoints_resume_create",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/ResumeRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookResumeResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/endpoints/{endpoint_id}/revoke-previous-secret/": {
+   "parameters": [
+    {
+     "in": "path",
+     "name": "endpoint_id",
+     "required": true,
+     "type": "string"
+    }
+   ],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_endpoints_revoke-previous-secret_create",
+    "parameters": [],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookRevokePreviousResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/endpoints/{endpoint_id}/rotate-secret/": {
+   "parameters": [
+    {
+     "in": "path",
+     "name": "endpoint_id",
+     "required": true,
+     "type": "string"
+    }
+   ],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_endpoints_rotate-secret_create",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/RotateRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookRotateSecretResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/endpoints/{endpoint_id}/test/": {
+   "parameters": [
+    {
+     "in": "path",
+     "name": "endpoint_id",
+     "required": true,
+     "type": "string"
+    }
+   ],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_endpoints_test_create",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/TestRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookTestResponse"
+      }
+     },
+     "202": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookTestResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/event-types/": {
+   "get": {
+    "description": "",
+    "operationId": "webhooks_event-types_list",
+    "parameters": [],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEventTypesResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-response-validation": true
+   },
+   "parameters": []
+  },
+  "/webhooks/events/": {
+   "get": {
+    "description": "",
+    "operationId": "webhooks_events_list",
+    "parameters": [
+     {
+      "enum": [
+       "prompt.version.created",
+       "prompt.label.changed",
+       "deployment.run.completed",
+       "deployment.run.failed"
+      ],
+      "in": "query",
+      "name": "type",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "maxLength": 200,
+      "minLength": 1,
+      "name": "subject",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "format": "date-time",
+      "in": "query",
+      "name": "since",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "format": "date-time",
+      "in": "query",
+      "name": "until",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "maxLength": 40,
+      "minLength": 1,
+      "name": "cursor",
+      "required": false,
+      "type": "string"
+     },
+     {
+      "in": "query",
+      "maximum": 100,
+      "minimum": 1,
+      "name": "limit",
+      "required": false,
+      "type": "integer"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookEventPageResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   },
+   "parameters": []
+  },
+  "/webhooks/policy/": {
+   "get": {
+    "description": "",
+    "operationId": "webhooks_policy_list",
+    "parameters": [],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookPolicyResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-response-validation": true
+   },
+   "parameters": [],
+   "put": {
+    "description": "",
+    "operationId": "webhooks_policy_update",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/PolicyRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookPolicyResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/policy/workspace/{workspace_id}/": {
+   "get": {
+    "description": "",
+    "operationId": "webhooks_policy_workspace_read",
+    "parameters": [],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookPolicyResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-response-validation": true
+   },
+   "parameters": [
+    {
+     "in": "path",
+     "name": "workspace_id",
+     "required": true,
+     "type": "string"
+    }
+   ],
+   "put": {
+    "description": "",
+    "operationId": "webhooks_policy_workspace_update",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/WorkspacePolicyRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookPolicyResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  },
+  "/webhooks/preview/": {
+   "parameters": [],
+   "post": {
+    "description": "",
+    "operationId": "webhooks_preview_create",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "data",
+      "required": true,
+      "schema": {
+       "$ref": "#/definitions/PreviewRequest"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "",
+      "schema": {
+       "$ref": "#/definitions/WebhookPreviewResponse"
+      }
+     },
+     "default": {
+      "description": "Default error response",
+      "schema": {
+       "$ref": "#/definitions/ManagementAPIErrorResponse"
+      }
+     }
+    },
+    "tags": [
+     "webhooks"
+    ],
+    "x-runtime-request-validation": true,
+    "x-runtime-response-validation": true
+   }
+  }
+ }
+}

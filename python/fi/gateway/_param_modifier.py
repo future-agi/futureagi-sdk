@@ -68,7 +68,7 @@ def modify_params_for_provider(model: str, body: dict[str, Any]) -> dict[str, An
     as needed for the target provider, based on the model name.
 
     Args:
-        model: The model identifier (e.g. "claude-3-5-sonnet-20241022").
+        model: The model identifier (e.g. "anthropic-direct/claude-sonnet-5").
         body: The request body dict (mutated in place and returned).
 
     Returns:
@@ -94,7 +94,7 @@ def _adapt_for_anthropic(model: str, body: dict[str, Any]) -> None:
     tool_choice = body.get("tool_choice")
     if isinstance(tool_choice, str):
         if tool_choice == "none":
-            # Anthropic doesn't have "none" — just remove tools
+            # Anthropic doesn't have "none" — remove tools
             body.pop("tool_choice", None)
             body.pop("tools", None)
         elif tool_choice == "required":

@@ -1,0 +1,7347 @@
+{
+ "area": "surface",
+ "cases": {
+  "surface.all[sync]": {
+   "requests": [],
+   "result": {
+    "__all__": [
+     "AGENTCC_GATEWAY_URL",
+     "APIConnectionError",
+     "APIStatusError",
+     "APITimeoutError",
+     "AgentCC",
+     "AgentCCError",
+     "AgentCCLogger",
+     "AsyncAgentCC",
+     "AsyncStream",
+     "AuthenticationError",
+     "BadGatewayError",
+     "BadRequestError",
+     "BudgetManager",
+     "CONTENT_POLICY_FALLBACKS",
+     "CONTEXT_WINDOW_FALLBACKS",
+     "CacheConfig",
+     "ChunkAccumulator",
+     "ConditionalRoutingConfig",
+     "FallbackConfig",
+     "FallbackTarget",
+     "GatewayConfig",
+     "GatewayTimeoutError",
+     "GuardrailBlockedError",
+     "GuardrailCheck",
+     "GuardrailConfig",
+     "GuardrailWarning",
+     "InternalServerError",
+     "JSONLoggingCallbackHandler",
+     "LoadBalanceConfig",
+     "LoadBalanceTarget",
+     "MODEL_INFO",
+     "ModelInfo",
+     "NOT_GIVEN",
+     "NotFoundError",
+     "PermissionDeniedError",
+     "RateLimitError",
+     "RetryConfig",
+     "RetryPolicy",
+     "RoutingCondition",
+     "ServiceUnavailableError",
+     "Session",
+     "SessionContext",
+     "Stream",
+     "StreamError",
+     "Timeout",
+     "TimeoutConfig",
+     "TrafficMirrorConfig",
+     "UnprocessableEntityError",
+     "__version__",
+     "abatch_completion",
+     "abatch_completion_models",
+     "abatch_completion_models_all",
+     "batch_completion",
+     "batch_completion_models",
+     "batch_completion_models_all",
+     "check_valid_key",
+     "completion_cost",
+     "completion_cost_from_response",
+     "create_headers",
+     "create_mock_client",
+     "decode",
+     "encode",
+     "function_to_dict",
+     "get_content_policy_fallback",
+     "get_context_window_fallback",
+     "get_max_output_tokens",
+     "get_max_tokens",
+     "get_model_info",
+     "get_valid_models",
+     "health_check",
+     "is_prompt_caching_valid",
+     "model_alias_map",
+     "patch_openai",
+     "register_model",
+     "return_raw_request",
+     "stream_chunk_builder",
+     "supports_function_calling",
+     "supports_json_mode",
+     "supports_response_schema",
+     "supports_vision",
+     "to_response_format",
+     "token_counter",
+     "trim_messages",
+     "validate_environment",
+     "validate_json_response"
+    ],
+    "count": 85,
+    "dir_public": [
+     "APIConnectionError",
+     "APIStatusError",
+     "APITimeoutError",
+     "AgentCCError",
+     "AuthenticationError",
+     "BadGatewayError",
+     "BadRequestError",
+     "GatewayTimeoutError",
+     "GuardrailBlockedError",
+     "GuardrailWarning",
+     "InternalServerError",
+     "NOT_GIVEN",
+     "NotFoundError",
+     "PermissionDeniedError",
+     "RateLimitError",
+     "ServiceUnavailableError",
+     "StreamError",
+     "UnprocessableEntityError",
+     "annotations"
+    ],
+    "version": "0.1.0"
+   }
+  },
+  "surface.client_tree[sync]": {
+   "requests": [],
+   "result": {
+    "AgentCC": {
+     "audio": {
+      "members": {
+       "speech": {
+        "members": {
+         "create": {
+          "coroutine": false,
+          "method": "(*, model: 'str', input: 'str', voice: 'str', response_format: 'str' = 'mp3', speed: 'float' = 1.0, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'bytes'"
+         }
+        },
+        "resource": "Speech"
+       },
+       "transcriptions": {
+        "members": {
+         "create": {
+          "coroutine": false,
+          "method": "(*, file: 'Any', model: 'str', language: 'Any' = NOT_GIVEN, prompt: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, temperature: 'Any' = NOT_GIVEN, timestamp_granularities: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'Transcription'"
+         }
+        },
+        "resource": "Transcriptions"
+       },
+       "translations": {
+        "members": {
+         "create": {
+          "coroutine": false,
+          "method": "(*, file: 'Any', model: 'str', prompt: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, temperature: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'Translation'"
+         }
+        },
+        "resource": "Translations"
+       }
+      },
+      "resource": "Audio"
+     },
+     "batches": {
+      "members": {
+       "cancel": {
+        "coroutine": false,
+        "method": "(batch_id: 'str') -> 'BatchResponse'"
+       },
+       "create": {
+        "coroutine": false,
+        "method": "(requests: 'list[dict[str, Any]]', *, max_concurrency: 'int' = 10) -> 'BatchResponse'"
+       },
+       "create_and_wait": {
+        "coroutine": false,
+        "method": "(requests: 'list[dict[str, Any]]', *, max_concurrency: 'int' = 10, poll_interval: 'float' = 2.0, timeout: 'float' = 3600.0) -> 'BatchResponse'"
+       },
+       "retrieve": {
+        "coroutine": false,
+        "method": "(batch_id: 'str') -> 'BatchResponse'"
+       },
+       "wait": {
+        "coroutine": false,
+        "method": "(batch_id: 'str', *, poll_interval: 'float' = 2.0, timeout: 'float' = 3600.0) -> 'BatchResponse'"
+       }
+      },
+      "resource": "Batches"
+     },
+     "chat": {
+      "members": {
+       "completions": {
+        "members": {
+         "create": {
+          "coroutine": false,
+          "method": "(*, model: 'str', messages: 'list[dict[str, Any]]', temperature: 'Any' = NOT_GIVEN, top_p: 'Any' = NOT_GIVEN, n: 'Any' = NOT_GIVEN, stream: 'Any' = NOT_GIVEN, stream_options: 'Any' = NOT_GIVEN, stop: 'Any' = NOT_GIVEN, max_tokens: 'Any' = NOT_GIVEN, max_completion_tokens: 'Any' = NOT_GIVEN, presence_penalty: 'Any' = NOT_GIVEN, frequency_penalty: 'Any' = NOT_GIVEN, logit_bias: 'Any' = NOT_GIVEN, logprobs: 'Any' = NOT_GIVEN, top_logprobs: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, seed: 'Any' = NOT_GIVEN, tools: 'Any' = NOT_GIVEN, tool_choice: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, service_tier: 'Any' = NOT_GIVEN, thinking: 'Any' = NOT_GIVEN, reasoning_effort: 'Any' = NOT_GIVEN, drop_params: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, mock_response: 'str | None' = None, **kwargs: 'Any') -> 'ChatCompletion | Any'"
+         },
+         "stream": {
+          "coroutine": false,
+          "method": "(*, model: 'str', messages: 'list[dict[str, Any]]', temperature: 'Any' = NOT_GIVEN, top_p: 'Any' = NOT_GIVEN, n: 'Any' = NOT_GIVEN, stream_options: 'Any' = NOT_GIVEN, stop: 'Any' = NOT_GIVEN, max_tokens: 'Any' = NOT_GIVEN, max_completion_tokens: 'Any' = NOT_GIVEN, presence_penalty: 'Any' = NOT_GIVEN, frequency_penalty: 'Any' = NOT_GIVEN, logit_bias: 'Any' = NOT_GIVEN, logprobs: 'Any' = NOT_GIVEN, top_logprobs: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, seed: 'Any' = NOT_GIVEN, tools: 'Any' = NOT_GIVEN, tool_choice: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, service_tier: 'Any' = NOT_GIVEN, thinking: 'Any' = NOT_GIVEN, reasoning_effort: 'Any' = NOT_GIVEN, drop_params: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'Any'"
+         }
+        },
+        "resource": "ChatCompletions"
+       }
+      },
+      "resource": "Chat"
+     },
+     "close": {
+      "coroutine": false,
+      "method": "() -> 'None'"
+     },
+     "completions": {
+      "members": {
+       "create": {
+        "coroutine": false,
+        "method": "(*, model: 'str', prompt: 'str | list[str]', max_tokens: 'Any' = NOT_GIVEN, temperature: 'Any' = NOT_GIVEN, top_p: 'Any' = NOT_GIVEN, n: 'Any' = NOT_GIVEN, stream: 'Any' = NOT_GIVEN, logprobs: 'Any' = NOT_GIVEN, echo: 'Any' = NOT_GIVEN, stop: 'Any' = NOT_GIVEN, presence_penalty: 'Any' = NOT_GIVEN, frequency_penalty: 'Any' = NOT_GIVEN, best_of: 'Any' = NOT_GIVEN, logit_bias: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, seed: 'Any' = NOT_GIVEN, suffix: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'Completion | Any'"
+       }
+      },
+      "resource": "Completions"
+     },
+     "current_cost": {
+      "value_type": "float"
+     },
+     "embeddings": {
+      "members": {
+       "create": {
+        "coroutine": false,
+        "method": "(*, model: 'str', input: 'str | list[str] | list[int] | list[list[int]]', encoding_format: 'Any' = NOT_GIVEN, dimensions: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'EmbeddingResponse'"
+       }
+      },
+      "resource": "Embeddings"
+     },
+     "files": {
+      "members": {
+       "content": {
+        "coroutine": false,
+        "method": "(file_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'bytes'"
+       },
+       "create": {
+        "coroutine": false,
+        "method": "(*, file: 'Any', purpose: 'str', session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'FileObject'"
+       },
+       "delete": {
+        "coroutine": false,
+        "method": "(file_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'FileDeleted'"
+       },
+       "list": {
+        "coroutine": false,
+        "method": "(*, purpose: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'FileList'"
+       },
+       "retrieve": {
+        "coroutine": false,
+        "method": "(file_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'FileObject'"
+       }
+      },
+      "resource": "Files"
+     },
+     "images": {
+      "members": {
+       "generate": {
+        "coroutine": false,
+        "method": "(*, prompt: 'str', model: 'Any' = NOT_GIVEN, n: 'Any' = NOT_GIVEN, quality: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, size: 'Any' = NOT_GIVEN, style: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'ImageResponse'"
+       }
+      },
+      "resource": "Images"
+     },
+     "models": {
+      "members": {
+       "list": {
+        "coroutine": false,
+        "method": "() -> 'ModelList'"
+       },
+       "retrieve": {
+        "coroutine": false,
+        "method": "(model_id: 'str') -> 'Model'"
+       }
+      },
+      "resource": "Models"
+     },
+     "moderations": {
+      "members": {
+       "create": {
+        "coroutine": false,
+        "method": "(*, input: 'str | list[str]', model: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'ModerationResponse'"
+       }
+      },
+      "resource": "Moderations"
+     },
+     "redact_messages": {
+      "value_type": "bool"
+     },
+     "rerank": {
+      "members": {
+       "create": {
+        "coroutine": false,
+        "method": "(*, model: 'str', query: 'str', documents: 'list[str]', top_n: 'Any' = NOT_GIVEN, return_documents: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'RerankResponse'"
+       }
+      },
+      "resource": "Rerank"
+     },
+     "reset_cost": {
+      "coroutine": false,
+      "method": "() -> 'None'"
+     },
+     "responses": {
+      "members": {
+       "create": {
+        "coroutine": false,
+        "method": "(*, model: 'str', input: 'str | list[dict[str, Any]]', instructions: 'Any' = NOT_GIVEN, tools: 'Any' = NOT_GIVEN, tool_choice: 'Any' = NOT_GIVEN, temperature: 'Any' = NOT_GIVEN, top_p: 'Any' = NOT_GIVEN, max_output_tokens: 'Any' = NOT_GIVEN, previous_response_id: 'Any' = NOT_GIVEN, store: 'bool' = True, metadata: 'Any' = NOT_GIVEN, stream: 'bool' = False, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'ResponseObject | Any'"
+       },
+       "delete": {
+        "coroutine": false,
+        "method": "(response_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'None'"
+       },
+       "retrieve": {
+        "coroutine": false,
+        "method": "(response_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'ResponseObject'"
+       }
+      },
+      "resource": "Responses"
+     },
+     "session": {
+      "coroutine": false,
+      "method": "(session_id: 'str | None' = None, name: 'str | None' = None, metadata: 'dict[str, Any] | None' = None) -> 'Any'"
+     },
+     "with_options": {
+      "coroutine": false,
+      "method": "(*, timeout: 'Any' = NOT_GIVEN, max_retries: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_query: 'dict[str, str] | None' = None, session_id: 'Any' = NOT_GIVEN, metadata: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, drop_params: 'Any' = NOT_GIVEN) -> 'AgentCC'"
+     }
+    },
+    "AsyncAgentCC": {
+     "aclose": {
+      "coroutine": true,
+      "method": "() -> 'None'"
+     },
+     "audio": {
+      "members": {
+       "speech": {
+        "members": {
+         "create": {
+          "coroutine": true,
+          "method": "(*, model: 'str', input: 'str', voice: 'str', response_format: 'str' = 'mp3', speed: 'float' = 1.0, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'bytes'"
+         }
+        },
+        "resource": "AsyncSpeech"
+       },
+       "transcriptions": {
+        "members": {
+         "create": {
+          "coroutine": true,
+          "method": "(*, file: 'Any', model: 'str', language: 'Any' = NOT_GIVEN, prompt: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, temperature: 'Any' = NOT_GIVEN, timestamp_granularities: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'Transcription'"
+         }
+        },
+        "resource": "AsyncTranscriptions"
+       },
+       "translations": {
+        "members": {
+         "create": {
+          "coroutine": true,
+          "method": "(*, file: 'Any', model: 'str', prompt: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, temperature: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'Translation'"
+         }
+        },
+        "resource": "AsyncTranslations"
+       }
+      },
+      "resource": "AsyncAudio"
+     },
+     "batches": {
+      "members": {
+       "cancel": {
+        "coroutine": true,
+        "method": "(batch_id: 'str') -> 'BatchResponse'"
+       },
+       "create": {
+        "coroutine": true,
+        "method": "(requests: 'list[dict[str, Any]]', *, max_concurrency: 'int' = 10) -> 'BatchResponse'"
+       },
+       "create_and_wait": {
+        "coroutine": true,
+        "method": "(requests: 'list[dict[str, Any]]', *, max_concurrency: 'int' = 10, poll_interval: 'float' = 2.0, timeout: 'float' = 3600.0) -> 'BatchResponse'"
+       },
+       "retrieve": {
+        "coroutine": true,
+        "method": "(batch_id: 'str') -> 'BatchResponse'"
+       },
+       "wait": {
+        "coroutine": true,
+        "method": "(batch_id: 'str', *, poll_interval: 'float' = 2.0, timeout: 'float' = 3600.0) -> 'BatchResponse'"
+       }
+      },
+      "resource": "AsyncBatches"
+     },
+     "chat": {
+      "members": {
+       "completions": {
+        "members": {
+         "create": {
+          "coroutine": true,
+          "method": "(*, model: 'str', messages: 'list[dict[str, Any]]', temperature: 'Any' = NOT_GIVEN, top_p: 'Any' = NOT_GIVEN, n: 'Any' = NOT_GIVEN, stream: 'Any' = NOT_GIVEN, stream_options: 'Any' = NOT_GIVEN, stop: 'Any' = NOT_GIVEN, max_tokens: 'Any' = NOT_GIVEN, max_completion_tokens: 'Any' = NOT_GIVEN, presence_penalty: 'Any' = NOT_GIVEN, frequency_penalty: 'Any' = NOT_GIVEN, logit_bias: 'Any' = NOT_GIVEN, logprobs: 'Any' = NOT_GIVEN, top_logprobs: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, seed: 'Any' = NOT_GIVEN, tools: 'Any' = NOT_GIVEN, tool_choice: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, service_tier: 'Any' = NOT_GIVEN, thinking: 'Any' = NOT_GIVEN, reasoning_effort: 'Any' = NOT_GIVEN, drop_params: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, mock_response: 'str | None' = None, **kwargs: 'Any') -> 'ChatCompletion | Any'"
+         },
+         "stream": {
+          "coroutine": true,
+          "method": "(*, model: 'str', messages: 'list[dict[str, Any]]', temperature: 'Any' = NOT_GIVEN, top_p: 'Any' = NOT_GIVEN, n: 'Any' = NOT_GIVEN, stream_options: 'Any' = NOT_GIVEN, stop: 'Any' = NOT_GIVEN, max_tokens: 'Any' = NOT_GIVEN, max_completion_tokens: 'Any' = NOT_GIVEN, presence_penalty: 'Any' = NOT_GIVEN, frequency_penalty: 'Any' = NOT_GIVEN, logit_bias: 'Any' = NOT_GIVEN, logprobs: 'Any' = NOT_GIVEN, top_logprobs: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, seed: 'Any' = NOT_GIVEN, tools: 'Any' = NOT_GIVEN, tool_choice: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, service_tier: 'Any' = NOT_GIVEN, thinking: 'Any' = NOT_GIVEN, reasoning_effort: 'Any' = NOT_GIVEN, drop_params: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'Any'"
+         }
+        },
+        "resource": "AsyncChatCompletions"
+       }
+      },
+      "resource": "AsyncChat"
+     },
+     "completions": {
+      "members": {
+       "create": {
+        "coroutine": true,
+        "method": "(*, model: 'str', prompt: 'str | list[str]', max_tokens: 'Any' = NOT_GIVEN, temperature: 'Any' = NOT_GIVEN, top_p: 'Any' = NOT_GIVEN, n: 'Any' = NOT_GIVEN, stream: 'Any' = NOT_GIVEN, logprobs: 'Any' = NOT_GIVEN, echo: 'Any' = NOT_GIVEN, stop: 'Any' = NOT_GIVEN, presence_penalty: 'Any' = NOT_GIVEN, frequency_penalty: 'Any' = NOT_GIVEN, best_of: 'Any' = NOT_GIVEN, logit_bias: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, seed: 'Any' = NOT_GIVEN, suffix: 'Any' = NOT_GIVEN, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'Completion | Any'"
+       }
+      },
+      "resource": "AsyncCompletions"
+     },
+     "current_cost": {
+      "value_type": "float"
+     },
+     "embeddings": {
+      "members": {
+       "create": {
+        "coroutine": true,
+        "method": "(*, model: 'str', input: 'str | list[str] | list[int] | list[list[int]]', encoding_format: 'Any' = NOT_GIVEN, dimensions: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'EmbeddingResponse'"
+       }
+      },
+      "resource": "AsyncEmbeddings"
+     },
+     "files": {
+      "members": {
+       "content": {
+        "coroutine": true,
+        "method": "(file_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'bytes'"
+       },
+       "create": {
+        "coroutine": true,
+        "method": "(*, file: 'Any', purpose: 'str', session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'FileObject'"
+       },
+       "delete": {
+        "coroutine": true,
+        "method": "(file_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'FileDeleted'"
+       },
+       "list": {
+        "coroutine": true,
+        "method": "(*, purpose: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'FileList'"
+       },
+       "retrieve": {
+        "coroutine": true,
+        "method": "(file_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'FileObject'"
+       }
+      },
+      "resource": "AsyncFiles"
+     },
+     "images": {
+      "members": {
+       "generate": {
+        "coroutine": true,
+        "method": "(*, prompt: 'str', model: 'Any' = NOT_GIVEN, n: 'Any' = NOT_GIVEN, quality: 'Any' = NOT_GIVEN, response_format: 'Any' = NOT_GIVEN, size: 'Any' = NOT_GIVEN, style: 'Any' = NOT_GIVEN, user: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'ImageResponse'"
+       }
+      },
+      "resource": "AsyncImages"
+     },
+     "models": {
+      "members": {
+       "list": {
+        "coroutine": true,
+        "method": "() -> 'ModelList'"
+       },
+       "retrieve": {
+        "coroutine": true,
+        "method": "(model_id: 'str') -> 'Model'"
+       }
+      },
+      "resource": "AsyncModels"
+     },
+     "moderations": {
+      "members": {
+       "create": {
+        "coroutine": true,
+        "method": "(*, input: 'str | list[str]', model: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'ModerationResponse'"
+       }
+      },
+      "resource": "AsyncModerations"
+     },
+     "redact_messages": {
+      "value_type": "bool"
+     },
+     "rerank": {
+      "members": {
+       "create": {
+        "coroutine": true,
+        "method": "(*, model: 'str', query: 'str', documents: 'list[str]', top_n: 'Any' = NOT_GIVEN, return_documents: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'RerankResponse'"
+       }
+      },
+      "resource": "AsyncRerank"
+     },
+     "reset_cost": {
+      "coroutine": false,
+      "method": "() -> 'None'"
+     },
+     "responses": {
+      "members": {
+       "create": {
+        "coroutine": true,
+        "method": "(*, model: 'str', input: 'str | list[dict[str, Any]]', instructions: 'Any' = NOT_GIVEN, tools: 'Any' = NOT_GIVEN, tool_choice: 'Any' = NOT_GIVEN, temperature: 'Any' = NOT_GIVEN, top_p: 'Any' = NOT_GIVEN, max_output_tokens: 'Any' = NOT_GIVEN, previous_response_id: 'Any' = NOT_GIVEN, store: 'bool' = True, metadata: 'Any' = NOT_GIVEN, stream: 'bool' = False, session_id: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, request_metadata: 'Any' = NOT_GIVEN, request_timeout: 'Any' = NOT_GIVEN, cache_ttl: 'Any' = NOT_GIVEN, cache_namespace: 'Any' = NOT_GIVEN, cache_force_refresh: 'Any' = NOT_GIVEN, cache_control: 'Any' = NOT_GIVEN, guardrail_policy: 'Any' = NOT_GIVEN, properties: 'dict[str, str] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, extra_headers: 'dict[str, str] | None' = None, extra_body: 'dict[str, Any] | None' = None, timeout: 'Any' = NOT_GIVEN, **kwargs: 'Any') -> 'ResponseObject | Any'"
+       },
+       "delete": {
+        "coroutine": true,
+        "method": "(response_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'None'"
+       },
+       "retrieve": {
+        "coroutine": true,
+        "method": "(response_id: 'str', *, extra_headers: 'dict[str, str] | None' = None, timeout: 'Any' = NOT_GIVEN) -> 'ResponseObject'"
+       }
+      },
+      "resource": "AsyncResponses"
+     },
+     "session": {
+      "coroutine": false,
+      "method": "(session_id: 'str | None' = None, name: 'str | None' = None, metadata: 'dict[str, Any] | None' = None) -> 'Any'"
+     },
+     "with_options": {
+      "coroutine": false,
+      "method": "(*, timeout: 'Any' = NOT_GIVEN, max_retries: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_query: 'dict[str, str] | None' = None, session_id: 'Any' = NOT_GIVEN, metadata: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, drop_params: 'Any' = NOT_GIVEN) -> 'AsyncAgentCC'"
+     }
+    }
+   }
+  },
+  "surface.errors[sync]": {
+   "requests": [],
+   "result": {
+    "APIConnectionError": {
+     "__exception__": "APIConnectionError",
+     "args": [
+      "connection refused"
+     ],
+     "attrs": {
+      "message": "connection refused"
+     },
+     "mro": [
+      "APIConnectionError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "args": [
+       "connection refused"
+      ],
+      "ok": true,
+      "str": "connection refused",
+      "type": "APIConnectionError"
+     },
+     "repr": "APIConnectionError('connection refused')",
+     "str": "connection refused"
+    },
+    "APIStatusError": {
+     "__exception__": "APIStatusError",
+     "args": [
+      "APIStatusError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "APIStatusError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "APIStatusError(status_code=418, message='APIStatusError message')",
+     "str": "Error code: 418 - APIStatusError message"
+    },
+    "APITimeoutError": {
+     "__exception__": "APITimeoutError",
+     "args": [
+      "Request timed out"
+     ],
+     "attrs": {
+      "message": "Request timed out"
+     },
+     "mro": [
+      "APITimeoutError",
+      "APIConnectionError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "args": [
+       "Request timed out"
+      ],
+      "ok": true,
+      "str": "Request timed out",
+      "type": "APITimeoutError"
+     },
+     "repr": "APITimeoutError('Request timed out')",
+     "str": "Request timed out"
+    },
+    "AgentCCError": {
+     "__exception__": "AgentCCError",
+     "args": [
+      "base message"
+     ],
+     "attrs": {
+      "message": "base message"
+     },
+     "mro": [
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "args": [
+       "base message"
+      ],
+      "ok": true,
+      "str": "base message",
+      "type": "AgentCCError"
+     },
+     "repr": "AgentCCError('base message')",
+     "str": "base message"
+    },
+    "AuthenticationError": {
+     "__exception__": "AuthenticationError",
+     "args": [
+      "AuthenticationError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "AuthenticationError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "AuthenticationError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "AuthenticationError(status_code=418, message='AuthenticationError message')",
+     "str": "Error code: 418 - AuthenticationError message"
+    },
+    "BadGatewayError": {
+     "__exception__": "BadGatewayError",
+     "args": [
+      "BadGatewayError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "BadGatewayError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "BadGatewayError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "BadGatewayError(status_code=418, message='BadGatewayError message')",
+     "str": "Error code: 418 - BadGatewayError message"
+    },
+    "BadRequestError": {
+     "__exception__": "BadRequestError",
+     "args": [
+      "BadRequestError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "BadRequestError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "BadRequestError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "BadRequestError(status_code=418, message='BadRequestError message')",
+     "str": "Error code: 418 - BadRequestError message"
+    },
+    "GatewayTimeoutError": {
+     "__exception__": "GatewayTimeoutError",
+     "args": [
+      "GatewayTimeoutError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "GatewayTimeoutError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "GatewayTimeoutError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "GatewayTimeoutError(status_code=418, message='GatewayTimeoutError message')",
+     "str": "Error code: 418 - GatewayTimeoutError message"
+    },
+    "GuardrailBlockedError": {
+     "__exception__": "GuardrailBlockedError",
+     "args": [
+      "GuardrailBlockedError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "guardrail_action": null,
+      "guardrail_confidence": null,
+      "guardrail_message": null,
+      "guardrail_name": null,
+      "message": "GuardrailBlockedError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "GuardrailBlockedError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "GuardrailBlockedError.__init__() takes 1 positional argument but 2 were given",
+      "ok": false
+     },
+     "repr": "GuardrailBlockedError(status_code=418, message='GuardrailBlockedError message')",
+     "str": "Error code: 418 - GuardrailBlockedError message"
+    },
+    "GuardrailWarning": {
+     "__exception__": "GuardrailWarning",
+     "args": [
+      "warned"
+     ],
+     "attrs": {
+      "body": {
+       "id": "c"
+      },
+      "code": null,
+      "completion": {
+       "id": "c"
+      },
+      "guardrail_action": null,
+      "guardrail_confidence": null,
+      "guardrail_message": null,
+      "guardrail_name": null,
+      "message": "warned",
+      "param": null,
+      "request_id": null,
+      "status_code": 246,
+      "type": null
+     },
+     "mro": [
+      "GuardrailWarning",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "GuardrailWarning.__init__() takes 1 positional argument but 2 were given",
+      "ok": false
+     },
+     "repr": "GuardrailWarning(status_code=246, message='warned')",
+     "str": "Error code: 246 - warned"
+    },
+    "InternalServerError": {
+     "__exception__": "InternalServerError",
+     "args": [
+      "InternalServerError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "InternalServerError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "InternalServerError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "InternalServerError(status_code=418, message='InternalServerError message')",
+     "str": "Error code: 418 - InternalServerError message"
+    },
+    "NotFoundError": {
+     "__exception__": "NotFoundError",
+     "args": [
+      "NotFoundError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "NotFoundError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "NotFoundError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "NotFoundError(status_code=418, message='NotFoundError message')",
+     "str": "Error code: 418 - NotFoundError message"
+    },
+    "PermissionDeniedError": {
+     "__exception__": "PermissionDeniedError",
+     "args": [
+      "PermissionDeniedError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "PermissionDeniedError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "PermissionDeniedError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "PermissionDeniedError(status_code=418, message='PermissionDeniedError message')",
+     "str": "Error code: 418 - PermissionDeniedError message"
+    },
+    "RateLimitError": {
+     "__exception__": "RateLimitError",
+     "args": [
+      "RateLimitError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "RateLimitError message",
+      "param": "p",
+      "ratelimit_limit": null,
+      "ratelimit_remaining": null,
+      "ratelimit_reset": null,
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "RateLimitError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "RateLimitError.__init__() takes 1 positional argument but 2 were given",
+      "ok": false
+     },
+     "repr": "RateLimitError(status_code=418, message='RateLimitError message')",
+     "str": "Error code: 418 - RateLimitError message"
+    },
+    "ServiceUnavailableError": {
+     "__exception__": "ServiceUnavailableError",
+     "args": [
+      "ServiceUnavailableError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "ServiceUnavailableError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "ServiceUnavailableError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "ServiceUnavailableError(status_code=418, message='ServiceUnavailableError message')",
+     "str": "Error code: 418 - ServiceUnavailableError message"
+    },
+    "StreamError": {
+     "__exception__": "StreamError",
+     "args": [
+      "stream broke"
+     ],
+     "attrs": {
+      "message": "stream broke"
+     },
+     "mro": [
+      "StreamError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "args": [
+       "stream broke"
+      ],
+      "ok": true,
+      "str": "stream broke",
+      "type": "StreamError"
+     },
+     "repr": "StreamError('stream broke')",
+     "str": "stream broke"
+    },
+    "UnprocessableEntityError": {
+     "__exception__": "UnprocessableEntityError",
+     "args": [
+      "UnprocessableEntityError message"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "m"
+       }
+      },
+      "code": "c",
+      "message": "UnprocessableEntityError message",
+      "param": "p",
+      "request_id": "req-1",
+      "status_code": 418,
+      "type": "t"
+     },
+     "mro": [
+      "UnprocessableEntityError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "UnprocessableEntityError(status_code=418, message='UnprocessableEntityError message')",
+     "str": "Error code: 418 - UnprocessableEntityError message"
+    }
+   }
+  },
+  "surface.model_json_schema[sync]": {
+   "requests": [],
+   "result": {
+    "AgentCCMetadata": {
+     "$defs": {
+      "RateLimitInfo": {
+       "description": "Rate-limit information extracted from ``x-ratelimit-*`` headers.",
+       "properties": {
+        "limit": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Limit"
+        },
+        "remaining": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Remaining"
+        },
+        "reset": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Reset"
+        }
+       },
+       "title": "RateLimitInfo",
+       "type": "object"
+      }
+     },
+     "description": "Structured metadata parsed from AgentCC gateway response headers.\n\nEvery response from the gateway includes ``x-agentcc-*`` headers.\nThis model provides typed access to that metadata.",
+     "properties": {
+      "cache_status": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Cache Status"
+      },
+      "cost": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Cost"
+      },
+      "fallback_used": {
+       "default": false,
+       "title": "Fallback Used",
+       "type": "boolean"
+      },
+      "guardrail_triggered": {
+       "default": false,
+       "title": "Guardrail Triggered",
+       "type": "boolean"
+      },
+      "http_response": {
+       "default": null,
+       "title": "Http Response"
+      },
+      "latency_ms": {
+       "default": 0,
+       "title": "Latency Ms",
+       "type": "integer"
+      },
+      "model_used": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Model Used"
+      },
+      "provider": {
+       "default": "unknown",
+       "title": "Provider",
+       "type": "string"
+      },
+      "ratelimit": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/RateLimitInfo"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "request_id": {
+       "default": "unknown",
+       "title": "Request Id",
+       "type": "string"
+      },
+      "routing_strategy": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Routing Strategy"
+      },
+      "timeout_ms": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Timeout Ms"
+      },
+      "trace_id": {
+       "default": "unknown",
+       "title": "Trace Id",
+       "type": "string"
+      }
+     },
+     "title": "AgentCCMetadata",
+     "type": "object"
+    },
+    "BatchResponse": {
+     "additionalProperties": true,
+     "description": "Response from the batch API.",
+     "properties": {
+      "batch_id": {
+       "title": "Batch Id",
+       "type": "string"
+      },
+      "completed_at": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Completed At"
+      },
+      "created_at": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Created At"
+      },
+      "max_concurrency": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Max Concurrency"
+      },
+      "results": {
+       "anyOf": [
+        {
+         "items": {},
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Results"
+      },
+      "status": {
+       "title": "Status",
+       "type": "string"
+      },
+      "summary": {
+       "anyOf": [
+        {
+         "type": "object"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Summary"
+      },
+      "total": {
+       "title": "Total",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "batch_id",
+      "status",
+      "total"
+     ],
+     "title": "BatchResponse",
+     "type": "object"
+    },
+    "CategoryScores": {
+     "additionalProperties": true,
+     "properties": {},
+     "title": "CategoryScores",
+     "type": "object"
+    },
+    "ChatCompletion": {
+     "$defs": {
+      "AgentCCMetadata": {
+       "description": "Structured metadata parsed from AgentCC gateway response headers.\n\nEvery response from the gateway includes ``x-agentcc-*`` headers.\nThis model provides typed access to that metadata.",
+       "properties": {
+        "cache_status": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Cache Status"
+        },
+        "cost": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Cost"
+        },
+        "fallback_used": {
+         "default": false,
+         "title": "Fallback Used",
+         "type": "boolean"
+        },
+        "guardrail_triggered": {
+         "default": false,
+         "title": "Guardrail Triggered",
+         "type": "boolean"
+        },
+        "http_response": {
+         "default": null,
+         "title": "Http Response"
+        },
+        "latency_ms": {
+         "default": 0,
+         "title": "Latency Ms",
+         "type": "integer"
+        },
+        "model_used": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Model Used"
+        },
+        "provider": {
+         "default": "unknown",
+         "title": "Provider",
+         "type": "string"
+        },
+        "ratelimit": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/RateLimitInfo"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "request_id": {
+         "default": "unknown",
+         "title": "Request Id",
+         "type": "string"
+        },
+        "routing_strategy": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Routing Strategy"
+        },
+        "timeout_ms": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Timeout Ms"
+        },
+        "trace_id": {
+         "default": "unknown",
+         "title": "Trace Id",
+         "type": "string"
+        }
+       },
+       "title": "AgentCCMetadata",
+       "type": "object"
+      },
+      "ChatCompletionMessage": {
+       "additionalProperties": true,
+       "properties": {
+        "content": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Content"
+        },
+        "name": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Name"
+        },
+        "role": {
+         "title": "Role",
+         "type": "string"
+        },
+        "tool_calls": {
+         "anyOf": [
+          {
+           "items": {
+            "$ref": {
+             "__truncated__": "str"
+            }
+           },
+           "type": "array"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Tool Calls"
+        }
+       },
+       "required": [
+        "role"
+       ],
+       "title": "ChatCompletionMessage",
+       "type": "object"
+      },
+      "Choice": {
+       "additionalProperties": true,
+       "properties": {
+        "finish_reason": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Finish Reason"
+        },
+        "index": {
+         "title": "Index",
+         "type": "integer"
+        },
+        "logprobs": {
+         "default": null,
+         "title": "Logprobs"
+        },
+        "message": {
+         "$ref": "#/$defs/ChatCompletionMessage"
+        }
+       },
+       "required": [
+        "index",
+        "message"
+       ],
+       "title": "Choice",
+       "type": "object"
+      },
+      "FunctionCall": {
+       "properties": {
+        "arguments": {
+         "title": "Arguments",
+         "type": "string"
+        },
+        "name": {
+         "title": "Name",
+         "type": "string"
+        }
+       },
+       "required": [
+        "name",
+        "arguments"
+       ],
+       "title": "FunctionCall",
+       "type": "object"
+      },
+      "RateLimitInfo": {
+       "description": "Rate-limit information extracted from ``x-ratelimit-*`` headers.",
+       "properties": {
+        "limit": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Limit"
+        },
+        "remaining": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Remaining"
+        },
+        "reset": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Reset"
+        }
+       },
+       "title": "RateLimitInfo",
+       "type": "object"
+      },
+      "ToolCall": {
+       "properties": {
+        "function": {
+         "$ref": "#/$defs/FunctionCall"
+        },
+        "id": {
+         "title": "Id",
+         "type": "string"
+        },
+        "type": {
+         "title": "Type",
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "type",
+        "function"
+       ],
+       "title": "ToolCall",
+       "type": "object"
+      },
+      "Usage": {
+       "additionalProperties": true,
+       "description": "Token usage information from a completion response.",
+       "properties": {
+        "completion_tokens": {
+         "title": "Completion Tokens",
+         "type": "integer"
+        },
+        "completion_tokens_details": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Completion Tokens Details"
+        },
+        "prompt_tokens": {
+         "title": "Prompt Tokens",
+         "type": "integer"
+        },
+        "prompt_tokens_details": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Prompt Tokens Details"
+        },
+        "total_tokens": {
+         "title": "Total Tokens",
+         "type": "integer"
+        }
+       },
+       "required": [
+        "prompt_tokens",
+        "completion_tokens",
+        "total_tokens"
+       ],
+       "title": "Usage",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "agentcc": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/AgentCCMetadata"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "choices": {
+       "items": {
+        "$ref": "#/$defs/Choice"
+       },
+       "title": "Choices",
+       "type": "array"
+      },
+      "created": {
+       "title": "Created",
+       "type": "integer"
+      },
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "model": {
+       "title": "Model",
+       "type": "string"
+      },
+      "object": {
+       "title": "Object",
+       "type": "string"
+      },
+      "service_tier": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Service Tier"
+      },
+      "system_fingerprint": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "System Fingerprint"
+      },
+      "usage": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Usage"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      }
+     },
+     "required": [
+      "id",
+      "object",
+      "created",
+      "model",
+      "choices"
+     ],
+     "title": "ChatCompletion",
+     "type": "object"
+    },
+    "ChatCompletionChunk": {
+     "$defs": {
+      "Delta": {
+       "properties": {
+        "content": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Content"
+        },
+        "role": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Role"
+        },
+        "tool_calls": {
+         "anyOf": [
+          {
+           "items": {
+            "$ref": {
+             "__truncated__": "str"
+            }
+           },
+           "type": "array"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Tool Calls"
+        }
+       },
+       "title": "Delta",
+       "type": "object"
+      },
+      "FunctionCallDelta": {
+       "properties": {
+        "arguments": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Arguments"
+        },
+        "name": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Name"
+        }
+       },
+       "title": "FunctionCallDelta",
+       "type": "object"
+      },
+      "StreamChoice": {
+       "additionalProperties": true,
+       "properties": {
+        "delta": {
+         "$ref": "#/$defs/Delta"
+        },
+        "finish_reason": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Finish Reason"
+        },
+        "index": {
+         "title": "Index",
+         "type": "integer"
+        },
+        "logprobs": {
+         "default": null,
+         "title": "Logprobs"
+        }
+       },
+       "required": [
+        "index",
+        "delta"
+       ],
+       "title": "StreamChoice",
+       "type": "object"
+      },
+      "ToolCallDelta": {
+       "properties": {
+        "function": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/FunctionCallDelta"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "id": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Id"
+        },
+        "index": {
+         "title": "Index",
+         "type": "integer"
+        },
+        "type": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Type"
+        }
+       },
+       "required": [
+        "index"
+       ],
+       "title": "ToolCallDelta",
+       "type": "object"
+      },
+      "Usage": {
+       "additionalProperties": true,
+       "description": "Token usage information from a completion response.",
+       "properties": {
+        "completion_tokens": {
+         "title": "Completion Tokens",
+         "type": "integer"
+        },
+        "completion_tokens_details": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Completion Tokens Details"
+        },
+        "prompt_tokens": {
+         "title": "Prompt Tokens",
+         "type": "integer"
+        },
+        "prompt_tokens_details": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Prompt Tokens Details"
+        },
+        "total_tokens": {
+         "title": "Total Tokens",
+         "type": "integer"
+        }
+       },
+       "required": [
+        "prompt_tokens",
+        "completion_tokens",
+        "total_tokens"
+       ],
+       "title": "Usage",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "choices": {
+       "items": {
+        "$ref": "#/$defs/StreamChoice"
+       },
+       "title": "Choices",
+       "type": "array"
+      },
+      "created": {
+       "title": "Created",
+       "type": "integer"
+      },
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "model": {
+       "title": "Model",
+       "type": "string"
+      },
+      "object": {
+       "title": "Object",
+       "type": "string"
+      },
+      "system_fingerprint": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "System Fingerprint"
+      },
+      "usage": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Usage"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      }
+     },
+     "required": [
+      "id",
+      "object",
+      "created",
+      "model",
+      "choices"
+     ],
+     "title": "ChatCompletionChunk",
+     "type": "object"
+    },
+    "ChatCompletionMessage": {
+     "$defs": {
+      "FunctionCall": {
+       "properties": {
+        "arguments": {
+         "title": "Arguments",
+         "type": "string"
+        },
+        "name": {
+         "title": "Name",
+         "type": "string"
+        }
+       },
+       "required": [
+        "name",
+        "arguments"
+       ],
+       "title": "FunctionCall",
+       "type": "object"
+      },
+      "ToolCall": {
+       "properties": {
+        "function": {
+         "$ref": "#/$defs/FunctionCall"
+        },
+        "id": {
+         "title": "Id",
+         "type": "string"
+        },
+        "type": {
+         "title": "Type",
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "type",
+        "function"
+       ],
+       "title": "ToolCall",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "content": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Content"
+      },
+      "name": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Name"
+      },
+      "role": {
+       "title": "Role",
+       "type": "string"
+      },
+      "tool_calls": {
+       "anyOf": [
+        {
+         "items": {
+          "$ref": "#/$defs/ToolCall"
+         },
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Tool Calls"
+      }
+     },
+     "required": [
+      "role"
+     ],
+     "title": "ChatCompletionMessage",
+     "type": "object"
+    },
+    "Choice": {
+     "$defs": {
+      "ChatCompletionMessage": {
+       "additionalProperties": true,
+       "properties": {
+        "content": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Content"
+        },
+        "name": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Name"
+        },
+        "role": {
+         "title": "Role",
+         "type": "string"
+        },
+        "tool_calls": {
+         "anyOf": [
+          {
+           "items": {
+            "$ref": {
+             "__truncated__": "str"
+            }
+           },
+           "type": "array"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Tool Calls"
+        }
+       },
+       "required": [
+        "role"
+       ],
+       "title": "ChatCompletionMessage",
+       "type": "object"
+      },
+      "FunctionCall": {
+       "properties": {
+        "arguments": {
+         "title": "Arguments",
+         "type": "string"
+        },
+        "name": {
+         "title": "Name",
+         "type": "string"
+        }
+       },
+       "required": [
+        "name",
+        "arguments"
+       ],
+       "title": "FunctionCall",
+       "type": "object"
+      },
+      "ToolCall": {
+       "properties": {
+        "function": {
+         "$ref": "#/$defs/FunctionCall"
+        },
+        "id": {
+         "title": "Id",
+         "type": "string"
+        },
+        "type": {
+         "title": "Type",
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "type",
+        "function"
+       ],
+       "title": "ToolCall",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "finish_reason": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Finish Reason"
+      },
+      "index": {
+       "title": "Index",
+       "type": "integer"
+      },
+      "logprobs": {
+       "default": null,
+       "title": "Logprobs"
+      },
+      "message": {
+       "$ref": "#/$defs/ChatCompletionMessage"
+      }
+     },
+     "required": [
+      "index",
+      "message"
+     ],
+     "title": "Choice",
+     "type": "object"
+    },
+    "Completion": {
+     "$defs": {
+      "AgentCCMetadata": {
+       "description": "Structured metadata parsed from AgentCC gateway response headers.\n\nEvery response from the gateway includes ``x-agentcc-*`` headers.\nThis model provides typed access to that metadata.",
+       "properties": {
+        "cache_status": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Cache Status"
+        },
+        "cost": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Cost"
+        },
+        "fallback_used": {
+         "default": false,
+         "title": "Fallback Used",
+         "type": "boolean"
+        },
+        "guardrail_triggered": {
+         "default": false,
+         "title": "Guardrail Triggered",
+         "type": "boolean"
+        },
+        "http_response": {
+         "default": null,
+         "title": "Http Response"
+        },
+        "latency_ms": {
+         "default": 0,
+         "title": "Latency Ms",
+         "type": "integer"
+        },
+        "model_used": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Model Used"
+        },
+        "provider": {
+         "default": "unknown",
+         "title": "Provider",
+         "type": "string"
+        },
+        "ratelimit": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/RateLimitInfo"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "request_id": {
+         "default": "unknown",
+         "title": "Request Id",
+         "type": "string"
+        },
+        "routing_strategy": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Routing Strategy"
+        },
+        "timeout_ms": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Timeout Ms"
+        },
+        "trace_id": {
+         "default": "unknown",
+         "title": "Trace Id",
+         "type": "string"
+        }
+       },
+       "title": "AgentCCMetadata",
+       "type": "object"
+      },
+      "CompletionChoice": {
+       "additionalProperties": true,
+       "properties": {
+        "finish_reason": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Finish Reason"
+        },
+        "index": {
+         "title": "Index",
+         "type": "integer"
+        },
+        "logprobs": {
+         "anyOf": [
+          {},
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Logprobs"
+        },
+        "text": {
+         "title": "Text",
+         "type": "string"
+        }
+       },
+       "required": [
+        "text",
+        "index"
+       ],
+       "title": "CompletionChoice",
+       "type": "object"
+      },
+      "RateLimitInfo": {
+       "description": "Rate-limit information extracted from ``x-ratelimit-*`` headers.",
+       "properties": {
+        "limit": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Limit"
+        },
+        "remaining": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Remaining"
+        },
+        "reset": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Reset"
+        }
+       },
+       "title": "RateLimitInfo",
+       "type": "object"
+      },
+      "Usage": {
+       "additionalProperties": true,
+       "description": "Token usage information from a completion response.",
+       "properties": {
+        "completion_tokens": {
+         "title": "Completion Tokens",
+         "type": "integer"
+        },
+        "completion_tokens_details": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Completion Tokens Details"
+        },
+        "prompt_tokens": {
+         "title": "Prompt Tokens",
+         "type": "integer"
+        },
+        "prompt_tokens_details": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Prompt Tokens Details"
+        },
+        "total_tokens": {
+         "title": "Total Tokens",
+         "type": "integer"
+        }
+       },
+       "required": [
+        "prompt_tokens",
+        "completion_tokens",
+        "total_tokens"
+       ],
+       "title": "Usage",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "agentcc": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/AgentCCMetadata"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "choices": {
+       "items": {
+        "$ref": "#/$defs/CompletionChoice"
+       },
+       "title": "Choices",
+       "type": "array"
+      },
+      "created": {
+       "title": "Created",
+       "type": "integer"
+      },
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "model": {
+       "title": "Model",
+       "type": "string"
+      },
+      "object": {
+       "default": "text_completion",
+       "title": "Object",
+       "type": "string"
+      },
+      "system_fingerprint": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "System Fingerprint"
+      },
+      "usage": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Usage"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      }
+     },
+     "required": [
+      "id",
+      "created",
+      "model",
+      "choices"
+     ],
+     "title": "Completion",
+     "type": "object"
+    },
+    "CompletionChoice": {
+     "additionalProperties": true,
+     "properties": {
+      "finish_reason": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Finish Reason"
+      },
+      "index": {
+       "title": "Index",
+       "type": "integer"
+      },
+      "logprobs": {
+       "anyOf": [
+        {},
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Logprobs"
+      },
+      "text": {
+       "title": "Text",
+       "type": "string"
+      }
+     },
+     "required": [
+      "text",
+      "index"
+     ],
+     "title": "CompletionChoice",
+     "type": "object"
+    },
+    "ContentPart": {
+     "additionalProperties": true,
+     "properties": {
+      "text": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Text"
+      },
+      "type": {
+       "default": "output_text",
+       "title": "Type",
+       "type": "string"
+      }
+     },
+     "title": "ContentPart",
+     "type": "object"
+    },
+    "Delta": {
+     "$defs": {
+      "FunctionCallDelta": {
+       "properties": {
+        "arguments": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Arguments"
+        },
+        "name": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Name"
+        }
+       },
+       "title": "FunctionCallDelta",
+       "type": "object"
+      },
+      "ToolCallDelta": {
+       "properties": {
+        "function": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/FunctionCallDelta"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "id": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Id"
+        },
+        "index": {
+         "title": "Index",
+         "type": "integer"
+        },
+        "type": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Type"
+        }
+       },
+       "required": [
+        "index"
+       ],
+       "title": "ToolCallDelta",
+       "type": "object"
+      }
+     },
+     "properties": {
+      "content": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Content"
+      },
+      "role": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Role"
+      },
+      "tool_calls": {
+       "anyOf": [
+        {
+         "items": {
+          "$ref": "#/$defs/ToolCallDelta"
+         },
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Tool Calls"
+      }
+     },
+     "title": "Delta",
+     "type": "object"
+    },
+    "Embedding": {
+     "additionalProperties": true,
+     "properties": {
+      "embedding": {
+       "items": {
+        "type": "number"
+       },
+       "title": "Embedding",
+       "type": "array"
+      },
+      "index": {
+       "title": "Index",
+       "type": "integer"
+      },
+      "object": {
+       "default": "embedding",
+       "title": "Object",
+       "type": "string"
+      }
+     },
+     "required": [
+      "embedding",
+      "index"
+     ],
+     "title": "Embedding",
+     "type": "object"
+    },
+    "EmbeddingResponse": {
+     "$defs": {
+      "AgentCCMetadata": {
+       "description": "Structured metadata parsed from AgentCC gateway response headers.\n\nEvery response from the gateway includes ``x-agentcc-*`` headers.\nThis model provides typed access to that metadata.",
+       "properties": {
+        "cache_status": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Cache Status"
+        },
+        "cost": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Cost"
+        },
+        "fallback_used": {
+         "default": false,
+         "title": "Fallback Used",
+         "type": "boolean"
+        },
+        "guardrail_triggered": {
+         "default": false,
+         "title": "Guardrail Triggered",
+         "type": "boolean"
+        },
+        "http_response": {
+         "default": null,
+         "title": "Http Response"
+        },
+        "latency_ms": {
+         "default": 0,
+         "title": "Latency Ms",
+         "type": "integer"
+        },
+        "model_used": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Model Used"
+        },
+        "provider": {
+         "default": "unknown",
+         "title": "Provider",
+         "type": "string"
+        },
+        "ratelimit": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/RateLimitInfo"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "request_id": {
+         "default": "unknown",
+         "title": "Request Id",
+         "type": "string"
+        },
+        "routing_strategy": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Routing Strategy"
+        },
+        "timeout_ms": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Timeout Ms"
+        },
+        "trace_id": {
+         "default": "unknown",
+         "title": "Trace Id",
+         "type": "string"
+        }
+       },
+       "title": "AgentCCMetadata",
+       "type": "object"
+      },
+      "Embedding": {
+       "additionalProperties": true,
+       "properties": {
+        "embedding": {
+         "items": {
+          "type": "number"
+         },
+         "title": "Embedding",
+         "type": "array"
+        },
+        "index": {
+         "title": "Index",
+         "type": "integer"
+        },
+        "object": {
+         "default": "embedding",
+         "title": "Object",
+         "type": "string"
+        }
+       },
+       "required": [
+        "embedding",
+        "index"
+       ],
+       "title": "Embedding",
+       "type": "object"
+      },
+      "RateLimitInfo": {
+       "description": "Rate-limit information extracted from ``x-ratelimit-*`` headers.",
+       "properties": {
+        "limit": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Limit"
+        },
+        "remaining": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Remaining"
+        },
+        "reset": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Reset"
+        }
+       },
+       "title": "RateLimitInfo",
+       "type": "object"
+      },
+      "Usage": {
+       "additionalProperties": true,
+       "description": "Token usage information from a completion response.",
+       "properties": {
+        "completion_tokens": {
+         "title": "Completion Tokens",
+         "type": "integer"
+        },
+        "completion_tokens_details": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Completion Tokens Details"
+        },
+        "prompt_tokens": {
+         "title": "Prompt Tokens",
+         "type": "integer"
+        },
+        "prompt_tokens_details": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Prompt Tokens Details"
+        },
+        "total_tokens": {
+         "title": "Total Tokens",
+         "type": "integer"
+        }
+       },
+       "required": [
+        "prompt_tokens",
+        "completion_tokens",
+        "total_tokens"
+       ],
+       "title": "Usage",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "agentcc": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/AgentCCMetadata"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "data": {
+       "items": {
+        "$ref": "#/$defs/Embedding"
+       },
+       "title": "Data",
+       "type": "array"
+      },
+      "model": {
+       "title": "Model",
+       "type": "string"
+      },
+      "object": {
+       "default": "list",
+       "title": "Object",
+       "type": "string"
+      },
+      "usage": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/Usage"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      }
+     },
+     "required": [
+      "data",
+      "model"
+     ],
+     "title": "EmbeddingResponse",
+     "type": "object"
+    },
+    "ErrorBody": {
+     "description": "Parsed error object from the gateway's JSON error response.",
+     "properties": {
+      "code": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Code"
+      },
+      "message": {
+       "title": "Message",
+       "type": "string"
+      },
+      "param": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Param"
+      },
+      "type": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Type"
+      }
+     },
+     "required": [
+      "message"
+     ],
+     "title": "ErrorBody",
+     "type": "object"
+    },
+    "ErrorResponse": {
+     "$defs": {
+      "ErrorBody": {
+       "description": "Parsed error object from the gateway's JSON error response.",
+       "properties": {
+        "code": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Code"
+        },
+        "message": {
+         "title": "Message",
+         "type": "string"
+        },
+        "param": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Param"
+        },
+        "type": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Type"
+        }
+       },
+       "required": [
+        "message"
+       ],
+       "title": "ErrorBody",
+       "type": "object"
+      }
+     },
+     "description": "Top-level error response: ``{\"error\": {...}}``.",
+     "properties": {
+      "error": {
+       "$ref": "#/$defs/ErrorBody"
+      }
+     },
+     "required": [
+      "error"
+     ],
+     "title": "ErrorResponse",
+     "type": "object"
+    },
+    "FileDeleted": {
+     "additionalProperties": true,
+     "properties": {
+      "deleted": {
+       "default": false,
+       "title": "Deleted",
+       "type": "boolean"
+      },
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "object": {
+       "default": "file",
+       "title": "Object",
+       "type": "string"
+      }
+     },
+     "required": [
+      "id"
+     ],
+     "title": "FileDeleted",
+     "type": "object"
+    },
+    "FileList": {
+     "$defs": {
+      "FileObject": {
+       "additionalProperties": true,
+       "properties": {
+        "bytes": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Bytes"
+        },
+        "created_at": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Created At"
+        },
+        "filename": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Filename"
+        },
+        "id": {
+         "title": "Id",
+         "type": "string"
+        },
+        "object": {
+         "default": "file",
+         "title": "Object",
+         "type": "string"
+        },
+        "purpose": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Purpose"
+        },
+        "status": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Status"
+        },
+        "status_details": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {},
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Status Details"
+        }
+       },
+       "required": [
+        "id"
+       ],
+       "title": "FileObject",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "data": {
+       "default": [],
+       "items": {
+        "$ref": "#/$defs/FileObject"
+       },
+       "title": "Data",
+       "type": "array"
+      },
+      "object": {
+       "default": "list",
+       "title": "Object",
+       "type": "string"
+      }
+     },
+     "title": "FileList",
+     "type": "object"
+    },
+    "FileObject": {
+     "additionalProperties": true,
+     "properties": {
+      "bytes": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Bytes"
+      },
+      "created_at": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Created At"
+      },
+      "filename": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Filename"
+      },
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "object": {
+       "default": "file",
+       "title": "Object",
+       "type": "string"
+      },
+      "purpose": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Purpose"
+      },
+      "status": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      },
+      "status_details": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {},
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status Details"
+      }
+     },
+     "required": [
+      "id"
+     ],
+     "title": "FileObject",
+     "type": "object"
+    },
+    "FunctionCall": {
+     "properties": {
+      "arguments": {
+       "title": "Arguments",
+       "type": "string"
+      },
+      "name": {
+       "title": "Name",
+       "type": "string"
+      }
+     },
+     "required": [
+      "name",
+      "arguments"
+     ],
+     "title": "FunctionCall",
+     "type": "object"
+    },
+    "FunctionCallDelta": {
+     "properties": {
+      "arguments": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Arguments"
+      },
+      "name": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Name"
+      }
+     },
+     "title": "FunctionCallDelta",
+     "type": "object"
+    },
+    "HealthResponse": {
+     "description": "Response from the gateway health/readiness endpoints.",
+     "properties": {
+      "status": {
+       "title": "Status",
+       "type": "string"
+      }
+     },
+     "required": [
+      "status"
+     ],
+     "title": "HealthResponse",
+     "type": "object"
+    },
+    "Image": {
+     "additionalProperties": true,
+     "properties": {
+      "b64_json": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "B64 Json"
+      },
+      "revised_prompt": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Revised Prompt"
+      },
+      "url": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Url"
+      }
+     },
+     "title": "Image",
+     "type": "object"
+    },
+    "ImageResponse": {
+     "$defs": {
+      "AgentCCMetadata": {
+       "description": "Structured metadata parsed from AgentCC gateway response headers.\n\nEvery response from the gateway includes ``x-agentcc-*`` headers.\nThis model provides typed access to that metadata.",
+       "properties": {
+        "cache_status": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Cache Status"
+        },
+        "cost": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Cost"
+        },
+        "fallback_used": {
+         "default": false,
+         "title": "Fallback Used",
+         "type": "boolean"
+        },
+        "guardrail_triggered": {
+         "default": false,
+         "title": "Guardrail Triggered",
+         "type": "boolean"
+        },
+        "http_response": {
+         "default": null,
+         "title": "Http Response"
+        },
+        "latency_ms": {
+         "default": 0,
+         "title": "Latency Ms",
+         "type": "integer"
+        },
+        "model_used": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Model Used"
+        },
+        "provider": {
+         "default": "unknown",
+         "title": "Provider",
+         "type": "string"
+        },
+        "ratelimit": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/RateLimitInfo"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "request_id": {
+         "default": "unknown",
+         "title": "Request Id",
+         "type": "string"
+        },
+        "routing_strategy": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Routing Strategy"
+        },
+        "timeout_ms": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Timeout Ms"
+        },
+        "trace_id": {
+         "default": "unknown",
+         "title": "Trace Id",
+         "type": "string"
+        }
+       },
+       "title": "AgentCCMetadata",
+       "type": "object"
+      },
+      "Image": {
+       "additionalProperties": true,
+       "properties": {
+        "b64_json": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "B64 Json"
+        },
+        "revised_prompt": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Revised Prompt"
+        },
+        "url": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Url"
+        }
+       },
+       "title": "Image",
+       "type": "object"
+      },
+      "RateLimitInfo": {
+       "description": "Rate-limit information extracted from ``x-ratelimit-*`` headers.",
+       "properties": {
+        "limit": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Limit"
+        },
+        "remaining": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Remaining"
+        },
+        "reset": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Reset"
+        }
+       },
+       "title": "RateLimitInfo",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "agentcc": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/AgentCCMetadata"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "created": {
+       "title": "Created",
+       "type": "integer"
+      },
+      "data": {
+       "items": {
+        "$ref": "#/$defs/Image"
+       },
+       "title": "Data",
+       "type": "array"
+      }
+     },
+     "required": [
+      "created",
+      "data"
+     ],
+     "title": "ImageResponse",
+     "type": "object"
+    },
+    "Model": {
+     "additionalProperties": true,
+     "description": "A single model object returned by the gateway.",
+     "properties": {
+      "created": {
+       "title": "Created",
+       "type": "integer"
+      },
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "object": {
+       "title": "Object",
+       "type": "string"
+      },
+      "owned_by": {
+       "title": "Owned By",
+       "type": "string"
+      }
+     },
+     "required": [
+      "id",
+      "object",
+      "created",
+      "owned_by"
+     ],
+     "title": "Model",
+     "type": "object"
+    },
+    "ModelList": {
+     "$defs": {
+      "Model": {
+       "additionalProperties": true,
+       "description": "A single model object returned by the gateway.",
+       "properties": {
+        "created": {
+         "title": "Created",
+         "type": "integer"
+        },
+        "id": {
+         "title": "Id",
+         "type": "string"
+        },
+        "object": {
+         "title": "Object",
+         "type": "string"
+        },
+        "owned_by": {
+         "title": "Owned By",
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "object",
+        "created",
+        "owned_by"
+       ],
+       "title": "Model",
+       "type": "object"
+      }
+     },
+     "description": "Response from GET /v1/models.",
+     "properties": {
+      "data": {
+       "items": {
+        "$ref": "#/$defs/Model"
+       },
+       "title": "Data",
+       "type": "array"
+      },
+      "object": {
+       "title": "Object",
+       "type": "string"
+      }
+     },
+     "required": [
+      "object",
+      "data"
+     ],
+     "title": "ModelList",
+     "type": "object"
+    },
+    "ModerationResponse": {
+     "$defs": {
+      "ModerationResult": {
+       "additionalProperties": true,
+       "properties": {
+        "categories": {
+         "additionalProperties": {
+          "type": "boolean"
+         },
+         "default": {},
+         "title": "Categories",
+         "type": "object"
+        },
+        "category_scores": {
+         "additionalProperties": {
+          "type": "number"
+         },
+         "default": {},
+         "title": "Category Scores",
+         "type": "object"
+        },
+        "flagged": {
+         "title": "Flagged",
+         "type": "boolean"
+        }
+       },
+       "required": [
+        "flagged"
+       ],
+       "title": "ModerationResult",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "model": {
+       "title": "Model",
+       "type": "string"
+      },
+      "results": {
+       "items": {
+        "$ref": "#/$defs/ModerationResult"
+       },
+       "title": "Results",
+       "type": "array"
+      }
+     },
+     "required": [
+      "id",
+      "model",
+      "results"
+     ],
+     "title": "ModerationResponse",
+     "type": "object"
+    },
+    "ModerationResult": {
+     "additionalProperties": true,
+     "properties": {
+      "categories": {
+       "additionalProperties": {
+        "type": "boolean"
+       },
+       "default": {},
+       "title": "Categories",
+       "type": "object"
+      },
+      "category_scores": {
+       "additionalProperties": {
+        "type": "number"
+       },
+       "default": {},
+       "title": "Category Scores",
+       "type": "object"
+      },
+      "flagged": {
+       "title": "Flagged",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "flagged"
+     ],
+     "title": "ModerationResult",
+     "type": "object"
+    },
+    "RateLimitInfo": {
+     "description": "Rate-limit information extracted from ``x-ratelimit-*`` headers.",
+     "properties": {
+      "limit": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Limit"
+      },
+      "remaining": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Remaining"
+      },
+      "reset": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Reset"
+      }
+     },
+     "title": "RateLimitInfo",
+     "type": "object"
+    },
+    "RerankResponse": {
+     "$defs": {
+      "RerankResult": {
+       "additionalProperties": true,
+       "properties": {
+        "document": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Document"
+        },
+        "index": {
+         "title": "Index",
+         "type": "integer"
+        },
+        "relevance_score": {
+         "title": "Relevance Score",
+         "type": "number"
+        }
+       },
+       "required": [
+        "index",
+        "relevance_score"
+       ],
+       "title": "RerankResult",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "id": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Id"
+      },
+      "model": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Model"
+      },
+      "results": {
+       "default": [],
+       "items": {
+        "$ref": "#/$defs/RerankResult"
+       },
+       "title": "Results",
+       "type": "array"
+      },
+      "usage": {
+       "anyOf": [
+        {
+         "type": "object"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Usage"
+      }
+     },
+     "title": "RerankResponse",
+     "type": "object"
+    },
+    "RerankResult": {
+     "additionalProperties": true,
+     "properties": {
+      "document": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Document"
+      },
+      "index": {
+       "title": "Index",
+       "type": "integer"
+      },
+      "relevance_score": {
+       "title": "Relevance Score",
+       "type": "number"
+      }
+     },
+     "required": [
+      "index",
+      "relevance_score"
+     ],
+     "title": "RerankResult",
+     "type": "object"
+    },
+    "ResponseObject": {
+     "$defs": {
+      "ContentPart": {
+       "additionalProperties": true,
+       "properties": {
+        "text": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Text"
+        },
+        "type": {
+         "default": "output_text",
+         "title": "Type",
+         "type": "string"
+        }
+       },
+       "title": "ContentPart",
+       "type": "object"
+      },
+      "ResponseOutput": {
+       "additionalProperties": true,
+       "properties": {
+        "content": {
+         "default": [],
+         "items": {
+          "$ref": "#/$defs/ContentPart"
+         },
+         "title": "Content",
+         "type": "array"
+        },
+        "type": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Type"
+        }
+       },
+       "title": "ResponseOutput",
+       "type": "object"
+      },
+      "ResponseUsage": {
+       "additionalProperties": true,
+       "properties": {
+        "input_tokens": {
+         "default": 0,
+         "title": "Input Tokens",
+         "type": "integer"
+        },
+        "output_tokens": {
+         "default": 0,
+         "title": "Output Tokens",
+         "type": "integer"
+        },
+        "total_tokens": {
+         "default": 0,
+         "title": "Total Tokens",
+         "type": "integer"
+        }
+       },
+       "title": "ResponseUsage",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "created_at": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Created At"
+      },
+      "error": {
+       "anyOf": [
+        {
+         "type": "object"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Error"
+      },
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "metadata": {
+       "anyOf": [
+        {
+         "type": "object"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Metadata"
+      },
+      "model": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Model"
+      },
+      "object": {
+       "default": "response",
+       "title": "Object",
+       "type": "string"
+      },
+      "output": {
+       "default": [],
+       "items": {
+        "$ref": "#/$defs/ResponseOutput"
+       },
+       "title": "Output",
+       "type": "array"
+      },
+      "status": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      },
+      "usage": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResponseUsage"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      }
+     },
+     "required": [
+      "id"
+     ],
+     "title": "ResponseObject",
+     "type": "object"
+    },
+    "ResponseOutput": {
+     "$defs": {
+      "ContentPart": {
+       "additionalProperties": true,
+       "properties": {
+        "text": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Text"
+        },
+        "type": {
+         "default": "output_text",
+         "title": "Type",
+         "type": "string"
+        }
+       },
+       "title": "ContentPart",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "content": {
+       "default": [],
+       "items": {
+        "$ref": "#/$defs/ContentPart"
+       },
+       "title": "Content",
+       "type": "array"
+      },
+      "type": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Type"
+      }
+     },
+     "title": "ResponseOutput",
+     "type": "object"
+    },
+    "ResponseStreamEvent": {
+     "$defs": {
+      "ContentPart": {
+       "additionalProperties": true,
+       "properties": {
+        "text": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Text"
+        },
+        "type": {
+         "default": "output_text",
+         "title": "Type",
+         "type": "string"
+        }
+       },
+       "title": "ContentPart",
+       "type": "object"
+      },
+      "ResponseObject": {
+       "additionalProperties": true,
+       "properties": {
+        "created_at": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Created At"
+        },
+        "error": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Error"
+        },
+        "id": {
+         "title": "Id",
+         "type": "string"
+        },
+        "metadata": {
+         "anyOf": [
+          {
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Metadata"
+        },
+        "model": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Model"
+        },
+        "object": {
+         "default": "response",
+         "title": "Object",
+         "type": "string"
+        },
+        "output": {
+         "default": [],
+         "items": {
+          "$ref": "#/$defs/ResponseOutput"
+         },
+         "title": "Output",
+         "type": "array"
+        },
+        "status": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Status"
+        },
+        "usage": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/ResponseUsage"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        }
+       },
+       "required": [
+        "id"
+       ],
+       "title": "ResponseObject",
+       "type": "object"
+      },
+      "ResponseOutput": {
+       "additionalProperties": true,
+       "properties": {
+        "content": {
+         "default": [],
+         "items": {
+          "$ref": "#/$defs/ContentPart"
+         },
+         "title": "Content",
+         "type": "array"
+        },
+        "type": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Type"
+        }
+       },
+       "title": "ResponseOutput",
+       "type": "object"
+      },
+      "ResponseUsage": {
+       "additionalProperties": true,
+       "properties": {
+        "input_tokens": {
+         "default": 0,
+         "title": "Input Tokens",
+         "type": "integer"
+        },
+        "output_tokens": {
+         "default": 0,
+         "title": "Output Tokens",
+         "type": "integer"
+        },
+        "total_tokens": {
+         "default": 0,
+         "title": "Total Tokens",
+         "type": "integer"
+        }
+       },
+       "title": "ResponseUsage",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "delta": {
+       "anyOf": [
+        {
+         "type": "object"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Delta"
+      },
+      "response": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResponseObject"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "type": {
+       "title": "Type",
+       "type": "string"
+      }
+     },
+     "required": [
+      "type"
+     ],
+     "title": "ResponseStreamEvent",
+     "type": "object"
+    },
+    "ResponseUsage": {
+     "additionalProperties": true,
+     "properties": {
+      "input_tokens": {
+       "default": 0,
+       "title": "Input Tokens",
+       "type": "integer"
+      },
+      "output_tokens": {
+       "default": 0,
+       "title": "Output Tokens",
+       "type": "integer"
+      },
+      "total_tokens": {
+       "default": 0,
+       "title": "Total Tokens",
+       "type": "integer"
+      }
+     },
+     "title": "ResponseUsage",
+     "type": "object"
+    },
+    "StreamChoice": {
+     "$defs": {
+      "Delta": {
+       "properties": {
+        "content": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Content"
+        },
+        "role": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Role"
+        },
+        "tool_calls": {
+         "anyOf": [
+          {
+           "items": {
+            "$ref": {
+             "__truncated__": "str"
+            }
+           },
+           "type": "array"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Tool Calls"
+        }
+       },
+       "title": "Delta",
+       "type": "object"
+      },
+      "FunctionCallDelta": {
+       "properties": {
+        "arguments": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Arguments"
+        },
+        "name": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Name"
+        }
+       },
+       "title": "FunctionCallDelta",
+       "type": "object"
+      },
+      "ToolCallDelta": {
+       "properties": {
+        "function": {
+         "anyOf": [
+          {
+           "$ref": "#/$defs/FunctionCallDelta"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null
+        },
+        "id": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Id"
+        },
+        "index": {
+         "title": "Index",
+         "type": "integer"
+        },
+        "type": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Type"
+        }
+       },
+       "required": [
+        "index"
+       ],
+       "title": "ToolCallDelta",
+       "type": "object"
+      }
+     },
+     "additionalProperties": true,
+     "properties": {
+      "delta": {
+       "$ref": "#/$defs/Delta"
+      },
+      "finish_reason": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Finish Reason"
+      },
+      "index": {
+       "title": "Index",
+       "type": "integer"
+      },
+      "logprobs": {
+       "default": null,
+       "title": "Logprobs"
+      }
+     },
+     "required": [
+      "index",
+      "delta"
+     ],
+     "title": "StreamChoice",
+     "type": "object"
+    },
+    "ToolCall": {
+     "$defs": {
+      "FunctionCall": {
+       "properties": {
+        "arguments": {
+         "title": "Arguments",
+         "type": "string"
+        },
+        "name": {
+         "title": "Name",
+         "type": "string"
+        }
+       },
+       "required": [
+        "name",
+        "arguments"
+       ],
+       "title": "FunctionCall",
+       "type": "object"
+      }
+     },
+     "properties": {
+      "function": {
+       "$ref": "#/$defs/FunctionCall"
+      },
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "type": {
+       "title": "Type",
+       "type": "string"
+      }
+     },
+     "required": [
+      "id",
+      "type",
+      "function"
+     ],
+     "title": "ToolCall",
+     "type": "object"
+    },
+    "ToolCallDelta": {
+     "$defs": {
+      "FunctionCallDelta": {
+       "properties": {
+        "arguments": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Arguments"
+        },
+        "name": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Name"
+        }
+       },
+       "title": "FunctionCallDelta",
+       "type": "object"
+      }
+     },
+     "properties": {
+      "function": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/FunctionCallDelta"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "id": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Id"
+      },
+      "index": {
+       "title": "Index",
+       "type": "integer"
+      },
+      "type": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Type"
+      }
+     },
+     "required": [
+      "index"
+     ],
+     "title": "ToolCallDelta",
+     "type": "object"
+    },
+    "Transcription": {
+     "additionalProperties": true,
+     "properties": {
+      "text": {
+       "title": "Text",
+       "type": "string"
+      }
+     },
+     "required": [
+      "text"
+     ],
+     "title": "Transcription",
+     "type": "object"
+    },
+    "Translation": {
+     "additionalProperties": true,
+     "properties": {
+      "text": {
+       "title": "Text",
+       "type": "string"
+      }
+     },
+     "required": [
+      "text"
+     ],
+     "title": "Translation",
+     "type": "object"
+    },
+    "Usage": {
+     "additionalProperties": true,
+     "description": "Token usage information from a completion response.",
+     "properties": {
+      "completion_tokens": {
+       "title": "Completion Tokens",
+       "type": "integer"
+      },
+      "completion_tokens_details": {
+       "anyOf": [
+        {
+         "type": "object"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Completion Tokens Details"
+      },
+      "prompt_tokens": {
+       "title": "Prompt Tokens",
+       "type": "integer"
+      },
+      "prompt_tokens_details": {
+       "anyOf": [
+        {
+         "type": "object"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Prompt Tokens Details"
+      },
+      "total_tokens": {
+       "title": "Total Tokens",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "prompt_tokens",
+      "completion_tokens",
+      "total_tokens"
+     ],
+     "title": "Usage",
+     "type": "object"
+    }
+   }
+  },
+  "surface.modules[sync]": {
+   "requests": [],
+   "result": {
+    "<root>": {
+     "all": [
+      "AGENTCC_GATEWAY_URL",
+      "APIConnectionError",
+      "APIStatusError",
+      "APITimeoutError",
+      "AgentCC",
+      "AgentCCError",
+      "AgentCCLogger",
+      "AsyncAgentCC",
+      "AsyncStream",
+      "AuthenticationError",
+      "BadGatewayError",
+      "BadRequestError",
+      "BudgetManager",
+      "CONTENT_POLICY_FALLBACKS",
+      "CONTEXT_WINDOW_FALLBACKS",
+      "CacheConfig",
+      "ChunkAccumulator",
+      "ConditionalRoutingConfig",
+      "FallbackConfig",
+      "FallbackTarget",
+      "GatewayConfig",
+      "GatewayTimeoutError",
+      "GuardrailBlockedError",
+      "GuardrailCheck",
+      "GuardrailConfig",
+      "GuardrailWarning",
+      "InternalServerError",
+      "JSONLoggingCallbackHandler",
+      "LoadBalanceConfig",
+      "LoadBalanceTarget",
+      "MODEL_INFO",
+      "ModelInfo",
+      "NOT_GIVEN",
+      "NotFoundError",
+      "PermissionDeniedError",
+      "RateLimitError",
+      "RetryConfig",
+      "RetryPolicy",
+      "RoutingCondition",
+      "ServiceUnavailableError",
+      "Session",
+      "SessionContext",
+      "Stream",
+      "StreamError",
+      "Timeout",
+      "TimeoutConfig",
+      "TrafficMirrorConfig",
+      "UnprocessableEntityError",
+      "__version__",
+      "abatch_completion",
+      "abatch_completion_models",
+      "abatch_completion_models_all",
+      "batch_completion",
+      "batch_completion_models",
+      "batch_completion_models_all",
+      "check_valid_key",
+      "completion_cost",
+      "completion_cost_from_response",
+      "create_headers",
+      "create_mock_client",
+      "decode",
+      "encode",
+      "function_to_dict",
+      "get_content_policy_fallback",
+      "get_context_window_fallback",
+      "get_max_output_tokens",
+      "get_max_tokens",
+      "get_model_info",
+      "get_valid_models",
+      "health_check",
+      "is_prompt_caching_valid",
+      "model_alias_map",
+      "patch_openai",
+      "register_model",
+      "return_raw_request",
+      "stream_chunk_builder",
+      "supports_function_calling",
+      "supports_json_mode",
+      "supports_response_schema",
+      "supports_vision",
+      "to_response_format",
+      "token_counter",
+      "trim_messages",
+      "validate_environment",
+      "validate_json_response"
+     ],
+     "defined": [],
+     "public": [
+      "APIConnectionError",
+      "APIStatusError",
+      "APITimeoutError",
+      "AgentCCError",
+      "AuthenticationError",
+      "BadGatewayError",
+      "BadRequestError",
+      "GatewayTimeoutError",
+      "GuardrailBlockedError",
+      "GuardrailWarning",
+      "InternalServerError",
+      "NOT_GIVEN",
+      "NotFoundError",
+      "PermissionDeniedError",
+      "RateLimitError",
+      "ServiceUnavailableError",
+      "StreamError",
+      "UnprocessableEntityError",
+      "annotations",
+      "callbacks",
+      "config",
+      "resources",
+      "testing",
+      "types"
+     ]
+    },
+    "_agentcc_params": {
+     "all": null,
+     "defined": [
+      "build_extra_headers",
+      "collect_agentcc_params",
+      "merge_session_headers"
+     ],
+     "public": [
+      "AGENTCC_PARAM_KEYS",
+      "Any",
+      "NOT_GIVEN",
+      "annotations",
+      "build_extra_headers",
+      "collect_agentcc_params",
+      "merge_session_headers"
+     ]
+    },
+    "_base_client": {
+     "all": null,
+     "defined": [
+      "AsyncBaseClient",
+      "BaseClient",
+      "RequestOptions",
+      "RetryConfig",
+      "SyncBaseClient",
+      "Timeout"
+     ],
+     "public": [
+      "ABC",
+      "AGENTCC_PARAM_TO_HEADER",
+      "APIConnectionError",
+      "APIStatusError",
+      "APITimeoutError",
+      "Any",
+      "AsyncBaseClient",
+      "BaseClient",
+      "DEFAULT_KEEPALIVE_CONNECTIONS",
+      "DEFAULT_KEEPALIVE_EXPIRY",
+      "DEFAULT_MAX_CONNECTIONS",
+      "DEFAULT_MAX_RETRIES",
+      "HEADER_API_KEY",
+      "HEADER_CONTENT_TYPE",
+      "HEADER_SDK_VERSION",
+      "HEADER_USER_AGENT",
+      "NOT_GIVEN",
+      "RETRYABLE_STATUS_CODES",
+      "RequestOptions",
+      "RetryConfig",
+      "SyncBaseClient",
+      "T",
+      "Timeout",
+      "TypeVar",
+      "annotations",
+      "anyio",
+      "dataclass",
+      "field",
+      "httpx",
+      "logger",
+      "logging",
+      "parse_timeout",
+      "random",
+      "serialize_agentcc_param",
+      "time"
+     ]
+    },
+    "_batch": {
+     "all": null,
+     "defined": [
+      "abatch_completion",
+      "abatch_completion_models",
+      "abatch_completion_models_all",
+      "batch_completion",
+      "batch_completion_models",
+      "batch_completion_models_all"
+     ],
+     "public": [
+      "Any",
+      "ChatCompletion",
+      "Future",
+      "ThreadPoolExecutor",
+      "abatch_completion",
+      "abatch_completion_models",
+      "abatch_completion_models_all",
+      "annotations",
+      "as_completed",
+      "asyncio",
+      "batch_completion",
+      "batch_completion_models",
+      "batch_completion_models_all"
+     ]
+    },
+    "_budget": {
+     "all": null,
+     "defined": [
+      "BudgetManager"
+     ],
+     "public": [
+      "BudgetManager",
+      "annotations",
+      "dataclass",
+      "field",
+      "re",
+      "threading",
+      "time"
+     ]
+    },
+    "_client": {
+     "all": null,
+     "defined": [
+      "AgentCC",
+      "AsyncAgentCC"
+     ],
+     "public": [
+      "AgentCC",
+      "Any",
+      "AsyncAgentCC",
+      "Callable",
+      "DEFAULT_MAX_RETRIES",
+      "NOT_GIVEN",
+      "annotations",
+      "os",
+      "threading"
+     ]
+    },
+    "_compat": {
+     "all": null,
+     "defined": [
+      "patch_openai"
+     ],
+     "public": [
+      "Any",
+      "annotations",
+      "patch_openai"
+     ]
+    },
+    "_constants": {
+     "all": null,
+     "defined": [],
+     "public": [
+      "AGENTCC_GATEWAY_URL",
+      "AGENTCC_PARAM_TO_HEADER",
+      "Any",
+      "DEFAULT_KEEPALIVE_CONNECTIONS",
+      "DEFAULT_KEEPALIVE_EXPIRY",
+      "DEFAULT_MAX_CONNECTIONS",
+      "DEFAULT_MAX_RETRIES",
+      "DEFAULT_TIMEOUT",
+      "HEADER_API_KEY",
+      "HEADER_CACHE_CONTROL",
+      "HEADER_CACHE_FORCE_REFRESH",
+      "HEADER_CACHE_NAMESPACE",
+      "HEADER_CACHE_TTL",
+      "HEADER_CONFIG",
+      "HEADER_CONTENT_TYPE",
+      "HEADER_GUARDRAIL_POLICY",
+      "HEADER_METADATA",
+      "HEADER_RATELIMIT_LIMIT",
+      "HEADER_RATELIMIT_REMAINING",
+      "HEADER_RATELIMIT_RESET",
+      "HEADER_REQUEST_TIMEOUT",
+      "HEADER_RESPONSE_CACHE",
+      "HEADER_RESPONSE_COST",
+      "HEADER_RESPONSE_FALLBACK_USED",
+      "HEADER_RESPONSE_GUARDRAIL_ACTION",
+      "HEADER_RESPONSE_GUARDRAIL_CONFIDENCE",
+      "HEADER_RESPONSE_GUARDRAIL_MESSAGE",
+      "HEADER_RESPONSE_GUARDRAIL_NAME",
+      "HEADER_RESPONSE_GUARDRAIL_TRIGGERED",
+      "HEADER_RESPONSE_LATENCY",
+      "HEADER_RESPONSE_MODEL_USED",
+      "HEADER_RESPONSE_PROVIDER",
+      "HEADER_RESPONSE_REQUEST_ID",
+      "HEADER_RESPONSE_ROUTING_STRATEGY",
+      "HEADER_RESPONSE_TIMEOUT",
+      "HEADER_RESPONSE_TRACE_ID",
+      "HEADER_SDK_VERSION",
+      "HEADER_SESSION_ID",
+      "HEADER_TRACE_ID",
+      "HEADER_USER_AGENT",
+      "NOT_GIVEN",
+      "RETRYABLE_STATUS_CODES",
+      "annotations",
+      "os"
+     ]
+    },
+    "_exceptions": {
+     "all": null,
+     "defined": [
+      "APIConnectionError",
+      "APIStatusError",
+      "APITimeoutError",
+      "AgentCCError",
+      "AuthenticationError",
+      "BadGatewayError",
+      "BadRequestError",
+      "GatewayTimeoutError",
+      "GuardrailBlockedError",
+      "GuardrailWarning",
+      "InternalServerError",
+      "NotFoundError",
+      "PermissionDeniedError",
+      "RateLimitError",
+      "ServiceUnavailableError",
+      "StreamError",
+      "UnprocessableEntityError"
+     ],
+     "public": [
+      "APIConnectionError",
+      "APIStatusError",
+      "APITimeoutError",
+      "AgentCCError",
+      "Any",
+      "AuthenticationError",
+      "BadGatewayError",
+      "BadRequestError",
+      "GatewayTimeoutError",
+      "GuardrailBlockedError",
+      "GuardrailWarning",
+      "InternalServerError",
+      "NotFoundError",
+      "PermissionDeniedError",
+      "RateLimitError",
+      "ServiceUnavailableError",
+      "StreamError",
+      "UnprocessableEntityError",
+      "annotations"
+     ]
+    },
+    "_function_utils": {
+     "all": null,
+     "defined": [
+      "function_to_dict"
+     ],
+     "public": [
+      "Any",
+      "Callable",
+      "annotations",
+      "function_to_dict",
+      "get_type_hints",
+      "inspect"
+     ]
+    },
+    "_gateway_config": {
+     "all": null,
+     "defined": [
+      "CacheConfig",
+      "ConditionalRoutingConfig",
+      "FallbackConfig",
+      "FallbackTarget",
+      "GatewayConfig",
+      "GuardrailCheck",
+      "GuardrailConfig",
+      "LoadBalanceConfig",
+      "LoadBalanceTarget",
+      "RetryConfig",
+      "RoutingCondition",
+      "TimeoutConfig",
+      "TrafficMirrorConfig",
+      "create_headers"
+     ],
+     "public": [
+      "Any",
+      "CacheConfig",
+      "ConditionalRoutingConfig",
+      "FallbackConfig",
+      "FallbackTarget",
+      "GatewayConfig",
+      "GuardrailCheck",
+      "GuardrailConfig",
+      "LoadBalanceConfig",
+      "LoadBalanceTarget",
+      "RetryConfig",
+      "RoutingCondition",
+      "TimeoutConfig",
+      "TrafficMirrorConfig",
+      "annotations",
+      "create_headers",
+      "dataclass",
+      "field",
+      "json"
+     ]
+    },
+    "_models_info": {
+     "all": null,
+     "defined": [
+      "ModelInfo",
+      "get_model_info",
+      "get_valid_models",
+      "register_model",
+      "supports_function_calling",
+      "supports_json_mode",
+      "supports_response_schema",
+      "supports_vision",
+      "validate_environment"
+     ],
+     "public": [
+      "Any",
+      "MODEL_INFO",
+      "ModelInfo",
+      "annotations",
+      "dataclass",
+      "get_model_info",
+      "get_valid_models",
+      "model_alias_map",
+      "os",
+      "register_model",
+      "supports_function_calling",
+      "supports_json_mode",
+      "supports_response_schema",
+      "supports_vision",
+      "validate_environment"
+     ]
+    },
+    "_param_modifier": {
+     "all": null,
+     "defined": [
+      "modify_params_for_provider"
+     ],
+     "public": [
+      "Any",
+      "annotations",
+      "modify_params_for_provider"
+     ]
+    },
+    "_retry_policy": {
+     "all": null,
+     "defined": [
+      "RetryPolicy"
+     ],
+     "public": [
+      "RetryPolicy",
+      "annotations",
+      "dataclass"
+     ]
+    },
+    "_session": {
+     "all": null,
+     "defined": [
+      "Session",
+      "SessionContext"
+     ],
+     "public": [
+      "Any",
+      "Session",
+      "SessionContext",
+      "TYPE_CHECKING",
+      "annotations",
+      "dataclass",
+      "field",
+      "uuid"
+     ]
+    },
+    "_streaming": {
+     "all": null,
+     "defined": [
+      "AsyncSSEParser",
+      "AsyncStream",
+      "AsyncStreamManager",
+      "ChunkAccumulator",
+      "MockStream",
+      "SSEEvent",
+      "SSEParser",
+      "Stream",
+      "StreamEvent",
+      "StreamManager",
+      "stream_chunk_builder"
+     ],
+     "public": [
+      "AgentCCMetadata",
+      "Any",
+      "AsyncIterator",
+      "AsyncSSEParser",
+      "AsyncStream",
+      "AsyncStreamManager",
+      "ChatCompletion",
+      "ChatCompletionChunk",
+      "ChatCompletionMessage",
+      "Choice",
+      "ChunkAccumulator",
+      "Delta",
+      "FunctionCall",
+      "FunctionCallDelta",
+      "Iterator",
+      "MockStream",
+      "SSEEvent",
+      "SSEParser",
+      "Stream",
+      "StreamChoice",
+      "StreamError",
+      "StreamEvent",
+      "StreamManager",
+      "ToolCall",
+      "ToolCallDelta",
+      "Usage",
+      "annotations",
+      "contextlib",
+      "dataclass",
+      "field",
+      "stream_chunk_builder"
+     ]
+    },
+    "_structured": {
+     "all": null,
+     "defined": [
+      "to_response_format",
+      "validate_json_response"
+     ],
+     "public": [
+      "Any",
+      "annotations",
+      "json",
+      "to_response_format",
+      "validate_json_response"
+     ]
+    },
+    "_tokens": {
+     "all": null,
+     "defined": [
+      "completion_cost",
+      "completion_cost_from_response",
+      "decode",
+      "encode",
+      "get_content_policy_fallback",
+      "get_context_window_fallback",
+      "get_max_output_tokens",
+      "get_max_tokens",
+      "is_prompt_caching_valid",
+      "token_counter",
+      "trim_messages"
+     ],
+     "public": [
+      "Any",
+      "CONTENT_POLICY_FALLBACKS",
+      "CONTEXT_WINDOW_FALLBACKS",
+      "annotations",
+      "completion_cost",
+      "completion_cost_from_response",
+      "decode",
+      "encode",
+      "get_content_policy_fallback",
+      "get_context_window_fallback",
+      "get_max_output_tokens",
+      "get_max_tokens",
+      "get_model_info",
+      "is_prompt_caching_valid",
+      "json",
+      "token_counter",
+      "trim_messages"
+     ]
+    },
+    "_utils": {
+     "all": null,
+     "defined": [
+      "check_valid_key",
+      "health_check",
+      "parse_timeout",
+      "redact_headers",
+      "return_raw_request",
+      "serialize_agentcc_param"
+     ],
+     "public": [
+      "Any",
+      "DEFAULT_TIMEOUT",
+      "Mapping",
+      "annotations",
+      "check_valid_key",
+      "health_check",
+      "httpx",
+      "json",
+      "parse_timeout",
+      "redact_headers",
+      "return_raw_request",
+      "serialize_agentcc_param",
+      "time"
+     ]
+    },
+    "callbacks": {
+     "all": [
+      "AgentCCLogger",
+      "CallbackHandler",
+      "CallbackRequest",
+      "CallbackResponse",
+      "JSONLoggingCallbackHandler",
+      "LoggingCallback",
+      "MetricsCallback",
+      "StreamInfo",
+      "redact_callback_request"
+     ],
+     "defined": [],
+     "public": [
+      "AgentCCLogger",
+      "CallbackHandler",
+      "CallbackRequest",
+      "CallbackResponse",
+      "JSONLoggingCallbackHandler",
+      "LoggingCallback",
+      "MetricsCallback",
+      "StreamInfo",
+      "annotations",
+      "base",
+      "custom_logger",
+      "json_logger",
+      "logging",
+      "redact_callback_request"
+     ]
+    },
+    "callbacks.base": {
+     "all": null,
+     "defined": [
+      "CallbackHandler",
+      "CallbackRequest",
+      "CallbackResponse",
+      "StreamInfo",
+      "redact_callback_request"
+     ],
+     "public": [
+      "Any",
+      "CallbackHandler",
+      "CallbackRequest",
+      "CallbackResponse",
+      "StreamInfo",
+      "annotations",
+      "dataclass",
+      "redact_callback_request"
+     ]
+    },
+    "callbacks.custom_logger": {
+     "all": null,
+     "defined": [
+      "AgentCCLogger"
+     ],
+     "public": [
+      "AgentCCLogger",
+      "Any",
+      "CallbackHandler",
+      "annotations"
+     ]
+    },
+    "callbacks.json_logger": {
+     "all": null,
+     "defined": [
+      "JSONLoggingCallbackHandler"
+     ],
+     "public": [
+      "Any",
+      "CallbackHandler",
+      "CallbackRequest",
+      "CallbackResponse",
+      "JSONLoggingCallbackHandler",
+      "StreamInfo",
+      "annotations",
+      "datetime",
+      "json",
+      "logging",
+      "timezone"
+     ]
+    },
+    "callbacks.logging": {
+     "all": null,
+     "defined": [
+      "LoggingCallback",
+      "MetricsCallback"
+     ],
+     "public": [
+      "CallbackHandler",
+      "CallbackRequest",
+      "CallbackResponse",
+      "LoggingCallback",
+      "MetricsCallback",
+      "annotations",
+      "logging",
+      "statistics",
+      "threading"
+     ]
+    },
+    "callbacks.opentelemetry": {
+     "all": null,
+     "defined": [],
+     "public": [
+      "annotations"
+     ]
+    },
+    "config": {
+     "all": [
+      "CacheConfig",
+      "ConditionalRoute",
+      "ConditionalRoutingConfig",
+      "DataclassCacheConfig",
+      "DataclassGatewayConfig",
+      "DataclassGuardrailConfig",
+      "DataclassRetryConfig",
+      "FallbackConfig",
+      "FallbackStrategy",
+      "FallbackTarget",
+      "GatewayConfig",
+      "GuardrailCheck",
+      "GuardrailConfig",
+      "GuardrailRule",
+      "LoadBalanceConfig",
+      "LoadBalanceStrategy",
+      "LoadBalanceTarget",
+      "RetryConfig",
+      "RouteCondition",
+      "RoutingCondition",
+      "Target",
+      "TimeoutConfig",
+      "TrafficMirrorConfig",
+      "create_headers"
+     ],
+     "defined": [
+      "CacheConfig",
+      "ConditionalRoute",
+      "FallbackStrategy",
+      "GatewayConfig",
+      "GuardrailConfig",
+      "GuardrailRule",
+      "LoadBalanceStrategy",
+      "RetryConfig",
+      "RouteCondition",
+      "Target"
+     ],
+     "public": [
+      "Any",
+      "BaseModel",
+      "CacheConfig",
+      "ConditionalRoute",
+      "ConditionalRoutingConfig",
+      "DataclassCacheConfig",
+      "DataclassGatewayConfig",
+      "DataclassGuardrailConfig",
+      "DataclassRetryConfig",
+      "FallbackConfig",
+      "FallbackStrategy",
+      "FallbackTarget",
+      "Field",
+      "GatewayConfig",
+      "GuardrailCheck",
+      "GuardrailConfig",
+      "GuardrailRule",
+      "Literal",
+      "LoadBalanceConfig",
+      "LoadBalanceStrategy",
+      "LoadBalanceTarget",
+      "RetryConfig",
+      "RouteCondition",
+      "RoutingCondition",
+      "Target",
+      "TimeoutConfig",
+      "TrafficMirrorConfig",
+      "annotations",
+      "create_headers",
+      "field_validator",
+      "json"
+     ]
+    },
+    "config.caching": {
+     "all": [
+      "CacheConfig"
+     ],
+     "defined": [],
+     "public": [
+      "CacheConfig",
+      "annotations"
+     ]
+    },
+    "config.fallback": {
+     "all": [
+      "FallbackStrategy",
+      "Target"
+     ],
+     "defined": [],
+     "public": [
+      "FallbackStrategy",
+      "Target",
+      "annotations"
+     ]
+    },
+    "config.guardrails": {
+     "all": [
+      "GuardrailConfig",
+      "GuardrailRule"
+     ],
+     "defined": [],
+     "public": [
+      "GuardrailConfig",
+      "GuardrailRule",
+      "annotations"
+     ]
+    },
+    "config.retry": {
+     "all": [
+      "RetryConfig"
+     ],
+     "defined": [],
+     "public": [
+      "RetryConfig",
+      "annotations"
+     ]
+    },
+    "config.routing": {
+     "all": [
+      "LoadBalanceStrategy",
+      "Target"
+     ],
+     "defined": [],
+     "public": [
+      "LoadBalanceStrategy",
+      "Target",
+      "annotations"
+     ]
+    },
+    "resources": {
+     "all": [
+      "AsyncAudio",
+      "AsyncBatches",
+      "AsyncChat",
+      "AsyncCompletions",
+      "AsyncEmbeddings",
+      "AsyncFiles",
+      "AsyncImages",
+      "AsyncModels",
+      "AsyncModerations",
+      "AsyncRerank",
+      "AsyncResponses",
+      "AsyncSpeech",
+      "AsyncTranscriptions",
+      "AsyncTranslations",
+      "Audio",
+      "Batches",
+      "Chat",
+      "Completions",
+      "Embeddings",
+      "Files",
+      "Images",
+      "Models",
+      "Moderations",
+      "Rerank",
+      "Responses",
+      "Speech",
+      "Transcriptions",
+      "Translations"
+     ],
+     "defined": [],
+     "public": [
+      "AsyncAudio",
+      "AsyncBatches",
+      "AsyncChat",
+      "AsyncCompletions",
+      "AsyncEmbeddings",
+      "AsyncFiles",
+      "AsyncImages",
+      "AsyncModels",
+      "AsyncModerations",
+      "AsyncRerank",
+      "AsyncResponses",
+      "AsyncSpeech",
+      "AsyncTranscriptions",
+      "AsyncTranslations",
+      "Audio",
+      "Batches",
+      "Chat",
+      "Completions",
+      "Embeddings",
+      "Files",
+      "Images",
+      "Models",
+      "Moderations",
+      "Rerank",
+      "Responses",
+      "Speech",
+      "Transcriptions",
+      "Translations",
+      "annotations",
+      "audio",
+      "batches",
+      "chat",
+      "completions",
+      "embeddings",
+      "files",
+      "images",
+      "models",
+      "moderations",
+      "rerank",
+      "responses"
+     ]
+    },
+    "resources.audio": {
+     "all": null,
+     "defined": [
+      "AsyncAudio",
+      "AsyncSpeech",
+      "AsyncTranscriptions",
+      "AsyncTranslations",
+      "Audio",
+      "Speech",
+      "Transcriptions",
+      "Translations"
+     ],
+     "public": [
+      "Any",
+      "AsyncAudio",
+      "AsyncSpeech",
+      "AsyncTranscriptions",
+      "AsyncTranslations",
+      "Audio",
+      "NOT_GIVEN",
+      "RequestOptions",
+      "Speech",
+      "Transcription",
+      "Transcriptions",
+      "Translation",
+      "Translations",
+      "annotations",
+      "build_extra_headers",
+      "collect_agentcc_params",
+      "merge_session_headers"
+     ]
+    },
+    "resources.batches": {
+     "all": null,
+     "defined": [
+      "AsyncBatches",
+      "Batches"
+     ],
+     "public": [
+      "APITimeoutError",
+      "Any",
+      "AsyncBatches",
+      "BatchResponse",
+      "Batches",
+      "RequestOptions",
+      "annotations",
+      "anyio",
+      "time"
+     ]
+    },
+    "resources.chat": {
+     "all": null,
+     "defined": [
+      "AsyncChat",
+      "Chat"
+     ],
+     "public": [
+      "Any",
+      "AsyncChat",
+      "AsyncChatCompletions",
+      "Chat",
+      "ChatCompletions",
+      "annotations",
+      "cached_property",
+      "completions"
+     ]
+    },
+    "resources.chat.completions": {
+     "all": null,
+     "defined": [
+      "AsyncChatCompletions",
+      "ChatCompletions"
+     ],
+     "public": [
+      "Any",
+      "AsyncChatCompletions",
+      "ChatCompletion",
+      "ChatCompletions",
+      "Iterator",
+      "NOT_GIVEN",
+      "RequestOptions",
+      "annotations"
+     ]
+    },
+    "resources.completions": {
+     "all": null,
+     "defined": [
+      "AsyncCompletions",
+      "Completions"
+     ],
+     "public": [
+      "Any",
+      "AsyncCompletions",
+      "Completion",
+      "Completions",
+      "NOT_GIVEN",
+      "RequestOptions",
+      "annotations",
+      "build_extra_headers",
+      "collect_agentcc_params",
+      "merge_session_headers"
+     ]
+    },
+    "resources.embeddings": {
+     "all": null,
+     "defined": [
+      "AsyncEmbeddings",
+      "Embeddings"
+     ],
+     "public": [
+      "Any",
+      "AsyncEmbeddings",
+      "EmbeddingResponse",
+      "Embeddings",
+      "NOT_GIVEN",
+      "RequestOptions",
+      "annotations"
+     ]
+    },
+    "resources.files": {
+     "all": null,
+     "defined": [
+      "AsyncFiles",
+      "Files"
+     ],
+     "public": [
+      "Any",
+      "AsyncFiles",
+      "FileDeleted",
+      "FileList",
+      "FileObject",
+      "Files",
+      "NOT_GIVEN",
+      "RequestOptions",
+      "annotations",
+      "build_extra_headers",
+      "collect_agentcc_params",
+      "merge_session_headers"
+     ]
+    },
+    "resources.images": {
+     "all": null,
+     "defined": [
+      "AsyncImages",
+      "Images"
+     ],
+     "public": [
+      "Any",
+      "AsyncImages",
+      "ImageResponse",
+      "Images",
+      "NOT_GIVEN",
+      "RequestOptions",
+      "annotations"
+     ]
+    },
+    "resources.models": {
+     "all": null,
+     "defined": [
+      "AsyncModels",
+      "Models"
+     ],
+     "public": [
+      "Any",
+      "AsyncModels",
+      "Model",
+      "ModelList",
+      "Models",
+      "RequestOptions",
+      "annotations"
+     ]
+    },
+    "resources.moderations": {
+     "all": null,
+     "defined": [
+      "AsyncModerations",
+      "Moderations"
+     ],
+     "public": [
+      "Any",
+      "AsyncModerations",
+      "ModerationResponse",
+      "Moderations",
+      "NOT_GIVEN",
+      "RequestOptions",
+      "annotations"
+     ]
+    },
+    "resources.rerank": {
+     "all": null,
+     "defined": [
+      "AsyncRerank",
+      "Rerank"
+     ],
+     "public": [
+      "Any",
+      "AsyncRerank",
+      "NOT_GIVEN",
+      "RequestOptions",
+      "Rerank",
+      "RerankResponse",
+      "annotations"
+     ]
+    },
+    "resources.responses": {
+     "all": null,
+     "defined": [
+      "AsyncResponses",
+      "Responses"
+     ],
+     "public": [
+      "Any",
+      "AsyncResponses",
+      "NOT_GIVEN",
+      "RequestOptions",
+      "ResponseObject",
+      "Responses",
+      "annotations",
+      "build_extra_headers",
+      "collect_agentcc_params",
+      "merge_session_headers"
+     ]
+    },
+    "testing": {
+     "all": [
+      "Interaction",
+      "MockAgentCC",
+      "RecordingAgentCC",
+      "RequestRecorder",
+      "assert_agentcc_metadata",
+      "assert_completion_has_content",
+      "assert_completion_valid",
+      "assert_cost_tracked",
+      "assert_guardrail_blocked",
+      "assert_stream_valid",
+      "assert_usage_valid",
+      "create_mock_client",
+      "make_agentcc_metadata",
+      "make_completion",
+      "make_message",
+      "make_tool_call",
+      "make_usage",
+      "mock_completion",
+      "mock_error"
+     ],
+     "defined": [],
+     "public": [
+      "Interaction",
+      "MockAgentCC",
+      "RecordingAgentCC",
+      "RequestRecorder",
+      "annotations",
+      "assert_agentcc_metadata",
+      "assert_completion_has_content",
+      "assert_completion_valid",
+      "assert_cost_tracked",
+      "assert_guardrail_blocked",
+      "assert_stream_valid",
+      "assert_usage_valid",
+      "assertions",
+      "create_mock_client",
+      "fixtures",
+      "make_agentcc_metadata",
+      "make_completion",
+      "make_message",
+      "make_tool_call",
+      "make_usage",
+      "mock",
+      "mock_completion",
+      "mock_error",
+      "recorder"
+     ]
+    },
+    "testing.assertions": {
+     "all": null,
+     "defined": [
+      "assert_agentcc_metadata",
+      "assert_completion_has_content",
+      "assert_completion_valid",
+      "assert_cost_tracked",
+      "assert_guardrail_blocked",
+      "assert_stream_valid",
+      "assert_usage_valid"
+     ],
+     "public": [
+      "Any",
+      "annotations",
+      "assert_agentcc_metadata",
+      "assert_completion_has_content",
+      "assert_completion_valid",
+      "assert_cost_tracked",
+      "assert_guardrail_blocked",
+      "assert_stream_valid",
+      "assert_usage_valid"
+     ]
+    },
+    "testing.fixtures": {
+     "all": null,
+     "defined": [
+      "make_agentcc_metadata",
+      "make_completion",
+      "make_message",
+      "make_tool_call",
+      "make_usage"
+     ],
+     "public": [
+      "AgentCCMetadata",
+      "ChatCompletion",
+      "ChatCompletionMessage",
+      "Choice",
+      "FunctionCall",
+      "ToolCall",
+      "Usage",
+      "annotations",
+      "make_agentcc_metadata",
+      "make_completion",
+      "make_message",
+      "make_tool_call",
+      "make_usage"
+     ]
+    },
+    "testing.mock": {
+     "all": null,
+     "defined": [
+      "MockAgentCC",
+      "create_mock_client",
+      "mock_completion",
+      "mock_error"
+     ],
+     "public": [
+      "AgentCCError",
+      "Any",
+      "ChatCompletion",
+      "MockAgentCC",
+      "annotations",
+      "create_mock_client",
+      "make_agentcc_metadata",
+      "make_completion",
+      "mock_completion",
+      "mock_error"
+     ]
+    },
+    "testing.recorder": {
+     "all": null,
+     "defined": [
+      "Interaction",
+      "RecordingAgentCC",
+      "RequestRecorder"
+     ],
+     "public": [
+      "Any",
+      "CallbackHandler",
+      "CallbackRequest",
+      "CallbackResponse",
+      "Interaction",
+      "Path",
+      "RecordingAgentCC",
+      "RequestRecorder",
+      "annotations",
+      "asdict",
+      "dataclass",
+      "json"
+     ]
+    },
+    "types": {
+     "all": [
+      "AgentCCMetadata",
+      "BatchResponse",
+      "Completion",
+      "CompletionChoice",
+      "ContentPart",
+      "Embedding",
+      "EmbeddingResponse",
+      "ErrorBody",
+      "ErrorResponse",
+      "FileDeleted",
+      "FileList",
+      "FileObject",
+      "HealthResponse",
+      "Image",
+      "ImageResponse",
+      "Model",
+      "ModelList",
+      "ModerationResponse",
+      "ModerationResult",
+      "RateLimitInfo",
+      "RerankResponse",
+      "RerankResult",
+      "ResponseObject",
+      "ResponseOutput",
+      "ResponseStreamEvent",
+      "ResponseUsage",
+      "Transcription",
+      "Translation",
+      "Usage"
+     ],
+     "defined": [],
+     "public": [
+      "AgentCCMetadata",
+      "BatchResponse",
+      "Completion",
+      "CompletionChoice",
+      "ContentPart",
+      "Embedding",
+      "EmbeddingResponse",
+      "ErrorBody",
+      "ErrorResponse",
+      "FileDeleted",
+      "FileList",
+      "FileObject",
+      "HealthResponse",
+      "Image",
+      "ImageResponse",
+      "Model",
+      "ModelList",
+      "ModerationResponse",
+      "ModerationResult",
+      "RateLimitInfo",
+      "RerankResponse",
+      "RerankResult",
+      "ResponseObject",
+      "ResponseOutput",
+      "ResponseStreamEvent",
+      "ResponseUsage",
+      "Transcription",
+      "Translation",
+      "Usage",
+      "agentcc_metadata",
+      "annotations",
+      "audio",
+      "batch",
+      "chat",
+      "completion",
+      "embedding",
+      "files",
+      "gateway_config",
+      "image",
+      "model",
+      "moderation",
+      "rerank",
+      "responses",
+      "shared"
+     ]
+    },
+    "types.agentcc_metadata": {
+     "all": null,
+     "defined": [
+      "AgentCCMetadata",
+      "RateLimitInfo"
+     ],
+     "public": [
+      "AgentCCMetadata",
+      "Any",
+      "BaseModel",
+      "ConfigDict",
+      "Field",
+      "Mapping",
+      "RateLimitInfo",
+      "annotations"
+     ]
+    },
+    "types.audio": {
+     "all": null,
+     "defined": [
+      "Transcription",
+      "Translation"
+     ],
+     "public": [
+      "BaseModel",
+      "ConfigDict",
+      "Transcription",
+      "Translation",
+      "annotations"
+     ]
+    },
+    "types.batch": {
+     "all": null,
+     "defined": [
+      "BatchResponse"
+     ],
+     "public": [
+      "Any",
+      "BaseModel",
+      "BatchResponse",
+      "ConfigDict",
+      "annotations"
+     ]
+    },
+    "types.chat": {
+     "all": [
+      "ChatCompletion",
+      "ChatCompletionAssistantMessageParam",
+      "ChatCompletionChunk",
+      "ChatCompletionMessage",
+      "ChatCompletionMessageParam",
+      "ChatCompletionMessageToolCallParam",
+      "ChatCompletionSystemMessageParam",
+      "ChatCompletionToolMessageParam",
+      "ChatCompletionUserMessageParam",
+      "Choice",
+      "CompletionCreateParams",
+      "Delta",
+      "FunctionCall",
+      "FunctionCallDelta",
+      "FunctionCallParam",
+      "StreamChoice",
+      "StreamOptions",
+      "ToolCall",
+      "ToolCallDelta"
+     ],
+     "defined": [],
+     "public": [
+      "ChatCompletion",
+      "ChatCompletionAssistantMessageParam",
+      "ChatCompletionChunk",
+      "ChatCompletionMessage",
+      "ChatCompletionMessageParam",
+      "ChatCompletionMessageToolCallParam",
+      "ChatCompletionSystemMessageParam",
+      "ChatCompletionToolMessageParam",
+      "ChatCompletionUserMessageParam",
+      "Choice",
+      "CompletionCreateParams",
+      "Delta",
+      "FunctionCall",
+      "FunctionCallDelta",
+      "FunctionCallParam",
+      "StreamChoice",
+      "StreamOptions",
+      "ToolCall",
+      "ToolCallDelta",
+      "annotations",
+      "chat_completion",
+      "chat_completion_chunk",
+      "chat_completion_message",
+      "completion_create_params"
+     ]
+    },
+    "types.chat.chat_completion": {
+     "all": null,
+     "defined": [
+      "ChatCompletion",
+      "Choice"
+     ],
+     "public": [
+      "AgentCCMetadata",
+      "Any",
+      "BaseModel",
+      "ChatCompletion",
+      "ChatCompletionMessage",
+      "Choice",
+      "ConfigDict",
+      "Usage",
+      "annotations"
+     ]
+    },
+    "types.chat.chat_completion_chunk": {
+     "all": null,
+     "defined": [
+      "ChatCompletionChunk",
+      "Delta",
+      "FunctionCallDelta",
+      "StreamChoice",
+      "ToolCallDelta"
+     ],
+     "public": [
+      "Any",
+      "BaseModel",
+      "ChatCompletionChunk",
+      "ConfigDict",
+      "Delta",
+      "FunctionCallDelta",
+      "StreamChoice",
+      "ToolCallDelta",
+      "Usage",
+      "annotations"
+     ]
+    },
+    "types.chat.chat_completion_message": {
+     "all": null,
+     "defined": [
+      "ChatCompletionAssistantMessageParam",
+      "ChatCompletionMessage",
+      "ChatCompletionMessageToolCallParam",
+      "ChatCompletionSystemMessageParam",
+      "ChatCompletionToolMessageParam",
+      "ChatCompletionUserMessageParam",
+      "FunctionCall",
+      "FunctionCallParam",
+      "ToolCall"
+     ],
+     "public": [
+      "Any",
+      "BaseModel",
+      "ChatCompletionAssistantMessageParam",
+      "ChatCompletionMessage",
+      "ChatCompletionMessageParam",
+      "ChatCompletionMessageToolCallParam",
+      "ChatCompletionSystemMessageParam",
+      "ChatCompletionToolMessageParam",
+      "ChatCompletionUserMessageParam",
+      "ConfigDict",
+      "FunctionCall",
+      "FunctionCallParam",
+      "Literal",
+      "Required",
+      "ToolCall",
+      "TypedDict",
+      "Union",
+      "annotations"
+     ]
+    },
+    "types.chat.completion_create_params": {
+     "all": null,
+     "defined": [
+      "CompletionCreateParams",
+      "StreamOptions"
+     ],
+     "public": [
+      "Any",
+      "ChatCompletionMessageParam",
+      "CompletionCreateParams",
+      "Required",
+      "StreamOptions",
+      "TypedDict",
+      "annotations"
+     ]
+    },
+    "types.completion": {
+     "all": null,
+     "defined": [
+      "Completion",
+      "CompletionChoice"
+     ],
+     "public": [
+      "AgentCCMetadata",
+      "BaseModel",
+      "Completion",
+      "CompletionChoice",
+      "ConfigDict",
+      "Usage",
+      "annotations"
+     ]
+    },
+    "types.embedding": {
+     "all": null,
+     "defined": [
+      "Embedding",
+      "EmbeddingResponse"
+     ],
+     "public": [
+      "AgentCCMetadata",
+      "BaseModel",
+      "ConfigDict",
+      "Embedding",
+      "EmbeddingResponse",
+      "Usage",
+      "annotations"
+     ]
+    },
+    "types.files": {
+     "all": null,
+     "defined": [
+      "FileDeleted",
+      "FileList",
+      "FileObject"
+     ],
+     "public": [
+      "Any",
+      "BaseModel",
+      "ConfigDict",
+      "FileDeleted",
+      "FileList",
+      "FileObject",
+      "annotations"
+     ]
+    },
+    "types.gateway_config": {
+     "all": null,
+     "defined": [
+      "HealthResponse"
+     ],
+     "public": [
+      "BaseModel",
+      "HealthResponse",
+      "annotations"
+     ]
+    },
+    "types.image": {
+     "all": null,
+     "defined": [
+      "Image",
+      "ImageResponse"
+     ],
+     "public": [
+      "AgentCCMetadata",
+      "BaseModel",
+      "ConfigDict",
+      "Image",
+      "ImageResponse",
+      "annotations"
+     ]
+    },
+    "types.model": {
+     "all": null,
+     "defined": [
+      "Model",
+      "ModelList"
+     ],
+     "public": [
+      "BaseModel",
+      "ConfigDict",
+      "Model",
+      "ModelList",
+      "annotations"
+     ]
+    },
+    "types.moderation": {
+     "all": null,
+     "defined": [
+      "CategoryScores",
+      "ModerationResponse",
+      "ModerationResult"
+     ],
+     "public": [
+      "BaseModel",
+      "CategoryScores",
+      "ConfigDict",
+      "ModerationResponse",
+      "ModerationResult",
+      "annotations"
+     ]
+    },
+    "types.rerank": {
+     "all": null,
+     "defined": [
+      "RerankResponse",
+      "RerankResult"
+     ],
+     "public": [
+      "BaseModel",
+      "ConfigDict",
+      "RerankResponse",
+      "RerankResult",
+      "annotations"
+     ]
+    },
+    "types.responses": {
+     "all": null,
+     "defined": [
+      "ContentPart",
+      "ResponseObject",
+      "ResponseOutput",
+      "ResponseStreamEvent",
+      "ResponseUsage"
+     ],
+     "public": [
+      "Any",
+      "BaseModel",
+      "ConfigDict",
+      "ContentPart",
+      "ResponseObject",
+      "ResponseOutput",
+      "ResponseStreamEvent",
+      "ResponseUsage",
+      "annotations"
+     ]
+    },
+    "types.shared": {
+     "all": null,
+     "defined": [
+      "ErrorBody",
+      "ErrorResponse",
+      "Usage"
+     ],
+     "public": [
+      "BaseModel",
+      "ConfigDict",
+      "ErrorBody",
+      "ErrorResponse",
+      "Usage",
+      "annotations"
+     ]
+    }
+   }
+  },
+  "surface.not_given[sync]": {
+   "requests": [],
+   "result": {
+    "bool": false,
+    "repr": "NOT_GIVEN",
+    "singleton": true,
+    "str": "NOT_GIVEN"
+   }
+  },
+  "surface.signatures[sync]": {
+   "requests": [],
+   "result": {
+    "AGENTCC_GATEWAY_URL": {
+     "value_type": "str"
+    },
+    "APIConnectionError": {
+     "members": {
+      "__init__": "(self, message: 'str', *, request: 'Any' = None) -> 'None'"
+     },
+     "mro": [
+      "APIConnectionError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "APIStatusError": {
+     "members": {
+      "__init__": "(self, message: 'str', *, status_code: 'int', type: 'str | None' = None, code: 'str | None' = None, param: 'str | None' = None, response: 'Any' = None, body: 'dict[str, Any] | None' = None, request_id: 'str | None' = None) -> 'None'",
+      "from_response": "classmethod (cls, response: 'Any') -> 'APIStatusError'"
+     },
+     "mro": [
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "APITimeoutError": {
+     "members": {
+      "__init__": "(self, message: 'str' = 'Request timed out', *, request: 'Any' = None) -> 'None'"
+     },
+     "mro": [
+      "APITimeoutError",
+      "APIConnectionError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "AgentCC": {
+     "members": {
+      "__init__": "(self, *, api_key: 'str | None' = None, base_url: 'str | None' = None, timeout: 'float | Any | None' = None, max_retries: 'int' = 2, default_headers: 'dict[str, str] | None' = None, default_query: 'dict[str, str] | None' = None, session_id: 'str | None' = None, metadata: 'dict[str, Any] | None' = None, config: 'Any' = None, callbacks: 'list[Any] | None' = None, http_client: 'Any' = None, drop_params: 'bool' = False, retry_policy: 'Any' = None, redact_messages: 'bool' = False, pre_call_rules: 'list[Callable] | None' = None, modify_params: 'bool' = False, enable_json_schema_validation: 'bool' = False) -> 'None'",
+      "audio": "property",
+      "batches": "property",
+      "chat": "property",
+      "close": "(self) -> 'None'",
+      "completions": "property",
+      "current_cost": "property",
+      "embeddings": "property",
+      "files": "property",
+      "images": "property",
+      "models": "property",
+      "moderations": "property",
+      "redact_messages": "property",
+      "rerank": "property",
+      "reset_cost": "(self) -> 'None'",
+      "responses": "property",
+      "session": "(self, session_id: 'str | None' = None, name: 'str | None' = None, metadata: 'dict[str, Any] | None' = None) -> 'Any'",
+      "with_options": "(self, *, timeout: 'Any' = NOT_GIVEN, max_retries: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_query: 'dict[str, str] | None' = None, session_id: 'Any' = NOT_GIVEN, metadata: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, drop_params: 'Any' = NOT_GIVEN) -> 'AgentCC'"
+     },
+     "mro": [
+      "AgentCC",
+      "object"
+     ]
+    },
+    "AgentCCError": {
+     "members": {
+      "__init__": "(self, message: 'str') -> 'None'"
+     },
+     "mro": [
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "AgentCCLogger": {
+     "members": {
+      "async_log_failure": "(self, model: 'str', messages: 'list', error: 'Exception', start_time: 'float', end_time: 'float') -> 'None'",
+      "async_log_success": "(self, model: 'str', messages: 'list', response: 'Any', start_time: 'float', end_time: 'float') -> 'None'",
+      "log_failure": "(self, model: 'str', messages: 'list', error: 'Exception', start_time: 'float', end_time: 'float') -> 'None'",
+      "log_pre_call": "(self, model: 'str', messages: 'list', kwargs: 'dict') -> 'None'",
+      "log_success": "(self, model: 'str', messages: 'list', response: 'Any', start_time: 'float', end_time: 'float') -> 'None'"
+     },
+     "mro": [
+      "AgentCCLogger",
+      "CallbackHandler",
+      "object"
+     ]
+    },
+    "AsyncAgentCC": {
+     "members": {
+      "__init__": "(self, *, api_key: 'str | None' = None, base_url: 'str | None' = None, timeout: 'float | Any | None' = None, max_retries: 'int' = 2, default_headers: 'dict[str, str] | None' = None, default_query: 'dict[str, str] | None' = None, session_id: 'str | None' = None, metadata: 'dict[str, Any] | None' = None, config: 'Any' = None, callbacks: 'list[Any] | None' = None, http_client: 'Any' = None, drop_params: 'bool' = False, retry_policy: 'Any' = None, redact_messages: 'bool' = False, pre_call_rules: 'list[Callable] | None' = None, modify_params: 'bool' = False, enable_json_schema_validation: 'bool' = False) -> 'None'",
+      "aclose": "(self) -> 'None'",
+      "audio": "property",
+      "batches": "property",
+      "chat": "property",
+      "completions": "property",
+      "current_cost": "property",
+      "embeddings": "property",
+      "files": "property",
+      "images": "property",
+      "models": "property",
+      "moderations": "property",
+      "redact_messages": "property",
+      "rerank": "property",
+      "reset_cost": "(self) -> 'None'",
+      "responses": "property",
+      "session": "(self, session_id: 'str | None' = None, name: 'str | None' = None, metadata: 'dict[str, Any] | None' = None) -> 'Any'",
+      "with_options": "(self, *, timeout: 'Any' = NOT_GIVEN, max_retries: 'Any' = NOT_GIVEN, extra_headers: 'dict[str, str] | None' = None, extra_query: 'dict[str, str] | None' = None, session_id: 'Any' = NOT_GIVEN, metadata: 'Any' = NOT_GIVEN, trace_id: 'Any' = NOT_GIVEN, drop_params: 'Any' = NOT_GIVEN) -> 'AsyncAgentCC'"
+     },
+     "mro": [
+      "AsyncAgentCC",
+      "object"
+     ]
+    },
+    "AsyncStream": {
+     "members": {
+      "__init__": "(self, response: 'Any', chunk_cls: 'type[ChatCompletionChunk]' = <class 'agentcc.types.chat.chat_completion_chunk.ChatCompletionChunk'>) -> 'None'",
+      "aclose": "(self) -> 'None'",
+      "agentcc": "property",
+      "response": "property"
+     },
+     "mro": [
+      "AsyncStream",
+      "object"
+     ]
+    },
+    "AuthenticationError": {
+     "members": {},
+     "mro": [
+      "AuthenticationError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "BadGatewayError": {
+     "members": {},
+     "mro": [
+      "BadGatewayError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "BadRequestError": {
+     "members": {},
+     "mro": [
+      "BadRequestError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "BudgetManager": {
+     "members": {
+      "__init__": "(self, max_budget: 'float | None' = None, window: 'str | None' = None) -> None",
+      "check_budget": "(self, estimated_cost: 'float' = 0.0, user: 'str | None' = None) -> 'None'",
+      "get_current_spend": "(self, user: 'str | None' = None) -> 'float'",
+      "get_remaining_budget": "(self, user: 'str | None' = None) -> 'float | None'",
+      "is_valid_user": "(self, user: 'str') -> 'bool'",
+      "max_budget": "attr:NoneType",
+      "projected_cost": "(self, hours: 'float' = 24.0, user: 'str | None' = None) -> 'float'",
+      "reset": "(self, user: 'str | None' = None) -> 'None'",
+      "set_user_budget": "(self, user: 'str', budget: 'float') -> 'None'",
+      "update_cost": "(self, cost: 'float', user: 'str | None' = None) -> 'None'",
+      "window": "attr:NoneType"
+     },
+     "mro": [
+      "BudgetManager",
+      "object"
+     ]
+    },
+    "CONTENT_POLICY_FALLBACKS": {
+     "value_type": "dict"
+    },
+    "CONTEXT_WINDOW_FALLBACKS": {
+     "value_type": "dict"
+    },
+    "CacheConfig": {
+     "members": {
+      "__init__": "(self, enabled: 'bool' = True, strategy: 'str' = 'exact', ttl: 'int | None' = None, namespace: 'str | None' = None, force_refresh: 'bool' = False, semantic_threshold: 'float | None' = None, cache_by_model: 'bool' = True, ignore_keys: 'list[str] | None' = None) -> None",
+      "cache_by_model": "attr:bool",
+      "enabled": "attr:bool",
+      "force_refresh": "attr:bool",
+      "ignore_keys": "attr:NoneType",
+      "namespace": "attr:NoneType",
+      "semantic_threshold": "attr:NoneType",
+      "strategy": "attr:str",
+      "ttl": "attr:NoneType"
+     },
+     "mro": [
+      "CacheConfig",
+      "object"
+     ]
+    },
+    "ChunkAccumulator": {
+     "members": {
+      "__init__": "(self) -> 'None'",
+      "add": "(self, chunk: 'ChatCompletionChunk') -> 'None'",
+      "build": "(self) -> 'ChatCompletion'"
+     },
+     "mro": [
+      "ChunkAccumulator",
+      "object"
+     ]
+    },
+    "ConditionalRoutingConfig": {
+     "members": {
+      "__init__": "(self, conditions: 'list[RoutingCondition]' = <factory>, default_target: 'str | None' = None) -> None",
+      "default_target": "attr:NoneType"
+     },
+     "mro": [
+      "ConditionalRoutingConfig",
+      "object"
+     ]
+    },
+    "FallbackConfig": {
+     "members": {
+      "__init__": "(self, targets: 'list[FallbackTarget]' = <factory>, on_status_codes: 'list[int] | None' = None) -> None",
+      "on_status_codes": "attr:NoneType"
+     },
+     "mro": [
+      "FallbackConfig",
+      "object"
+     ]
+    },
+    "FallbackTarget": {
+     "members": {
+      "__init__": "(self, model: 'str', provider: 'str | None' = None, override_params: 'dict[str, Any] | None' = None) -> None",
+      "override_params": "attr:NoneType",
+      "provider": "attr:NoneType"
+     },
+     "mro": [
+      "FallbackTarget",
+      "object"
+     ]
+    },
+    "GatewayConfig": {
+     "members": {
+      "__init__": "(self, fallback: 'FallbackConfig | None' = None, load_balance: 'LoadBalanceConfig | None' = None, cache: 'CacheConfig | None' = None, guardrails: 'GuardrailConfig | None' = None, routing: 'ConditionalRoutingConfig | None' = None, mirror: 'TrafficMirrorConfig | None' = None, retry: 'RetryConfig | None' = None, timeout: 'TimeoutConfig | None' = None) -> None",
+      "cache": "attr:NoneType",
+      "fallback": "attr:NoneType",
+      "guardrails": "attr:NoneType",
+      "load_balance": "attr:NoneType",
+      "mirror": "attr:NoneType",
+      "retry": "attr:NoneType",
+      "routing": "attr:NoneType",
+      "timeout": "attr:NoneType",
+      "to_dict": "(self) -> 'dict[str, Any]'",
+      "to_headers": "(self) -> 'dict[str, str]'"
+     },
+     "mro": [
+      "GatewayConfig",
+      "object"
+     ]
+    },
+    "GatewayTimeoutError": {
+     "members": {},
+     "mro": [
+      "GatewayTimeoutError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "GuardrailBlockedError": {
+     "members": {
+      "__init__": "(self, **kwargs: 'Any') -> 'None'"
+     },
+     "mro": [
+      "GuardrailBlockedError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "GuardrailCheck": {
+     "members": {
+      "__init__": "(self, name: 'str', enabled: 'bool' = True, action: 'str' = 'block', confidence_threshold: 'float' = 0.8, config: 'dict[str, Any] | None' = None) -> None",
+      "action": "attr:str",
+      "confidence_threshold": "attr:float",
+      "config": "attr:NoneType",
+      "enabled": "attr:bool"
+     },
+     "mro": [
+      "GuardrailCheck",
+      "object"
+     ]
+    },
+    "GuardrailConfig": {
+     "members": {
+      "__init__": "(self, input_guardrails: 'list[str] | None' = None, output_guardrails: 'list[str] | None' = None, deny: 'bool' = True, async_mode: 'bool' = False, sequential: 'bool' = False, checks: 'list[GuardrailCheck] | None' = None, pipeline_mode: 'str | None' = None, fail_open: 'bool' = False, timeout_ms: 'int | None' = None) -> None",
+      "async_mode": "attr:bool",
+      "checks": "attr:NoneType",
+      "deny": "attr:bool",
+      "fail_open": "attr:bool",
+      "input_guardrails": "attr:NoneType",
+      "output_guardrails": "attr:NoneType",
+      "pipeline_mode": "attr:NoneType",
+      "sequential": "attr:bool",
+      "timeout_ms": "attr:NoneType"
+     },
+     "mro": [
+      "GuardrailConfig",
+      "object"
+     ]
+    },
+    "GuardrailWarning": {
+     "members": {
+      "__init__": "(self, **kwargs: 'Any') -> 'None'"
+     },
+     "mro": [
+      "GuardrailWarning",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "InternalServerError": {
+     "members": {},
+     "mro": [
+      "InternalServerError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "JSONLoggingCallbackHandler": {
+     "members": {
+      "__init__": "(self, file_path: 'str | None' = None, log_level: 'str' = 'INFO') -> 'None'",
+      "on_error": "(self, request: 'CallbackRequest', error: 'Exception') -> 'None'",
+      "on_request_end": "(self, request: 'CallbackRequest', response: 'CallbackResponse') -> 'None'",
+      "on_stream_end": "(self, request: 'CallbackRequest', stream: 'StreamInfo', completion: 'Any') -> 'None'"
+     },
+     "mro": [
+      "JSONLoggingCallbackHandler",
+      "CallbackHandler",
+      "object"
+     ]
+    },
+    "LoadBalanceConfig": {
+     "members": {
+      "__init__": "(self, strategy: 'str' = 'round_robin', targets: 'list[LoadBalanceTarget] | None' = None) -> None",
+      "strategy": "attr:str",
+      "targets": "attr:NoneType"
+     },
+     "mro": [
+      "LoadBalanceConfig",
+      "object"
+     ]
+    },
+    "LoadBalanceTarget": {
+     "members": {
+      "__init__": "(self, model: 'str', provider: 'str | None' = None, weight: 'float' = 1.0, virtual_key: 'str | None' = None) -> None",
+      "provider": "attr:NoneType",
+      "virtual_key": "attr:NoneType",
+      "weight": "attr:float"
+     },
+     "mro": [
+      "LoadBalanceTarget",
+      "object"
+     ]
+    },
+    "MODEL_INFO": {
+     "value_type": "dict"
+    },
+    "ModelInfo": {
+     "members": {
+      "__init__": "(self, max_tokens: 'int', max_output_tokens: 'int | None' = None, input_cost_per_token: 'float' = 0.0, output_cost_per_token: 'float' = 0.0, supports_vision: 'bool' = False, supports_function_calling: 'bool' = False, supports_json_mode: 'bool' = False) -> None",
+      "input_cost_per_token": "attr:float",
+      "max_output_tokens": "attr:NoneType",
+      "output_cost_per_token": "attr:float",
+      "supports_function_calling": "attr:bool",
+      "supports_json_mode": "attr:bool",
+      "supports_vision": "attr:bool"
+     },
+     "mro": [
+      "ModelInfo",
+      "object"
+     ]
+    },
+    "NOT_GIVEN": {
+     "value_type": "_NotGiven"
+    },
+    "NotFoundError": {
+     "members": {},
+     "mro": [
+      "NotFoundError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "PermissionDeniedError": {
+     "members": {},
+     "mro": [
+      "PermissionDeniedError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "RateLimitError": {
+     "members": {
+      "__init__": "(self, **kwargs: 'Any') -> 'None'"
+     },
+     "mro": [
+      "RateLimitError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "RetryConfig": {
+     "members": {
+      "__init__": "(self, max_retries: 'int' = 2, on_status_codes: 'list[int] | None' = None, backoff_factor: 'float' = 0.5, backoff_max: 'float' = 30.0, backoff_jitter: 'float' = 0.25, respect_retry_after: 'bool' = True, max_retry_wait: 'float' = 60.0) -> None",
+      "backoff_factor": "attr:float",
+      "backoff_jitter": "attr:float",
+      "backoff_max": "attr:float",
+      "max_retries": "attr:int",
+      "max_retry_wait": "attr:float",
+      "on_status_codes": "attr:NoneType",
+      "respect_retry_after": "attr:bool"
+     },
+     "mro": [
+      "RetryConfig",
+      "object"
+     ]
+    },
+    "RetryPolicy": {
+     "members": {
+      "BadGatewayRetries": "attr:int",
+      "ConnectionErrorRetries": "attr:int",
+      "GatewayTimeoutRetries": "attr:int",
+      "InternalServerErrorRetries": "attr:int",
+      "RateLimitErrorRetries": "attr:int",
+      "ServiceUnavailableRetries": "attr:int",
+      "TimeoutRetries": "attr:int",
+      "__init__": "(self, RateLimitErrorRetries: 'int' = 2, TimeoutRetries: 'int' = 2, ConnectionErrorRetries: 'int' = 2, InternalServerErrorRetries: 'int' = 1, BadGatewayRetries: 'int' = 1, ServiceUnavailableRetries: 'int' = 1, GatewayTimeoutRetries: 'int' = 1) -> None",
+      "get_retries_for_connection_error": "(self) -> 'int'",
+      "get_retries_for_status": "(self, status_code: 'int') -> 'int'",
+      "get_retries_for_timeout": "(self) -> 'int'"
+     },
+     "mro": [
+      "RetryPolicy",
+      "object"
+     ]
+    },
+    "RoutingCondition": {
+     "members": {
+      "__init__": "(self, field: 'str', operator: 'str', value: 'Any', target: 'str') -> None"
+     },
+     "mro": [
+      "RoutingCondition",
+      "object"
+     ]
+    },
+    "ServiceUnavailableError": {
+     "members": {},
+     "mro": [
+      "ServiceUnavailableError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "Session": {
+     "members": {
+      "__init__": "(self, session_id: 'str' = '', name: 'str | None' = None, path: 'str' = '/', metadata: 'dict[str, Any]' = <factory>) -> None",
+      "name": "attr:NoneType",
+      "path": "attr:str",
+      "request_count": "property",
+      "reset_path": "(self) -> 'None'",
+      "session_id": "attr:str",
+      "step": "(self, name: 'str') -> 'None'",
+      "to_headers": "(self) -> 'dict[str, str]'",
+      "total_cost": "property",
+      "total_tokens": "property",
+      "track_request": "(self, cost: 'float' = 0.0, tokens: 'int' = 0) -> 'None'"
+     },
+     "mro": [
+      "Session",
+      "object"
+     ]
+    },
+    "SessionContext": {
+     "members": {
+      "__init__": "(self, client: 'AgentCC | AsyncAgentCC', *, session_id: 'str | None' = None, name: 'str | None' = None, metadata: 'dict[str, Any] | None' = None) -> 'None'"
+     },
+     "mro": [
+      "SessionContext",
+      "object"
+     ]
+    },
+    "Stream": {
+     "members": {
+      "__init__": "(self, response: 'Any', chunk_cls: 'type[ChatCompletionChunk]' = <class 'agentcc.types.chat.chat_completion_chunk.ChatCompletionChunk'>) -> 'None'",
+      "agentcc": "property",
+      "close": "(self) -> 'None'",
+      "response": "property"
+     },
+     "mro": [
+      "Stream",
+      "object"
+     ]
+    },
+    "StreamError": {
+     "members": {},
+     "mro": [
+      "StreamError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "Timeout": {
+     "members": {
+      "__init__": "(self, connect: 'float | None' = None, read: 'float | None' = None, write: 'float | None' = None, pool: 'float | None' = None) -> None",
+      "connect": "attr:NoneType",
+      "pool": "attr:NoneType",
+      "read": "attr:NoneType",
+      "write": "attr:NoneType"
+     },
+     "mro": [
+      "Timeout",
+      "object"
+     ]
+    },
+    "TimeoutConfig": {
+     "members": {
+      "__init__": "(self, connect: 'float | None' = None, read: 'float | None' = None, write: 'float | None' = None, pool: 'float | None' = None, total: 'float | None' = None) -> None",
+      "connect": "attr:NoneType",
+      "pool": "attr:NoneType",
+      "read": "attr:NoneType",
+      "total": "attr:NoneType",
+      "write": "attr:NoneType"
+     },
+     "mro": [
+      "TimeoutConfig",
+      "object"
+     ]
+    },
+    "TrafficMirrorConfig": {
+     "members": {
+      "__init__": "(self, enabled: 'bool' = True, target_model: 'str | None' = None, target_provider: 'str | None' = None, sample_rate: 'float' = 1.0) -> None",
+      "enabled": "attr:bool",
+      "sample_rate": "attr:float",
+      "target_model": "attr:NoneType",
+      "target_provider": "attr:NoneType"
+     },
+     "mro": [
+      "TrafficMirrorConfig",
+      "object"
+     ]
+    },
+    "UnprocessableEntityError": {
+     "members": {},
+     "mro": [
+      "UnprocessableEntityError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ]
+    },
+    "__version__": {
+     "value_type": "str"
+    },
+    "abatch_completion": {
+     "coroutine": true,
+     "signature": "(client: 'Any', model: 'str', messages_list: 'list[list[dict[str, Any]]]', max_concurrency: 'int' = 10, return_exceptions: 'bool' = False, **kwargs: 'Any') -> 'list[ChatCompletion | Exception]'"
+    },
+    "abatch_completion_models": {
+     "coroutine": true,
+     "signature": "(client: 'Any', models: 'list[str]', messages: 'list[dict[str, Any]]', max_concurrency: 'int' = 10, **kwargs: 'Any') -> 'ChatCompletion'"
+    },
+    "abatch_completion_models_all": {
+     "coroutine": true,
+     "signature": "(client: 'Any', models: 'list[str]', messages: 'list[dict[str, Any]]', max_concurrency: 'int' = 10, return_exceptions: 'bool' = False, **kwargs: 'Any') -> 'list[ChatCompletion | Exception]'"
+    },
+    "batch_completion": {
+     "coroutine": false,
+     "signature": "(client: 'Any', model: 'str', messages_list: 'list[list[dict[str, Any]]]', max_concurrency: 'int' = 10, return_exceptions: 'bool' = False, **kwargs: 'Any') -> 'list[ChatCompletion | Exception]'"
+    },
+    "batch_completion_models": {
+     "coroutine": false,
+     "signature": "(client: 'Any', models: 'list[str]', messages: 'list[dict[str, Any]]', max_concurrency: 'int' = 10, **kwargs: 'Any') -> 'ChatCompletion'"
+    },
+    "batch_completion_models_all": {
+     "coroutine": false,
+     "signature": "(client: 'Any', models: 'list[str]', messages: 'list[dict[str, Any]]', max_concurrency: 'int' = 10, return_exceptions: 'bool' = False, **kwargs: 'Any') -> 'list[ChatCompletion | Exception]'"
+    },
+    "check_valid_key": {
+     "coroutine": false,
+     "signature": "(api_key: 'str', base_url: 'str') -> 'bool'"
+    },
+    "completion_cost": {
+     "coroutine": false,
+     "signature": "(model: 'str', prompt_tokens: 'int' = 0, completion_tokens: 'int' = 0) -> 'float | None'"
+    },
+    "completion_cost_from_response": {
+     "coroutine": false,
+     "signature": "(response: 'Any') -> 'float | None'"
+    },
+    "create_headers": {
+     "coroutine": false,
+     "signature": "(api_key: 'str | None' = None, config: 'GatewayConfig | None' = None, trace_id: 'str | None' = None, session_id: 'str | None' = None, session_name: 'str | None' = None, session_path: 'str | None' = None, metadata: 'dict[str, Any] | None' = None, user_id: 'str | None' = None, request_id: 'str | None' = None, cache_ttl: 'int | None' = None, cache_namespace: 'str | None' = None, cache_force_refresh: 'bool | None' = None, guardrail_policy: 'str | None' = None, properties: 'dict[str, str] | None' = None) -> 'dict[str, str]'"
+    },
+    "create_mock_client": {
+     "coroutine": false,
+     "signature": "(responses: 'dict[str, Any] | None' = None, api_key: 'str' = 'sk-test-mock', base_url: 'str' = 'https://mock.agentcc.test') -> 'Any'"
+    },
+    "decode": {
+     "coroutine": false,
+     "signature": "(model: 'str', tokens: 'list[int]') -> 'str'"
+    },
+    "encode": {
+     "coroutine": false,
+     "signature": "(model: 'str', text: 'str') -> 'list[int]'"
+    },
+    "function_to_dict": {
+     "coroutine": false,
+     "signature": "(func: 'Callable[..., Any]') -> 'dict[str, Any]'"
+    },
+    "get_content_policy_fallback": {
+     "coroutine": false,
+     "signature": "(model: 'str') -> 'str | None'"
+    },
+    "get_context_window_fallback": {
+     "coroutine": false,
+     "signature": "(model: 'str') -> 'str | None'"
+    },
+    "get_max_output_tokens": {
+     "coroutine": false,
+     "signature": "(model: 'str') -> 'int | None'"
+    },
+    "get_max_tokens": {
+     "coroutine": false,
+     "signature": "(model: 'str') -> 'int | None'"
+    },
+    "get_model_info": {
+     "coroutine": false,
+     "signature": "(model: 'str') -> 'ModelInfo | None'"
+    },
+    "get_valid_models": {
+     "coroutine": false,
+     "signature": "() -> 'list[str]'"
+    },
+    "health_check": {
+     "coroutine": false,
+     "signature": "(model: 'str | None' = None, api_key: 'str | None' = None, base_url: 'str | None' = None, timeout: 'float' = 10.0) -> 'dict[str, Any]'"
+    },
+    "is_prompt_caching_valid": {
+     "coroutine": false,
+     "signature": "(model: 'str', messages: 'list[dict[str, Any]]') -> 'tuple[bool, str]'"
+    },
+    "model_alias_map": {
+     "value_type": "dict"
+    },
+    "patch_openai": {
+     "coroutine": false,
+     "signature": "(client: 'Any' = None, *, api_key: 'str | None' = None, base_url: 'str | None' = None, **kwargs: 'Any') -> 'Any'"
+    },
+    "register_model": {
+     "coroutine": false,
+     "signature": "(model_name: 'str', model_info: 'ModelInfo') -> 'None'"
+    },
+    "return_raw_request": {
+     "coroutine": false,
+     "signature": "(*, model: 'str', messages: 'list[dict[str, Any]]', base_url: 'str' = 'https://gateway.futureagi.com', **kwargs: 'Any') -> 'dict[str, Any]'"
+    },
+    "stream_chunk_builder": {
+     "coroutine": false,
+     "signature": "(chunks: 'list[ChatCompletionChunk]') -> 'ChatCompletion'"
+    },
+    "supports_function_calling": {
+     "coroutine": false,
+     "signature": "(model: 'str') -> 'bool'"
+    },
+    "supports_json_mode": {
+     "coroutine": false,
+     "signature": "(model: 'str') -> 'bool'"
+    },
+    "supports_response_schema": {
+     "coroutine": false,
+     "signature": "(model: 'str') -> 'bool'"
+    },
+    "supports_vision": {
+     "coroutine": false,
+     "signature": "(model: 'str') -> 'bool'"
+    },
+    "to_response_format": {
+     "coroutine": false,
+     "signature": "(model_class: 'type') -> 'dict[str, Any]'"
+    },
+    "token_counter": {
+     "coroutine": false,
+     "signature": "(model: 'str', text: 'str | None' = None, messages: 'list[dict[str, Any]] | None' = None) -> 'int'"
+    },
+    "trim_messages": {
+     "coroutine": false,
+     "signature": "(messages: 'list[dict[str, Any]]', model: 'str', trim_ratio: 'float' = 0.75, max_tokens: 'int | None' = None) -> 'list[dict[str, Any]]'"
+    },
+    "validate_environment": {
+     "coroutine": false,
+     "signature": "() -> 'dict[str, Any]'"
+    },
+    "validate_json_response": {
+     "coroutine": false,
+     "signature": "(response_text: 'str', schema: 'dict[str, Any]') -> 'bool'"
+    }
+   }
+  }
+ },
+ "format": 1
+}

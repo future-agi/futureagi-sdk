@@ -1,0 +1,117 @@
+{
+  "description": "SSE frames as the agentcc gateway writes them on /v1/chat/completions with stream: true. Shared by the TypeScript (sdk/typescript/tests/stream-error.test.ts) and Python (sdk/python/tests/test_stream_error_parity.py) SDK tests: each case's frames are the data payloads of one response body, sent as 'data: <frame>\\n\\n' in order.",
+  "source": {
+    "repo": "agentcc-gateway",
+    "record": "stream-fixture-source",
+    "files": [
+      "internal/streaming/sse.go (SSEWriter.WriteError, WriteChunk, WriteDone)",
+      "internal/server/chat_stream.go (blockStream, the ProcessChunk and Finish block paths, the deadline cut)",
+      "internal/guardrails/stream_checker.go (the default block message)",
+      "internal/server/response_evidence.go (buildStreamingMetadataChunk: choices [] with usage)",
+      "internal/server/attempt_budget.go (streamCutError: ErrGatewayTimeout)"
+    ],
+    "error_frame_shape": "models.ErrorResponse marshalled by encoding/json: {\"error\":{\"message\",\"type\",\"param\":null,\"code\"}}, metadata omitted"
+  },
+  "cases": [
+    {
+      "name": "guardrail_block_after_content_then_done",
+      "about": "Content chunks, then the guardrail's error frame, then [DONE].",
+      "frames": [
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hello\"},\"finish_reason\":null}]}",
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" world\"},\"finish_reason\":null}]}",
+        "{\"error\":{\"message\":\"Content blocked by streaming guardrail\",\"type\":\"guardrail_error\",\"param\":null,\"code\":\"stream_blocked\"}}",
+        "[DONE]"
+      ],
+      "expect": {
+        "raises": true,
+        "type": "guardrail_error",
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "chunks_before_error": 2,
+        "text_before_error": "Hello world"
+      }
+    },
+    {
+      "name": "guardrail_block_at_finish_then_metadata_then_done",
+      "about": "The streaming checker's Finish block: content, the error frame, the gateway's metadata chunk (choices [] with usage), then [DONE]. The SDK must stop at the error and never yield the metadata chunk.",
+      "frames": [
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hello\"},\"finish_reason\":null}]}",
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}",
+        "{\"error\":{\"message\":\"Content blocked by streaming guardrail\",\"type\":\"guardrail_error\",\"param\":null,\"code\":\"stream_blocked\"}}",
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[],\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":2,\"total_tokens\":11}}",
+        "[DONE]"
+      ],
+      "expect": {
+        "raises": true,
+        "type": "guardrail_error",
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "chunks_before_error": 2,
+        "text_before_error": "Hello"
+      }
+    },
+    {
+      "name": "guardrail_block_first_frame",
+      "about": "The streaming checker blocks the first chunk: the error frame is the first frame and the gateway closes the stream without [DONE].",
+      "frames": [
+        "{\"error\":{\"message\":\"Content blocked by streaming guardrail\",\"type\":\"guardrail_error\",\"param\":null,\"code\":\"stream_blocked\"}}"
+      ],
+      "expect": {
+        "raises": true,
+        "type": "guardrail_error",
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "chunks_before_error": 0,
+        "text_before_error": ""
+      }
+    },
+    {
+      "name": "upstream_timeout_cut_after_content",
+      "about": "A non-guardrail stream error: the upstream call's deadline cut the stream (streamCutError, ErrGatewayTimeout); no [DONE] for a cut answer.",
+      "frames": [
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Partial\"},\"finish_reason\":null}]}",
+        "{\"error\":{\"message\":\"the stream's upstream call timed out\",\"type\":\"gateway_timeout\",\"param\":null,\"code\":\"gateway_timeout\"}}"
+      ],
+      "expect": {
+        "raises": true,
+        "type": "gateway_timeout",
+        "code": "gateway_timeout",
+        "message": "the stream's upstream call timed out",
+        "chunks_before_error": 1,
+        "text_before_error": "Partial"
+      }
+    },
+    {
+      "name": "normal_stream",
+      "about": "A stream with no error: content chunks, a finish chunk, [DONE].",
+      "frames": [
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hello\"},\"finish_reason\":null}]}",
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" world\"},\"finish_reason\":null}]}",
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}",
+        "[DONE]"
+      ],
+      "expect": {
+        "raises": false,
+        "chunks": 3,
+        "text": "Hello world",
+        "total_tokens": null
+      }
+    },
+    {
+      "name": "usage_chunk_with_empty_choices",
+      "about": "A stream with no error whose last chunk is the gateway's metadata chunk: choices [] and usage.",
+      "frames": [
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hello\"},\"finish_reason\":null}]}",
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}",
+        "{\"id\":\"chatcmpl-sdk101\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[],\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":1,\"total_tokens\":10}}",
+        "[DONE]"
+      ],
+      "expect": {
+        "raises": false,
+        "chunks": 3,
+        "text": "Hello",
+        "total_tokens": 10
+      }
+    }
+  ]
+}

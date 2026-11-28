@@ -48,7 +48,7 @@ PING_PATH = "/v1/ping"
 NAMES_PATH = "/model-hub/develops/get-datasets-names/"
 KB_PATH = "/model-hub/knowledge-base/"
 KB_LIST_PATH = "/model-hub/knowledge-base/list/"
-PROMPT_BY_NAME_PATH = "/model-hub/prompt-labels/get-by-name/"
+PROMPT_BY_NAME_PATH = "/model-hub/prompt-templates/get-template-by-name/"
 PROMPT_LIST_PATH = "/model-hub/prompt-templates/"
 
 
@@ -79,6 +79,7 @@ class Desk:
         self.requests: List[Tuple[str, str, Optional[str], Optional[str]]] = []
         self.raw = b""
         self._lock = threading.Lock()
+        self.connections = 0
         desk = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -107,6 +108,11 @@ class Desk:
 
         class Server(ThreadingHTTPServer):
             daemon_threads = True
+
+            def get_request(self):
+                connection = super().get_request()
+                desk.connections += 1
+                return connection
 
         self._server = Server(("127.0.0.1", 0), Handler)
         self.base = f"http://127.0.0.1:{self._server.server_address[1]}"
@@ -249,21 +255,24 @@ def test_keys_given_as_arguments_win_over_the_environment(monkeypatch, net, tmp_
 
 
 @pytest.mark.parametrize("given", ["api-key", "secret-key"])
-def test_one_key_given_as_an_argument_wins_and_the_other_is_read_from_the_environment(monkeypatch, net, given):  # noqa: F811
+def test_one_explicit_key_is_not_paired_with_an_environment_key(monkeypatch, net, given):  # noqa: F811
     key, secret = tenant("a")
     env_key, env_secret = tenant("e")
     tenants = {"a (arguments)": (key, secret), "e (environment)": (env_key, env_secret)}
     with _scene(monkeypatch, net) as desk:
         monkeypatch.setenv("FI_API_KEY", env_key)
         monkeypatch.setenv("FI_SECRET_KEY", env_secret)
-        if given == "api-key":
-            client, expected = Client(fi_api_key=key, fi_base_url=desk.base), (key, env_secret)
-        else:
-            client, expected = Client(fi_secret_key=secret, fi_base_url=desk.base), (env_key, secret)
-        _ping(client)
+        keys = {"fi_api_key": key} if given == "api-key" else {"fi_secret_key": secret}
+        with pytest.raises(MissingAuthError) as caught:
+            _ping(Client(fi_base_url=desk.base, **keys))
         report = _report(desk, net, tenants)
-        assert [entry[2:] for entry in desk.requests] == [expected], report
-        assert (client._fi_api_key, client._fi_secret_key) == expected, report
+        assert desk.connections == 0 and desk.requests == [], report
+        for value in (key, secret, env_key, env_secret):
+            assert (desk.bytes_of(value), _count(net.target.raw, value), _count(net.proxy.raw, value)) == (0, 0, 0), report
+        assert (net.target.connections, net.proxy.connections) == (0, 0), report
+        assert caught.value.get_error_code() == AUTH_CODE
+        assert (caught.value.missing_api_key, caught.value.missing_secret_key) == (given == "secret-key", given == "api-key")
+
 
 
 # ---------------------------------------------------------------------------------------------

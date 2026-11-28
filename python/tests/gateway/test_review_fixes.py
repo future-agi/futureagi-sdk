@@ -102,7 +102,7 @@ def test_stream_error_response_is_closed() -> None:
 # --- errors ------------------------------------------------------------------
 
 
-def test_string_error_envelope_still_maps_to_a_typed_error() -> None:
+def test_string_error_envelope_maps_to_a_typed_error() -> None:
     response = httpx.Response(502, json={"error": "upstream unavailable"}, request=httpx.Request("POST", BASE))
     exc = APIStatusError.from_response(response)
     assert isinstance(exc, BadGatewayError) and "upstream unavailable" in exc.message

@@ -1,0 +1,151 @@
+{
+ "format": 1,
+ "about": "The Python port's intended differences against the agentcc 1.0.0 golden that still wait for a reviewer record, for the comparison py-agentcc-1.0.0->e-new-py only. An entry lands here first with status 'landed' (evidence and test_id filled, reviewer null) and moves into the golden's tests/fixtures/gateway/intended-differences.json as 'proven' once an independent review signs it (by, commit, verdict); this list contains only entries still awaiting that review. Ids are new: '-py' splits of the golden's D-xx work list, 'PY-*' for port changes without a D number. scripts/gateway/compare_enew.py reads the port's entries from both files and requires 0 unlisted differences and every rule used. Every rule pins its value with an anchored regex of the observed value (the futureagi version generalised); a glob path appears only where every difference it matches has that same value change. The signed entries' rules are derived from the e-new-py recording at the commit named in 'recorded_at'; each landed entry's evidence names its own recording.",
+ "recorded_at": "python-overlay-source",
+ "differences": [
+  {
+   "id": "PY-1.5-billing-refusals",
+   "lang": "py",
+   "status": "landed",
+   "summary": "New errors in fi.gateway for the gateway's billing and budget refusals, chosen by (status, error.code), never error.type: InsufficientCreditsError (402 managed_credits_exhausted / managed_credits_insufficient) and AgentBudgetExhaustedError (402 agent_budget_exhausted), both APIStatusError subclasses, and BudgetExceededError (429 budget_exceeded / org_budget_exceeded), a RateLimitError subclass so an existing except RateLimitError still catches it. Each carries error.metadata as .metadata with its fields as properties and survives pickling without the response. fi.gateway._retry_policy.classify_refusal holds every class and retry decision. The 17 released errors keep their class, attributes, str, repr and pickling.",
+   "applies_to": [
+    "py-agentcc-1.0.0->e-new-py"
+   ],
+   "evidence": "golden surface.all, surface.modules <root>, _exceptions and _retry_policy, surface.signatures, surface.errors",
+   "test_id": "python/tests/gateway/test_onekey_credit_errors.py::test_the_typed_refusals_are_importable_from_fi_gateway",
+   "reviewer": null,
+   "match": [
+    {
+     "path": "surface.all[sync]/result/__all__/AgentBudgetExhaustedError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.all[sync]/result/__all__/BudgetExceededError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.all[sync]/result/__all__/InsufficientCreditsError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.all[sync]/result/dir_public/AgentBudgetExhaustedError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.all[sync]/result/dir_public/BudgetExceededError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.all[sync]/result/dir_public/InsufficientCreditsError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/<root>/all/AgentBudgetExhaustedError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/<root>/all/BudgetExceededError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/<root>/all/InsufficientCreditsError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/<root>/public/AgentBudgetExhaustedError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/<root>/public/BudgetExceededError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/<root>/public/InsufficientCreditsError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/_exceptions/defined/AgentBudgetExhaustedError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/_exceptions/defined/BudgetExceededError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/_exceptions/defined/InsufficientCreditsError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/_exceptions/public/AgentBudgetExhaustedError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/_exceptions/public/BudgetExceededError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/_exceptions/public/InsufficientCreditsError",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/_retry_policy/defined/classify_refusal",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.modules[sync]/result/_retry_policy/public/classify_refusal",
+     "kind": "added",
+     "new": "^true$"
+    },
+    {
+     "path": "surface.signatures[sync]/result/AgentBudgetExhaustedError",
+     "kind": "added",
+     "new": "^\\{\"members\":\\{\\},\"mro\":\\[\"AgentBudgetExhaustedError\",\"_RefusalDetails\",\"APIStatusError\",\"AgentCCError\",\"SDKException\",\"Exception\",\"BaseException\",\"object\"\\]\\}$"
+    },
+    {
+     "path": "surface.signatures[sync]/result/BudgetExceededError",
+     "kind": "added",
+     "new": "^\\{\"members\":\\{\\},\"mro\":\\[\"BudgetExceededError\",\"_RefusalDetails\",\"RateLimitError\",\"APIStatusError\",\"AgentCCError\",\"SDKException\",\"Exception\",\"BaseException\",\"object\"\\]\\}$"
+    },
+    {
+     "path": "surface.signatures[sync]/result/InsufficientCreditsError",
+     "kind": "added",
+     "new": "^\\{\"members\":\\{\\},\"mro\":\\[\"InsufficientCreditsError\",\"_RefusalDetails\",\"APIStatusError\",\"AgentCCError\",\"SDKException\",\"Exception\",\"BaseException\",\"object\"\\]\\}$"
+    },
+    {
+     "path": "surface.errors[sync]/result/AgentBudgetExhaustedError",
+     "kind": "added",
+     "new": "^\\{\"__exception__\":\"AgentBudgetExhaustedError\",\"args\":\\[\"AgentBudgetExhaustedError\\ message\"\\],\"attrs\":\\{\"body\":\\{\"error\":\\{\"message\":\"m\"\\}\\},\"code\":\"c\",\"message\":\"AgentBudgetExhaustedError\\ message\",\"metadata\":\\{\\},\"param\":\"p\",\"request_id\":\"req\\-1\",\"status_code\":418,\"type\":\"t\"\\},\"mro\":\\[\"AgentBudgetExhaustedError\",\"_RefusalDetails\",\"APIStatusError\",\"AgentCCError\",\"SDKException\",\"Exception\",\"BaseException\",\"object\"\\],\"pickle\":\\{\"args\":\\[\"AgentBudgetExhaustedError\\ message\"\\],\"ok\":true,\"str\":\"Error\\ code:\\ 418\\ \\-\\ AgentBudgetExhaustedError\\ message\",\"type\":\"AgentBudgetExhaustedError\"\\},\"repr\":\"AgentBudgetExhaustedError\\(status_code=418,\\ message='AgentBudgetExhaustedError\\ message'\\)\",\"str\":\"Error\\ code:\\ 418\\ \\-\\ AgentBudgetExhaustedError\\ message\"\\}$"
+    },
+    {
+     "path": "surface.errors[sync]/result/BudgetExceededError",
+     "kind": "added",
+     "new": "^\\{\"__exception__\":\"BudgetExceededError\",\"args\":\\[\"BudgetExceededError\\ message\"\\],\"attrs\":\\{\"body\":\\{\"error\":\\{\"message\":\"m\"\\}\\},\"code\":\"c\",\"message\":\"BudgetExceededError\\ message\",\"metadata\":\\{\\},\"param\":\"p\",\"ratelimit_limit\":null,\"ratelimit_remaining\":null,\"ratelimit_reset\":null,\"request_id\":\"req\\-1\",\"status_code\":418,\"type\":\"t\"\\},\"mro\":\\[\"BudgetExceededError\",\"_RefusalDetails\",\"RateLimitError\",\"APIStatusError\",\"AgentCCError\",\"SDKException\",\"Exception\",\"BaseException\",\"object\"\\],\"pickle\":\\{\"args\":\\[\"BudgetExceededError\\ message\"\\],\"ok\":true,\"str\":\"Error\\ code:\\ 418\\ \\-\\ BudgetExceededError\\ message\",\"type\":\"BudgetExceededError\"\\},\"repr\":\"BudgetExceededError\\(status_code=418,\\ message='BudgetExceededError\\ message'\\)\",\"str\":\"Error\\ code:\\ 418\\ \\-\\ BudgetExceededError\\ message\"\\}$"
+    },
+    {
+     "path": "surface.errors[sync]/result/InsufficientCreditsError",
+     "kind": "added",
+     "new": "^\\{\"__exception__\":\"InsufficientCreditsError\",\"args\":\\[\"InsufficientCreditsError\\ message\"\\],\"attrs\":\\{\"body\":\\{\"error\":\\{\"message\":\"m\"\\}\\},\"code\":\"c\",\"message\":\"InsufficientCreditsError\\ message\",\"metadata\":\\{\\},\"param\":\"p\",\"request_id\":\"req\\-1\",\"status_code\":418,\"type\":\"t\"\\},\"mro\":\\[\"InsufficientCreditsError\",\"_RefusalDetails\",\"APIStatusError\",\"AgentCCError\",\"SDKException\",\"Exception\",\"BaseException\",\"object\"\\],\"pickle\":\\{\"args\":\\[\"InsufficientCreditsError\\ message\"\\],\"ok\":true,\"str\":\"Error\\ code:\\ 418\\ \\-\\ InsufficientCreditsError\\ message\",\"type\":\"InsufficientCreditsError\"\\},\"repr\":\"InsufficientCreditsError\\(status_code=418,\\ message='InsufficientCreditsError\\ message'\\)\",\"str\":\"Error\\ code:\\ 418\\ \\-\\ InsufficientCreditsError\\ message\"\\}$"
+    }
+   ]
+  }
+ ]
+}

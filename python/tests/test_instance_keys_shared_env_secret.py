@@ -1,9 +1,7 @@
-"""Clients built at once on threads, each with its own API key and the secret key from ``FI_SECRET_KEY``.
+"""Concurrent clients use separate API keys and a shared secret value.
 
-Eight threads, released together by a barrier, each build one client per round with their own ``fi_api_key``;
-the secret key of every client comes from the environment. Each client then sends one request to a listener on
-the loopback interface, under a path that names its tenant. Each request carries the API key of its own tenant
-and the bytes of no other tenant's key.
+Explicit key pairs send their own credentials to the loopback listener. An explicit API key paired
+with a secret set only in the environment is rejected without any connection.
 """
 
 from __future__ import annotations
@@ -17,6 +15,7 @@ import pytest
 
 from fi.api.auth import APIKeyAuth
 from fi.api.types import HttpMethod, RequestConfig
+from fi.utils.errors import MissingAuthError
 from tests.test_plain_http_key_guards import _marker_forms, net  # noqa: F401
 
 THREADS = 8
@@ -29,6 +28,7 @@ class Desk:
     def __init__(self) -> None:
         self.received: list[tuple[str, bytes]] = []
         lock = threading.Lock()
+        self.connections = 0
         desk = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -51,6 +51,11 @@ class Desk:
         class Server(ThreadingHTTPServer):
             daemon_threads = True
 
+            def get_request(self):
+                connection = super().get_request()
+                desk.connections += 1
+                return connection
+
         self._server = Server(("127.0.0.1", 0), Handler)
         self.base = f"http://127.0.0.1:{self._server.server_address[1]}"
         threading.Thread(target=self._server.serve_forever, kwargs={"poll_interval": 0.05}, daemon=True).start()
@@ -65,7 +70,8 @@ def _count(raw: bytes, value: str) -> int:
 
 
 @pytest.mark.parametrize("cls_name", ["api-key-auth", "dataset"])
-def test_clients_built_at_once_with_the_secret_from_the_environment_send_their_own_api_key(cls_name, monkeypatch, net):  # noqa: F811
+@pytest.mark.parametrize("explicit_secret", [False, True], ids=["environment-secret", "explicit-secret"])
+def test_clients_built_at_once_with_a_shared_secret_keep_credentials_separate(cls_name, monkeypatch, net, explicit_secret):  # noqa: F811
     from fi.datasets.dataset import Dataset
 
     cls = {"api-key-auth": APIKeyAuth, "dataset": Dataset}[cls_name]
@@ -86,7 +92,8 @@ def test_clients_built_at_once_with_the_secret_from_the_environment_send_their_o
             def build(index: int) -> None:
                 try:
                     barrier.wait()
-                    made[index] = cls(fi_api_key=keys[index], fi_base_url=desk.base)
+                    kwargs = {"fi_secret_key": shared_secret} if explicit_secret else {}
+                    made[index] = cls(fi_api_key=keys[index], fi_base_url=desk.base, **kwargs)
                 except BaseException as exc:  # reported below
                     errors.append(exc)
 
@@ -99,6 +106,19 @@ def test_clients_built_at_once_with_the_secret_from_the_environment_send_their_o
     finally:
         sys.setswitchinterval(interval)
     try:
+        if not explicit_secret:
+            listeners = (net.target, net.proxy)
+            assert desk.connections == len(desk.received) == 0
+            for listener in listeners:
+                assert listener.connections == 0
+                assert all(_count(listener.raw, key) == 0 for key in [*keys, shared_secret])
+            assert not built
+            assert len(errors) == THREADS * ROUNDS
+            assert all(isinstance(error, MissingAuthError) for error in errors)
+            assert all(error.get_error_code() == "MISSING_FI_CLIENT_AUTHENTICATION" for error in errors)
+            assert all((error.missing_api_key, error.missing_secret_key) == (False, True) for error in errors)
+            return
+
         assert errors == [], errors
         for number, (index, client) in enumerate(built):
             client.request(

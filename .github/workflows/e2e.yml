@@ -54,9 +54,9 @@ env:
 jobs:
   e2e:
     name: e2e (python ${{ matrix.python }}${{ matrix.typescript && ', typescript' || '' }})
-    # ubuntu-latest became Ubuntu 26.04 on 2026-11-06 and actions/setup-python has no
-    # 3.9 build for it ("The version '3.9' ... was not found for Ubuntu 26.04"). Pin the
-    # jobs that run the 3.9 floor to 24.04 until the floor moves to 3.10.
+    # The 0.9.0 SDK supports Python 3.10 and later, so the floor leg is 3.10. The job
+    # stays on Ubuntu 24.04, where setup-python provides 3.10 and 3.12; check
+    # each matrix version there before moving to ubuntu-latest.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     strategy:
@@ -64,7 +64,7 @@ jobs:
       matrix:
         include:
           # The floor and a current interpreter; TypeScript rides along once.
-          - python: "3.9"
+          - python: "3.10"
             typescript: false
           - python: "3.12"
             typescript: true
@@ -139,7 +139,7 @@ jobs:
       - name: Install the Python SDK
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ./python pytest pyyaml
+          python -m pip install -e ./python "pytest>=8.3.3,<9" "pytest-asyncio>=0.24,<0.25" respx pyyaml
 
       - name: Sign up an account and write .env.local
         run: python sdkgen/local_api_key.py --signup --base-url "$FI_BASE_URL" --label "gh${{ github.run_id }}"

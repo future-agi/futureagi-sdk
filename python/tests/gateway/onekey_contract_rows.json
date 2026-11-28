@@ -1,0 +1,1921 @@
+{
+  "rows": [
+    {
+      "status": 402,
+      "type": "payment_required",
+      "code": "managed_credits_exhausted",
+      "retry": "never",
+      "remedy": "Add credit on Settings Billing; on a grant-only install ask its operator to grant credit; alternatively use your own provider key on Gateway Providers.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "limit_source": {
+              "type": "string",
+              "const": "agentcc_credits"
+            },
+            "remedy_hint": {
+              "type": "string",
+              "const": "add_credits"
+            },
+            "resets_at": {
+              "type": "null"
+            },
+            "scope": {
+              "type": "string",
+              "const": "org"
+            },
+            "required_usd": {
+              "type": "number"
+            },
+            "available_usd": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "limit_source",
+            "remedy_hint",
+            "resets_at",
+            "scope",
+            "required_usd",
+            "available_usd"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 402,
+      "type": "payment_required",
+      "code": "managed_credits_insufficient",
+      "retry": "only if error.metadata.limit_source == \"agentcc_in_flight\" AND error.metadata.remedy_hint == \"retry\", after the Retry-After header (2 s); otherwise never",
+      "remedy": "For in-flight holds, wait for Retry-After; otherwise add credit, lower max_tokens or use your own provider key.",
+      "variants": [
+        {
+          "when": "ReserveInFlight",
+          "message_template": "MANAGED_CREDITS_IN_FLIGHT",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/credits/refusals.go:41-44",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_in_flight"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "retry"
+                },
+                "resets_at": {
+                  "type": "null"
+                },
+                "scope": {
+                  "type": "string",
+                  "const": "org"
+                },
+                "required_usd": {
+                  "type": "number"
+                },
+                "available_usd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at",
+                "scope",
+                "required_usd",
+                "available_usd"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "yes, after Retry-After",
+          "headers": {
+            "Retry-After": {
+              "presence": "present",
+              "type": "string",
+              "format": "positive integer delta-seconds",
+              "seconds": 2
+            }
+          }
+        },
+        {
+          "when": "insufficient balance, not in-flight",
+          "message_template": "MANAGED_CREDITS_INSUFFICIENT",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/credits/refusals.go:45-47",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_credits"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "add_credits"
+                },
+                "resets_at": {
+                  "type": "null"
+                },
+                "scope": {
+                  "type": "string",
+                  "const": "org"
+                },
+                "required_usd": {
+                  "type": "number"
+                },
+                "available_usd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at",
+                "scope",
+                "required_usd",
+                "available_usd"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        }
+      ],
+      "metadata_presence": "present",
+      "headers": {
+        "Retry-After": {
+          "presence": "in-flight variant only",
+          "type": "string",
+          "format": "positive integer delta-seconds",
+          "seconds": 2
+        }
+      },
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_credits"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "add_credits"
+                },
+                "resets_at": {
+                  "type": "null"
+                },
+                "scope": {
+                  "type": "string",
+                  "const": "org"
+                },
+                "required_usd": {
+                  "type": "number"
+                },
+                "available_usd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at",
+                "scope",
+                "required_usd",
+                "available_usd"
+              ],
+              "additionalProperties": true
+            },
+            {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_in_flight"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "retry"
+                },
+                "resets_at": {
+                  "type": "null"
+                },
+                "scope": {
+                  "type": "string",
+                  "const": "org"
+                },
+                "required_usd": {
+                  "type": "number"
+                },
+                "available_usd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at",
+                "scope",
+                "required_usd",
+                "available_usd"
+              ],
+              "additionalProperties": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "status": 402,
+      "type": "payment_required",
+      "code": "agent_budget_exhausted",
+      "retry": "never",
+      "remedy": "Raise the run budget or start a new run; a call-only budget may also be lowered by reducing max_tokens or choosing a cheaper model. Administrative ceilings need an authorized policy change.",
+      "variants": [
+        {
+          "when": "legacy run/caller budget; required_usd omitted when unknown; scope omitted outside a run",
+          "message_template": "AGENT_BUDGET_EXHAUSTED",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/agentbudget/errors.go:30-65",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_agent_budget"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "raise_run_budget"
+                },
+                "resets_at": {
+                  "type": "null"
+                },
+                "available_usd": {
+                  "type": "number"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "required_usd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at",
+                "available_usd"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        },
+        {
+          "when": "effective administrative run ceiling",
+          "message_template": "ADMIN_RUN_CAP_REFUSED",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/cap_refusal.go:8-62; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/contracts/generated/gateway_admin.go:509-514",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "cap_scope": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "key"
+                  ]
+                },
+                "cap_ref": {
+                  "type": "string"
+                },
+                "cap_kind": {
+                  "type": "string",
+                  "enum": [
+                    "daily",
+                    "run"
+                  ]
+                },
+                "policy_revision": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "cap_scope",
+                "cap_ref",
+                "cap_kind",
+                "policy_revision"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        }
+      ],
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_agent_budget"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "raise_run_budget"
+                },
+                "resets_at": {
+                  "type": "null"
+                },
+                "available_usd": {
+                  "type": "number"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "required_usd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at",
+                "available_usd"
+              ],
+              "additionalProperties": true
+            },
+            {
+              "type": "object",
+              "properties": {
+                "cap_scope": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "key"
+                  ]
+                },
+                "cap_ref": {
+                  "type": "string"
+                },
+                "cap_kind": {
+                  "type": "string",
+                  "enum": [
+                    "daily",
+                    "run"
+                  ]
+                },
+                "policy_revision": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "cap_scope",
+                "cap_ref",
+                "cap_kind",
+                "policy_revision"
+              ],
+              "additionalProperties": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "status": 429,
+      "type": "rate_limit_error",
+      "code": "budget_exceeded",
+      "retry": "never",
+      "remedy": "An administrator raises the binding budget, or wait for its period to reset; never automatically retry the same refusal.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 429,
+      "type": "rate_limit_error",
+      "code": "org_budget_exceeded",
+      "retry": "never",
+      "remedy": "Raise the binding budget/daily cap through an authorized administrator, or wait for its reset; no automatic retry.",
+      "variants": [
+        {
+          "when": "hierarchical org budget",
+          "message_template": "ORG_BUDGET_EXCEEDED",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/budget.go:372-382",
+          "error": {
+            "metadata": null
+          },
+          "metadata_presence": "omitted",
+          "retry": "never",
+          "headers": {}
+        },
+        {
+          "when": "daily administrative cap",
+          "message_template": "ADMIN_DAILY_CAP_REFUSED",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/cap_plugin.go:71-75; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/cap_refusal.go:8-62; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/contracts/generated/gateway_admin.go:509-514",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "cap_scope": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "key"
+                  ]
+                },
+                "cap_ref": {
+                  "type": "string"
+                },
+                "cap_kind": {
+                  "type": "string",
+                  "enum": [
+                    "daily",
+                    "run"
+                  ]
+                },
+                "policy_revision": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "cap_scope",
+                "cap_ref",
+                "cap_kind",
+                "policy_revision"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        }
+      ],
+      "metadata_presence": "variant-dependent: absent for hierarchical budget; present for administrative daily cap",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "cap_scope": {
+              "type": "string",
+              "enum": [
+                "agent",
+                "key"
+              ]
+            },
+            "cap_ref": {
+              "type": "string"
+            },
+            "cap_kind": {
+              "type": "string",
+              "enum": [
+                "daily",
+                "run"
+              ]
+            },
+            "policy_revision": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "cap_scope",
+            "cap_ref",
+            "cap_kind",
+            "policy_revision"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 429,
+      "type": "rate_limit_error",
+      "code": "managed_spend_velocity",
+      "retry": "only for the filled-window variant carrying error.metadata.remedy_hint == \"retry\" and a positive Retry-After header; never automatically retry request_exceeds_minute_cap, request_exceeds_hour_cap or new_org_daily_cap",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "variants": [
+        {
+          "when": "filled spend window",
+          "message_template": "MANAGED_SPEND_WINDOW_FULL",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/spendguard/errors.go:55-69",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_spend_guard"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "retry"
+                },
+                "resets_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "RFC 3339 UTC timestamp, or null"
+                },
+                "scope": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at",
+                "scope"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "yes, after Retry-After",
+          "headers": {
+            "Retry-After": {
+              "presence": "present; at least 1 second",
+              "type": "string",
+              "format": "positive integer delta-seconds"
+            }
+          }
+        },
+        {
+          "when": "request exceeds minute cap",
+          "message_template": "MANAGED_SPEND_REQUEST_EXCEEDS_MINUTE_CAP",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/spendguard/errors.go:25-33",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "const": "request_exceeds_minute_cap"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        },
+        {
+          "when": "request exceeds hour cap",
+          "message_template": "MANAGED_SPEND_REQUEST_EXCEEDS_HOUR_CAP",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/spendguard/errors.go:35-42",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "const": "request_exceeds_hour_cap"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        },
+        {
+          "when": "new-org daily allowance exceeded",
+          "message_template": "MANAGED_SPEND_NEW_ORG_DAILY_CAP",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/spendguard/errors.go:44-53",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "const": "new_org_daily_cap"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        }
+      ],
+      "metadata_presence": "present",
+      "headers": {
+        "Retry-After": {
+          "presence": "filled-window variant only; ceil(resets_at - now), at least 1 second",
+          "type": "string",
+          "format": "positive integer delta-seconds"
+        }
+      },
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_spend_guard"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "retry"
+                },
+                "resets_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "RFC 3339 UTC timestamp, or null"
+                },
+                "scope": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at",
+                "scope"
+              ],
+              "additionalProperties": true
+            },
+            {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "request_exceeds_minute_cap",
+                    "request_exceeds_hour_cap",
+                    "new_org_daily_cap"
+                  ]
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "status": 429,
+      "type": "rate_limit_error",
+      "code": "rate_limit_exceeded",
+      "retry": "yes, bounded backoff; honor Retry-After when present",
+      "remedy": "Honor Retry-After if present; otherwise bounded exponential backoff.",
+      "metadata_presence": "omitted",
+      "headers": {
+        "Retry-After": {
+          "presence": "when the producer supplies positive resetSeconds; absent on the generic constructor",
+          "type": "string",
+          "format": "positive integer delta-seconds"
+        }
+      },
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 503,
+      "type": "server_error",
+      "code": "managed_billing_unavailable",
+      "retry": "yes, bounded backoff; honor Retry-After when present",
+      "remedy": "Retry with bounded backoff or use your own provider key; persistent credit-store failure needs an operator.",
+      "variants": [
+        {
+          "when": "credit store unreachable",
+          "message_template": "MANAGED_BILLING_STORE_UNAVAILABLE",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/credits/refusals.go:51-58",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "const": "redis_unavailable"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "retry"
+                }
+              },
+              "required": [
+                "reason",
+                "remedy_hint"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "yes, bounded backoff",
+          "headers": {}
+        },
+        {
+          "when": "account is being restored",
+          "message_template": "MANAGED_BILLING_ACCOUNT_MISSING",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/credits/refusals.go:60-66",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "const": "account_state_missing"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "retry"
+                }
+              },
+              "required": [
+                "reason",
+                "remedy_hint"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "yes, after Retry-After",
+          "headers": {
+            "Retry-After": {
+              "presence": "present; configurable, default 30 seconds",
+              "type": "string",
+              "format": "positive integer delta-seconds"
+            }
+          }
+        }
+      ],
+      "metadata_presence": "present",
+      "headers": {
+        "Retry-After": {
+          "presence": "account_state_missing only; configured duration rounded up, minimum 1 second, default 30",
+          "type": "string",
+          "format": "positive integer delta-seconds"
+        }
+      },
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string",
+              "enum": [
+                "redis_unavailable",
+                "account_state_missing"
+              ]
+            },
+            "remedy_hint": {
+              "type": "string",
+              "const": "retry"
+            }
+          },
+          "required": [
+            "reason",
+            "remedy_hint"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 403,
+      "type": "permission_error",
+      "code": "permission_denied",
+      "retry": "never",
+      "remedy": "Choose a managed model with supported pricing, or use your own provider key. A policy/IP refusal sharing this code requires its own policy remedy.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 403,
+      "type": "permission_error",
+      "code": "future_agi_credits_off",
+      "retry": "never",
+      "remedy": "An organization Owner or Admin uses the \"Turn on Future AGI credits\" control on the Gateway Models page, or adds their own provider key on the Gateway Providers page.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 401,
+      "type": "authentication_error",
+      "code": "invalid_api_key",
+      "retry": "never",
+      "remedy": "Create or rotate a gateway API key on Gateway API Keys and supply it in the endpoint-supported authentication header. Do not send Build Keys or provider-vendor keys as gateway credentials.",
+      "variants": [
+        {
+          "when": "no key",
+          "message_template": "INVALID_API_KEY_MISSING",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/middleware/auth_errors.go:18-35,50-78",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "const": "missing_api_key"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        },
+        {
+          "when": "unknown/revoked/expired/deleted gateway-format network key",
+          "message_template": "INVALID_API_KEY_UNKNOWN",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/auth/keystore.go:143-154,307-318; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/middleware/auth_errors.go:13-21,41-64",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "const": "unknown_api_key"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        },
+        {
+          "when": "Build Keys format",
+          "message_template": "INVALID_API_KEY_FUTURE_AGI_FORMAT",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/middleware/auth_errors.go:36-37,50-64",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "const": "future_agi_api_key"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        },
+        {
+          "when": "non-gateway key format",
+          "message_template": "INVALID_API_KEY_OTHER_FORMAT",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/middleware/auth_errors.go:38-40,50-64",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "const": "not_a_gateway_key"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {}
+        },
+        {
+          "when": "pipeline already has an expired key object",
+          "message_template": "INVALID_API_KEY_PIPELINE_EXPIRED",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/auth/auth.go:80-84",
+          "error": {
+            "metadata": null
+          },
+          "metadata_presence": "omitted",
+          "retry": "never",
+          "headers": {}
+        },
+        {
+          "when": "pipeline already has an inactive key object",
+          "message_template": "INVALID_API_KEY_PIPELINE_INACTIVE",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/auth/auth.go:86-89",
+          "error": {
+            "metadata": null
+          },
+          "metadata_presence": "omitted",
+          "retry": "never",
+          "headers": {}
+        }
+      ],
+      "metadata_presence": "present for middleware ErrUnauthorizedKey; absent for expired/inactive pipeline constructors",
+      "headers": {
+        "WWW-Authenticate": {
+          "presence": "canonical WriteError adds it if absent",
+          "name": "models.BearerChallenge",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/models/errors.go:196-212"
+        }
+      },
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string",
+              "enum": [
+                "missing_api_key",
+                "future_agi_api_key",
+                "not_a_gateway_key",
+                "unknown_api_key"
+              ]
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 402,
+      "type": "payment_required",
+      "code": "agent_call_cap_exceeded",
+      "retry": "never",
+      "remedy": "Lower max_tokens, choose a cheaper model or raise the cap.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "limit_source": {
+              "type": "string",
+              "const": "agentcc_call_cap"
+            },
+            "remedy_hint": {
+              "type": "string",
+              "const": "lower_max_tokens"
+            },
+            "resets_at": {
+              "type": "null"
+            },
+            "required_usd": {
+              "type": "number"
+            },
+            "available_usd": {
+              "type": "number"
+            },
+            "scope": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "limit_source",
+            "remedy_hint",
+            "resets_at",
+            "required_usd",
+            "available_usd"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 402,
+      "type": "payment_required",
+      "code": "call_cap_unenforceable",
+      "retry": "never",
+      "remedy": "Choose a priced model with an enforceable bound or correct the administrative identity/route/cap policy; do not bypass the cap.",
+      "variants": [
+        {
+          "when": "legacy unpriced model under cap",
+          "message_template": "CALL_CAP_UNENFORCEABLE",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/agentbudget/errors.go:78-89",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_call_cap"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "use_priced_model"
+                },
+                "resets_at": {
+                  "type": "null"
+                },
+                "scope": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {},
+          "type": "payment_required"
+        },
+        {
+          "when": "strict cap qualification before Admission exists",
+          "message_template": "STRICT_CAP_UNENFORCEABLE",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/cap_admission.go:42-64",
+          "error": {
+            "metadata": null
+          },
+          "metadata_presence": "omitted",
+          "retry": "never",
+          "headers": {},
+          "type": "invalid_request_error"
+        },
+        {
+          "when": "strict qualification decorated by Admission.Refusal",
+          "message_template": "STRICT_CAP_UNENFORCEABLE",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/cap_refusal.go:8-62; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/contracts/generated/gateway_admin.go:509-514",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "cap_scope": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "key"
+                  ]
+                },
+                "cap_ref": {
+                  "type": "string"
+                },
+                "cap_kind": {
+                  "type": "string",
+                  "enum": [
+                    "daily",
+                    "run"
+                  ]
+                },
+                "policy_revision": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "cap_scope",
+                "cap_ref",
+                "cap_kind",
+                "policy_revision"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {},
+          "type": "invalid_request_error"
+        },
+        {
+          "when": "administrative run limit cannot qualify the request",
+          "message_template": "ADMIN_RUN_CAP_REFUSED",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/agentbudget/refusal.go:5-9; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/cap_refusal.go:8-62; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/contracts/generated/gateway_admin.go:509-514",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "cap_scope": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "key"
+                  ]
+                },
+                "cap_ref": {
+                  "type": "string"
+                },
+                "cap_kind": {
+                  "type": "string",
+                  "enum": [
+                    "daily",
+                    "run"
+                  ]
+                },
+                "policy_revision": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "cap_scope",
+                "cap_ref",
+                "cap_kind",
+                "policy_revision"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "never",
+          "headers": {},
+          "type": "payment_required"
+        }
+      ],
+      "metadata_presence": "variant-dependent: PaymentMeta, administrative identity, or omitted before an Admission exists",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "limit_source": {
+                  "type": "string",
+                  "const": "agentcc_call_cap"
+                },
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "use_priced_model"
+                },
+                "resets_at": {
+                  "type": "null"
+                },
+                "scope": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit_source",
+                "remedy_hint",
+                "resets_at"
+              ],
+              "additionalProperties": true
+            },
+            {
+              "type": "object",
+              "properties": {
+                "cap_scope": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "key"
+                  ]
+                },
+                "cap_ref": {
+                  "type": "string"
+                },
+                "cap_kind": {
+                  "type": "string",
+                  "enum": [
+                    "daily",
+                    "run"
+                  ]
+                },
+                "policy_revision": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "cap_scope",
+                "cap_ref",
+                "cap_kind",
+                "policy_revision"
+              ],
+              "additionalProperties": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "status": 402,
+      "type": "payment_required",
+      "code": "agent_run_stopped",
+      "retry": "never",
+      "remedy": "Address the stop cause and start a new run.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "limit_source": {
+              "type": "string",
+              "const": "agentcc_run_stop"
+            },
+            "remedy_hint": {
+              "type": "string",
+              "const": "start_new_run"
+            },
+            "resets_at": {
+              "type": "null"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "limit_source",
+            "remedy_hint",
+            "resets_at"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 503,
+      "type": "server_error",
+      "code": "budget_state_unavailable",
+      "retry": "yes, bounded backoff for transient unavailability; persistent policy/state failures need operator action",
+      "remedy": "Retry transient state failures with bounded backoff; an administrator must correct missing activation/stale policy or persistent unavailable durable state.",
+      "variants": [
+        {
+          "when": "legacy run-budget store",
+          "message_template": "RUN_BUDGET_STATE_UNAVAILABLE",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/agentbudget/errors.go:100-107",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "retry"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "const": "redis_unavailable"
+                }
+              },
+              "required": [
+                "remedy_hint",
+                "scope",
+                "reason"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "yes, bounded backoff",
+          "headers": {},
+          "type": "server_error"
+        },
+        {
+          "when": "daily durable admission-cap state",
+          "message_template": "ADMISSION_CAP_STATE_UNAVAILABLE",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/cap_plugin.go:20-22,38-78; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/cap_refusal.go:8-62; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/contracts/generated/gateway_admin.go:509-514",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "cap_scope": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "key"
+                  ]
+                },
+                "cap_ref": {
+                  "type": "string"
+                },
+                "cap_kind": {
+                  "type": "string",
+                  "enum": [
+                    "daily",
+                    "run"
+                  ]
+                },
+                "policy_revision": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "cap_scope",
+                "cap_ref",
+                "cap_kind",
+                "policy_revision"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "yes, bounded backoff; operator correction may be needed",
+          "headers": {},
+          "type": "invalid_request_error"
+        },
+        {
+          "when": "run-store failure decorated with administrative identity",
+          "message_template": "ADMIN_CAP_STATE_UNAVAILABLE",
+          "source": "651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/plugins/budget/cap_refusal.go:8-62; 651ab5bb8ac3a6c54d82c59bdd5a1f1271049aec:agentcc-gateway/internal/contracts/generated/gateway_admin.go:509-514",
+          "error": {
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "cap_scope": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "key"
+                  ]
+                },
+                "cap_ref": {
+                  "type": "string"
+                },
+                "cap_kind": {
+                  "type": "string",
+                  "enum": [
+                    "daily",
+                    "run"
+                  ]
+                },
+                "policy_revision": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "cap_scope",
+                "cap_ref",
+                "cap_kind",
+                "policy_revision"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "metadata_presence": "present",
+          "retry": "yes, bounded backoff",
+          "headers": {},
+          "type": "server_error"
+        }
+      ],
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "remedy_hint": {
+                  "type": "string",
+                  "const": "retry"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "const": "redis_unavailable"
+                }
+              },
+              "required": [
+                "remedy_hint",
+                "scope",
+                "reason"
+              ],
+              "additionalProperties": true
+            },
+            {
+              "type": "object",
+              "properties": {
+                "cap_scope": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "key"
+                  ]
+                },
+                "cap_ref": {
+                  "type": "string"
+                },
+                "cap_kind": {
+                  "type": "string",
+                  "enum": [
+                    "daily",
+                    "run"
+                  ]
+                },
+                "policy_revision": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "cap_scope",
+                "cap_ref",
+                "cap_kind",
+                "policy_revision"
+              ],
+              "additionalProperties": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "status": 402,
+      "type": "payment_required",
+      "code": "managed_spend_paused",
+      "retry": "never",
+      "remedy": "An administrator raises the exhausted budget or resumes the anomaly-paused organization; own provider keys are an alternative.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "limit_source": {
+              "type": "string",
+              "const": "agentcc_budget"
+            },
+            "remedy_hint": {
+              "type": "string",
+              "enum": [
+                "raise_budget",
+                "contact_admin"
+              ]
+            },
+            "resets_at": {
+              "type": "null"
+            },
+            "scope": {
+              "type": "string",
+              "const": "org"
+            }
+          },
+          "required": [
+            "limit_source",
+            "remedy_hint",
+            "resets_at",
+            "scope"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 402,
+      "type": "insufficient_credits",
+      "code": "payment_required",
+      "retry": "never",
+      "remedy": "Top up the managed API key prepaid balance.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 429,
+      "type": "rate_limit_error",
+      "code": "budget_throttled",
+      "retry": "yes, after Retry-After",
+      "remedy": "Wait for the throttle slot window or ask an administrator to adjust it.",
+      "metadata_presence": "omitted",
+      "headers": {
+        "Retry-After": {
+          "presence": "present; ceil(next minute boundary - now), minimum 1 second",
+          "type": "string",
+          "format": "positive integer delta-seconds"
+        }
+      },
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 503,
+      "type": "server_error",
+      "code": "key_list_not_loaded",
+      "retry": "yes, bounded backoff; no Retry-After emitted",
+      "remedy": "Wait for the first control-plane key list; an operator repairs persistent synchronization failure.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 403,
+      "type": "permission_error",
+      "code": "model_not_permitted",
+      "retry": "never",
+      "remedy": "Choose an allowed model with supported pricing or ask an authorized administrator to adjust the binding policy.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 403,
+      "type": "permission_error",
+      "code": "managed_router_unbounded",
+      "retry": "never",
+      "remedy": "Use a bounded priced managed model or your own provider key for the vendor router.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "unsupported_field_for_managed",
+      "retry": "never",
+      "remedy": "Remove/change the unsupported field or use your own provider key for the dimension.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "unsupported_routing_field",
+      "retry": "never",
+      "remedy": "Remove the unsupported routing field or select a supported endpoint/own-provider-key route.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 403,
+      "type": "permission_error",
+      "code": "key_scope_denied",
+      "retry": "never",
+      "remedy": "Use a key authorized for this operation or have an authorized administrator issue an appropriately scoped key.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 402,
+      "type": "payment_required",
+      "code": "agent_key_budget_exhausted",
+      "retry": "never",
+      "remedy": "An org administrator raises/repairs the workspace agent-key budget, or wait for its stated reset.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "limit_source": {
+              "type": "string",
+              "const": "agentcc_key_limit"
+            },
+            "remedy_hint": {
+              "type": "string",
+              "const": "raise_key_budget"
+            },
+            "resets_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "RFC 3339 UTC timestamp, or null"
+            },
+            "scope": {
+              "type": "string"
+            },
+            "available_usd": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "limit_source",
+            "remedy_hint",
+            "resets_at",
+            "scope",
+            "available_usd"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 429,
+      "type": "rate_limit_error",
+      "code": "token_rate_limit_exceeded",
+      "retry": "yes, honor Retry-After when positive; otherwise bounded backoff",
+      "remedy": "Wait for the token-rate window or adjust the authorized token-rate limit.",
+      "metadata_presence": "omitted",
+      "headers": {
+        "Retry-After": {
+          "presence": "when resetSeconds is positive",
+          "type": "string",
+          "format": "positive integer delta-seconds"
+        }
+      },
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 429,
+      "type": "rate_limit_error",
+      "code": "usage_paused",
+      "retry": "never",
+      "remedy": "Adjust the exhausted budget or contact support; this is not transient rate limiting.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 429,
+      "type": "rate_limit_error",
+      "code": "quota_exceeded",
+      "retry": "never",
+      "remedy": "Upgrade the plan or obtain additional request quota; do not blindly retry.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "usage_unavailable",
+      "retry": "never",
+      "remedy": "Send without background so the gateway can observe and bill usage.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 503,
+      "type": "server_error",
+      "code": "provider_busy",
+      "retry": "yes, after Retry-After; no upstream dispatch occurred",
+      "remedy": "Wait for a provider slot, then retry after Retry-After.",
+      "metadata_presence": "omitted",
+      "headers": {
+        "Retry-After": {
+          "presence": "present",
+          "type": "string",
+          "format": "positive integer delta-seconds",
+          "seconds": 1
+        }
+      },
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 409,
+      "type": "invalid_request_error",
+      "code": "idempotency_in_progress",
+      "retry": "yes, after Retry-After",
+      "remedy": "Retry the same request and idempotency key after Retry-After.",
+      "metadata_presence": "omitted",
+      "headers": {
+        "Retry-After": {
+          "presence": "present",
+          "type": "string",
+          "format": "positive integer delta-seconds",
+          "seconds": 1
+        }
+      },
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 422,
+      "type": "invalid_request_error",
+      "code": "idempotency_key_reused",
+      "retry": "never",
+      "remedy": "Use a new idempotency key for a genuinely different request body.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 404,
+      "type": "not_found",
+      "code": "managed_models_disabled",
+      "retry": "never",
+      "remedy": "An operator configures managed providers before this admin operation is available.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "deferred_run_unavailable",
+      "retry": "never",
+      "remedy": "Send the organization-key request synchronously.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 404,
+      "type": "not_found",
+      "code": "model_not_found",
+      "retry": "never",
+      "remedy": "Use GET /v1/models and choose a model this key can call.",
+      "metadata_presence": "present only when eligible suggestions exist; omitted otherwise",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "suggestions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 3
+            }
+          },
+          "required": [
+            "suggestions"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 504,
+      "type": "gateway_timeout",
+      "code": "gateway_timeout",
+      "retry": "yes for the cited pre-dispatch admission branch; other gateway_timeout producers require their own idempotency assessment",
+      "remedy": "For a provider-slot wait timeout, retry with bounded backoff and an appropriate deadline.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    }
+  ],
+  "pending_rows": [
+    {
+      "status": 403,
+      "type": "permission_error",
+      "code": "permission_denied",
+      "retry": "never",
+      "remedy": "Choose a priced managed model or use your own provider key.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "pending packet (not on 651ab5bb); inherited wire tuple is already current",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "managed_resource_unsupported",
+      "retry": "never",
+      "remedy": "Use a supported managed request shape or your own provider key.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "pending (not on 651ab5bb); existing on ISO, reused by the packet",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "unsupported_field_for_managed",
+      "retry": "never",
+      "remedy": "Use priced text/image content without unsupported content dimensions/cache_control, or your own provider key.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "pending behavior (not on 651ab5bb); code already exists on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    }
+  ],
+  "source_sha256": "f98177f6ebdef717e3c0f440a5598bcbc5f92b580efc57f2490c29a99f44c7fa"
+}

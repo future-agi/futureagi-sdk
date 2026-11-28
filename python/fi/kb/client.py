@@ -1,17 +1,80 @@
 from typing import Dict, Optional, List, Union
 
-from fi.api.auth import APIKeyAuth, ResponseHandler
+from fi.api.auth import APIKeyAuth, ResponseHandler, refuse_redirect
 from fi.api.types import HttpMethod, RequestConfig
-from fi.kb.types import KnowledgeBaseConfig
+from fi.errors import ConfigurationError
+from fi.kb.types import KnowledgeBaseConfig, StatusType
 
 from fi.utils.errors import InvalidAuthError
 from fi.utils.routes import Routes
 from fi.utils.errors import FileNotFoundException, UnsupportedFileType, SDKException
 import os
 
-def _refused(error: BaseException) -> bool:
-    """Whether ``error`` is the refusal of a keyed plain-http request, which is raised as it is."""
-    return getattr(error, "code", None) == "insecure_http_origin"
+
+def _send_direct(method: str, request_kwargs: Dict, prepare=None):
+    """One upload request on a session the SDK builds: a plain-http request goes direct, whatever the proxy variables say,
+    and an https request keeps them (a proxy only carries the tunnel). ``prepare`` judges a request's keyed URL and adds
+    the extra headers for it (``HttpClient._direct_kwargs``).
+
+    A 301, 302, 303, 307 or 308 to the origin of the first request (scheme, host and port) is followed as ``requests``
+    follows it, as 0.8.1 did: a 303 or 302 as a ``GET`` (a ``HEAD`` stays a ``HEAD``), a 301 to a ``POST`` as a ``GET``,
+    without the body for a 301, 302 or 303, and with the same body for a 307 or 308; each hop is judged by ``prepare``
+    before it is sent, and a sixth redirect in a row raises ``requests.TooManyRedirects``. A redirect to another origin
+    raises ``KeyedRedirectRefusedError`` and nothing is sent to it. Without ``prepare`` the arguments are sent as they
+    are, and a redirect answer to a keyed request raises ``KeyedRedirectRefusedError``."""
+    import requests
+
+    from fi._core.requests_session import LoopbackDirectSession, same_origin_redirect_target
+    from fi.api.auth import MAX_REDIRECTS, _BODY_HEADERS, _redirect_method
+
+    class _UploadSession(LoopbackDirectSession):
+        returns_same_origin_redirects = True
+
+    if prepare is None:
+        with LoopbackDirectSession() as session:
+            return session.request(method, **request_kwargs)
+    first = str(request_kwargs["url"])
+    kwargs = prepare(dict(request_kwargs))
+    sent_names = {str(name).lower() for name in kwargs.get("headers") or {}}
+    with _UploadSession() as session:
+        response = session.request(method, **kwargs)
+        redirects = 0
+        while (target := same_origin_redirect_target(response, first)) is not None:
+            redirects += 1
+            if redirects > MAX_REDIRECTS:
+                response.close()
+                raise requests.TooManyRedirects(f"Exceeded {MAX_REDIRECTS} redirects.", response=response)
+            status, prepared = response.status_code, response.request.copy()
+            response.close()
+            hop = prepare({**request_kwargs, "url": target, "headers": dict(request_kwargs.get("headers") or {})})
+            prepared.prepare_url(target, None)
+            prepared.method = _redirect_method(status, prepared.method)
+            for name in [name for name in prepared.headers if name.lower() in sent_names or name.lower() == "cookie"]:
+                del prepared.headers[name]
+            prepared.headers.update(hop.get("headers") or {})
+            if status not in (307, 308):
+                prepared.body = None
+                for name in [name for name in prepared.headers if name.lower() in _BODY_HEADERS]:
+                    del prepared.headers[name]
+            elif prepared.body is not None and "Content-Type" not in prepared.headers:
+                # The body goes again; when its media type came from a header that does not apply to this URL, it is
+                # sent with the type ``requests`` gives such a body.
+                prepared.headers["Content-Type"] = _body_media_type(prepared.body, request_kwargs)
+            sent_names = {str(name).lower() for name in hop.get("headers") or {}}
+            prepared.prepare_cookies(session.cookies)
+            settings = session.merge_environment_settings(prepared.url, {}, None, None, None)
+            response = session.send(prepared, timeout=kwargs.get("timeout"), allow_redirects=False, **settings)
+        return response
+
+
+def _body_media_type(body, request_kwargs: Dict) -> str:
+    """The media type ``requests`` gives the body it encoded from ``request_kwargs``."""
+    if request_kwargs.get("files"):
+        first = (body if isinstance(body, bytes) else str(body).encode()).split(b"\r\n", 1)[0]
+        return "multipart/form-data; boundary=" + first[2:].decode("ascii", "replace")
+    if request_kwargs.get("json") is not None and not request_kwargs.get("data"):
+        return "application/json"
+    return "application/x-www-form-urlencoded"
 
 
 class KBResponseHandler(ResponseHandler[Dict, KnowledgeBaseConfig]):
@@ -112,13 +175,14 @@ class KnowledgeBase(APIKeyAuth):
 
         # Internal cache of the current KB (instance of KnowledgeBaseConfig)
         self.kb: Optional[KnowledgeBaseConfig] = None
+        self._valid_file_paths: List[str] = []
 
         if kb_name:
             try:
                 self.kb = self._get_kb_from_name(kb_name)
-            except Exception as e:
-                if _refused(e):
-                    raise
+            except ConfigurationError:
+                raise  # a refusal to send the keys is not a missing knowledge base
+            except Exception:
                 raise SDKException(
                     f"Knowledge Base with name '{kb_name}' not found. Please create it first or verify the name."
                 )
@@ -139,7 +203,6 @@ class KnowledgeBase(APIKeyAuth):
         Returns:
             self for chaining
         """
-        files = []
         try:
             import requests  
             
@@ -147,9 +210,7 @@ class KnowledgeBase(APIKeyAuth):
             if not self.kb or self.kb.name != kb_name:
                 try:
                     self.kb = self._get_kb_from_name(kb_name)
-                except Exception as e:
-                    if _refused(e):
-                        raise
+                except Exception:
                     raise SDKException(
                         f"Knowledge Base named '{kb_name}' not found when attempting to update."
                     )
@@ -170,6 +231,8 @@ class KnowledgeBase(APIKeyAuth):
                 "kb_id": str(self.kb.id),
                 "name": self.kb.name if new_name is None else new_name,
             }
+            
+            files = []
             
             try:
                 if self._valid_file_paths:
@@ -195,7 +258,18 @@ class KnowledgeBase(APIKeyAuth):
                     'X-Secret-Key': self._fi_secret_key,
                 }
                 
-                response = self._upload("PATCH", url, headers, data, files)
+                request_kwargs = {
+                    "url": url,
+                    "headers": headers,
+                    "timeout": 300,
+                }
+                if files:
+                    request_kwargs.update({"data": data, "files": files})
+                else:
+                    request_kwargs["json"] = data
+
+                response = _send_direct("PATCH", request_kwargs, self._direct_kwargs)
+                refuse_redirect(response)
                 
                 KBResponseHandler._handle_error(response)
                 parsed_result_data = KBResponseHandler._parse_success(response)
@@ -217,14 +291,12 @@ class KnowledgeBase(APIKeyAuth):
                     if hasattr(file_tuple[1][1], 'close') and not file_tuple[1][1].closed:
                         file_tuple[1][1].close()
             
-        except SDKException:
+        except (SDKException, ConfigurationError):
             raise
         except Exception as e:
             for _, (_name, fh, _type) in files:
                 if hasattr(fh, 'close') and not fh.closed:
                     fh.close()
-            if _refused(e):
-                raise
             raise SDKException("Failed to update the Knowledge Base due to an unexpected error.", cause=e)
 
     def delete_files_from_kb(
@@ -267,7 +339,7 @@ class KnowledgeBase(APIKeyAuth):
                 "kb_id": str(self.kb.id)
             }
             
-            response = self.request(
+            self.request(
                 config=RequestConfig(
                     method=method,
                     url=url,
@@ -282,8 +354,6 @@ class KnowledgeBase(APIKeyAuth):
         except SDKException:
             raise
         except Exception as e:
-            if _refused(e):
-                raise
             raise SDKException("Failed to delete files from the Knowledge Base due to an unexpected error.", cause=e)
 
     def delete_kb(
@@ -344,7 +414,7 @@ class KnowledgeBase(APIKeyAuth):
             url = self._base_url + "/" + Routes.knowledge_base.value       
             json_payload = {"kb_ids": resolved_ids}
             
-            response = self.request(
+            self.request(
                 config=RequestConfig(
                     method=method,
                     url=url,
@@ -362,8 +432,6 @@ class KnowledgeBase(APIKeyAuth):
         except SDKException:
             raise
         except Exception as e:
-            if _refused(e):
-                raise
             raise SDKException("Failed to delete Knowledge Base(s) due to an unexpected error.", cause=e)
 
     def create_kb(self, name: Optional[str] = None, file_paths: Optional[Union[str, List[str]]] = None):
@@ -384,7 +452,6 @@ class KnowledgeBase(APIKeyAuth):
         try:
             data = {"name": final_kb_name}
                 
-            method = HttpMethod.POST
             url = self._base_url + "/" + Routes.knowledge_base.value
             
             files = []
@@ -414,7 +481,18 @@ class KnowledgeBase(APIKeyAuth):
                     'X-Secret-Key': self._fi_secret_key,
                 }
                 
-                response = self._upload("POST", url, headers, data, files)
+                request_kwargs = {
+                    "url": url,
+                    "headers": headers,
+                    "timeout": 300,
+                }
+                if files:
+                    request_kwargs.update({"data": data, "files": files})
+                else:
+                    request_kwargs["json"] = data
+
+                response = _send_direct("POST", request_kwargs, self._direct_kwargs)
+                refuse_redirect(response)
                 KBResponseHandler._handle_error(response)
                 parsed_result_data = KBResponseHandler._parse_success(response)
 
@@ -433,26 +511,35 @@ class KnowledgeBase(APIKeyAuth):
                     if hasattr(file_tuple[1][1], 'close') and not file_tuple[1][1].closed:
                         file_tuple[1][1].close()
         
-        except SDKException:
+        except (SDKException, ConfigurationError):
             raise
         except Exception as e:
             for _, (_name, fh, _type) in files:
                 if hasattr(fh, 'close') and not fh.closed:
                     fh.close()
-            if _refused(e):
-                raise
             raise SDKException("Failed to create the Knowledge Base due to an unexpected error.", cause=e)
 
-    def _upload(self, method: str, url: str, headers: Dict[str, str], data: Dict, files: List) -> "requests.Response":
-        """Send a multipart upload as ``requests.request`` does, through a fresh session: the client's session
-        settings do not apply, and the request is judged on its own headers (see ``fi.api.auth._send_prepared``)."""
-        import requests
-
-        from fi.api.auth import _prepare, _send_prepared
-
-        with requests.Session() as session:
-            prepared = _prepare(session, requests.Request(method=method, url=url, headers=headers, data=data, files=files), self._allow_insecure_http)
-            return _send_prepared(session, prepared, 300, self._allow_insecure_http, url=url)
+    def list_kbs(self, search: Optional[str] = None) -> List[KnowledgeBaseConfig]:
+        """List knowledge bases visible to the authenticated user."""
+        params = {"search": search} if search else {}
+        response = self.request(
+            config=RequestConfig(
+                method=HttpMethod.GET,
+                url=self._base_url + "/" + Routes.knowledge_base_list.value,
+                params=params,
+            ),
+            response_handler=KBResponseHandler,
+        )
+        table_data = response["result"].get("table_data") or []
+        return [
+            KnowledgeBaseConfig(
+                id=item.get("id"),
+                name=item.get("name"),
+                files=item.get("files") or [],
+                status=item.get("status") or StatusType.PROCESSING.value,
+            )
+            for item in table_data
+        ]
 
     def _check_file_paths(self, file_paths: Union[str, List[str]]) -> bool:
         """
@@ -533,15 +620,7 @@ class KnowledgeBase(APIKeyAuth):
         Returns:
             Knowledge BaseConfig: Knowledge Base Config object 
         """
-        response = self.request(
-            config=RequestConfig(
-                method=HttpMethod.GET,
-                url=self._base_url + "/" + Routes.knowledge_base_list.value,
-                params={"search": kb_name},
-            ),
-            response_handler=KBResponseHandler,
-        )
-        data = response["result"].get("table_data")
-        if not data:
+        matches = self.list_kbs(kb_name)
+        if not matches:
             raise SDKException(f"Knowledge Base with name '{kb_name}' not found.")
-        return KnowledgeBaseConfig(id=data[0].get("id"), name=data[0].get("name"))
+        return matches[0]

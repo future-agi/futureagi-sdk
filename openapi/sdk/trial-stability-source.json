@@ -1,0 +1,7 @@
+{
+  "backend_repository": "future-agi/future-agi",
+  "backend_revision": "32ea09fa63d0ffa2e5178d1ede94f0f8b5796b7a",
+  "operations": [
+    "POST /model-hub/experiment-runs/compare/"
+  ]
+}

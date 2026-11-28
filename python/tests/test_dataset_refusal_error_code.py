@@ -1,7 +1,6 @@
-"""The error code a ``DatasetError`` reports when ``fi.datasets`` raises it in place of a plain http refusal.
+"""Error codes for a DatasetError and the plain HTTP refusal it wraps.
 
-``fi.datasets`` wraps a refused request in ``DatasetError``; that error carries ``.code`` ``insecure_http_origin``,
-and ``get_error_code()`` reports the same code. A ``DatasetError`` raised for any other reason keeps its own code.
+The wrapper reports the dataset operation code; the underlying refusal reports the credential policy code.
 
 Every case targets loopback listeners through the lookup shim of ``test_plain_http_key_guards``
 (``api.futureagi.com`` resolves to the loopback interface), with an environment proxy pointed at the proxy
@@ -16,8 +15,10 @@ import pytest
 
 from fi.datasets.dataset import Dataset, LRUCache
 from fi.datasets.types import Column, DatasetConfig, ModelTypes
+from fi.errors import InsecureHttpRefusedError
 from fi.utils.errors import DatasetError, DatasetNotFoundError
-from tests.test_plain_http_key_guards import CODE, KEY, SECRET, net, use_proxy  # noqa: F401
+from tests.test_dataset_config_cache import _assert_refusal
+from tests.test_plain_http_key_guards import KEY, SECRET, net, use_proxy  # noqa: F401
 
 DATASET_CODE = "DATASET_OPERATION_INVALID"
 NAME = "refusal-code-probe"
@@ -69,12 +70,7 @@ def test_refused_dataset_call_reports_the_refusal_code(net, monkeypatch, call, o
 
     counts = _counts(net)
     assert counts == (0, 0, 0, 0), f"target {counts[0]}/{counts[1]}, proxy {counts[2]}/{counts[3]}"
-    assert isinstance(error, DatasetError), repr(error)
-    assert getattr(error, "code", None) == CODE, f"{type(error).__name__}: {error}"
-    assert error.get_error_code() == CODE, (
-        f"get_error_code()={error.get_error_code()!r}, .code={getattr(error, 'code', None)!r}; "
-        f"target {counts[0]}/{counts[1]}, proxy {counts[2]}/{counts[3]}"
-    )
+    _assert_refusal(error, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED", wrapped=True)
 
 
 @calls
@@ -86,11 +82,7 @@ def test_refused_dataset_call_with_environment_value_other_than_one_reports_the_
 
     counts = _counts(net)
     assert counts == (0, 0, 0, 0), f"target {counts[0]}/{counts[1]}, proxy {counts[2]}/{counts[3]}"
-    assert isinstance(error, DatasetError), repr(error)
-    assert error.get_error_code() == CODE, (
-        f"get_error_code()={error.get_error_code()!r}, .code={getattr(error, 'code', None)!r}; "
-        f"target {counts[0]}/{counts[1]}, proxy {counts[2]}/{counts[3]}"
-    )
+    _assert_refusal(error, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED", wrapped=True)
 
 
 # ---------------------------------------------------------------------------------------------

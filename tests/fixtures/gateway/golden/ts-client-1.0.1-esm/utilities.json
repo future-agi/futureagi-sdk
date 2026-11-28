@@ -1,0 +1,2371 @@
+{
+ "area": "utilities",
+ "cases": {
+  "utility.all": {
+   "requests": [],
+   "result": {
+    "alias": {},
+    "costFromResponse": {
+     "ok": 0.00007500000000000001
+    },
+    "encode": {
+     "raised": {
+      "__exception__": "AgentCCError",
+      "attrs": {
+       "name": "AgentCCError"
+      },
+      "chain": [
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "AgentCCError",
+      "message": "Token encoding requires the 'gpt-tokenizer' package. Install it with: npm install gpt-tokenizer",
+      "toString": "AgentCCError: Token encoding requires the 'gpt-tokenizer' package. Install it with: npm install gpt-tokenizer"
+     }
+    },
+    "functionToTool": {
+     "raised": {
+      "__exception__": "AgentCCError",
+      "attrs": {
+       "name": "AgentCCError"
+      },
+      "chain": [
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "AgentCCError",
+      "message": "functionToTool: schema must be a Zod schema or a JSON Schema object with a 'type' property",
+      "toString": "AgentCCError: functionToTool: schema must be a Zod schema or a JSON Schema object with a 'type' property"
+     }
+    },
+    "perModel": {
+     "": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": null,
+       "contextFallback": null,
+       "cost": null,
+       "encoding": "cl100k_base",
+       "functions": false,
+       "info": null,
+       "json": false,
+       "maxOutput": null,
+       "maxTokens": null,
+       "schema": false,
+       "vision": false
+      }
+     },
+     "claude-3-5-haiku-20241022": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": null,
+       "contextFallback": null,
+       "cost": 0.0048000000000000004,
+       "encoding": "cl100k_base",
+       "functions": true,
+       "info": {
+        "inputCostPerToken": 8e-7,
+        "maxOutputTokens": 8192,
+        "maxTokens": 200000,
+        "outputCostPerToken": 0.000004,
+        "supportsFunctionCalling": true,
+        "supportsJsonMode": true,
+        "supportsVision": false
+       },
+       "json": true,
+       "maxOutput": 8192,
+       "maxTokens": 200000,
+       "schema": true,
+       "vision": false
+      }
+     },
+     "claude-sonnet-4-20250514": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": null,
+       "contextFallback": null,
+       "cost": 0.018000000000000002,
+       "encoding": "cl100k_base",
+       "functions": true,
+       "info": {
+        "inputCostPerToken": 0.000003,
+        "maxOutputTokens": 64000,
+        "maxTokens": 200000,
+        "outputCostPerToken": 0.000015,
+        "supportsFunctionCalling": true,
+        "supportsJsonMode": true,
+        "supportsVision": true
+       },
+       "json": true,
+       "maxOutput": 64000,
+       "maxTokens": 200000,
+       "schema": true,
+       "vision": true
+      }
+     },
+     "gemini-2.0-flash": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": null,
+       "contextFallback": null,
+       "cost": 0.0005,
+       "encoding": "cl100k_base",
+       "functions": true,
+       "info": {
+        "inputCostPerToken": 1e-7,
+        "maxOutputTokens": 8192,
+        "maxTokens": 1048576,
+        "outputCostPerToken": 4e-7,
+        "supportsFunctionCalling": true,
+        "supportsJsonMode": true,
+        "supportsVision": true
+       },
+       "json": true,
+       "maxOutput": 8192,
+       "maxTokens": 1048576,
+       "schema": true,
+       "vision": true
+      }
+     },
+     "gpt-4": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": null,
+       "contextFallback": "gpt-4-turbo",
+       "cost": 0.09000000000000001,
+       "encoding": "cl100k_base",
+       "functions": true,
+       "info": {
+        "inputCostPerToken": 0.00003,
+        "maxOutputTokens": 8192,
+        "maxTokens": 8192,
+        "outputCostPerToken": 0.00006,
+        "supportsFunctionCalling": true,
+        "supportsJsonMode": false,
+        "supportsVision": false
+       },
+       "json": false,
+       "maxOutput": 8192,
+       "maxTokens": 8192,
+       "schema": false,
+       "vision": false
+      }
+     },
+     "gpt-4o": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": "gpt-4-turbo",
+       "contextFallback": null,
+       "cost": 0.0125,
+       "encoding": "o200k_base",
+       "functions": true,
+       "info": {
+        "inputCostPerToken": 0.0000025,
+        "maxOutputTokens": 16384,
+        "maxTokens": 128000,
+        "outputCostPerToken": 0.00001,
+        "supportsFunctionCalling": true,
+        "supportsJsonMode": true,
+        "supportsVision": true
+       },
+       "json": true,
+       "maxOutput": 16384,
+       "maxTokens": 128000,
+       "schema": true,
+       "vision": true
+      }
+     },
+     "gpt-4o-mini": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": "gpt-3.5-turbo",
+       "contextFallback": null,
+       "cost": 0.0007499999999999999,
+       "encoding": "o200k_base",
+       "functions": true,
+       "info": {
+        "inputCostPerToken": 1.5e-7,
+        "maxOutputTokens": 16384,
+        "maxTokens": 128000,
+        "outputCostPerToken": 6e-7,
+        "supportsFunctionCalling": true,
+        "supportsJsonMode": true,
+        "supportsVision": true
+       },
+       "json": true,
+       "maxOutput": 16384,
+       "maxTokens": 128000,
+       "schema": true,
+       "vision": true
+      }
+     },
+     "o1": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": null,
+       "contextFallback": null,
+       "cost": 0.07500000000000001,
+       "encoding": "o200k_base",
+       "functions": true,
+       "info": {
+        "inputCostPerToken": 0.000015,
+        "maxOutputTokens": 100000,
+        "maxTokens": 200000,
+        "outputCostPerToken": 0.00006,
+        "supportsFunctionCalling": true,
+        "supportsJsonMode": false,
+        "supportsVision": true
+       },
+       "json": false,
+       "maxOutput": 100000,
+       "maxTokens": 200000,
+       "schema": false,
+       "vision": true
+      }
+     },
+     "openai/gpt-4o": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": null,
+       "contextFallback": null,
+       "cost": null,
+       "encoding": "cl100k_base",
+       "functions": false,
+       "info": null,
+       "json": false,
+       "maxOutput": null,
+       "maxTokens": null,
+       "schema": false,
+       "vision": false
+      }
+     },
+     "text-embedding-3-small": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": null,
+       "contextFallback": null,
+       "cost": 0.00002,
+       "encoding": "cl100k_base",
+       "functions": false,
+       "info": {
+        "inputCostPerToken": 2e-8,
+        "maxOutputTokens": null,
+        "maxTokens": 8191,
+        "outputCostPerToken": 0,
+        "supportsFunctionCalling": false,
+        "supportsJsonMode": false,
+        "supportsVision": false
+       },
+       "json": false,
+       "maxOutput": null,
+       "maxTokens": 8191,
+       "schema": false,
+       "vision": false
+      }
+     },
+     "unknown-model": {
+      "ok": {
+       "caching": [
+        false,
+        "No caching indicators found"
+       ],
+       "contentFallback": null,
+       "contextFallback": null,
+       "cost": null,
+       "encoding": "cl100k_base",
+       "functions": false,
+       "info": null,
+       "json": false,
+       "maxOutput": null,
+       "maxTokens": null,
+       "schema": false,
+       "vision": false
+      }
+     }
+    },
+    "rules": {
+     "allow": "<absent>"
+    },
+    "structured": {
+     "isZod": false,
+     "missing": {
+      "errors": [
+       "/:  missing required property \"name\""
+      ],
+      "valid": false
+     },
+     "validate": {
+      "errors": [],
+      "valid": true
+     }
+    },
+    "tokens": {
+     "ok": [
+      3,
+      10
+     ]
+    },
+    "trace": {
+     "bad": null,
+     "id": "00000000000040008000000000000001",
+     "parse": {
+      "flags": "01",
+      "spanId": "b7ad6b7169203331",
+      "traceId": "0af7651916cd43dd8448eb211c80319c",
+      "version": "00"
+     },
+     "span": "0000000000004000"
+    },
+    "trim": {
+     "ok": [
+      [
+       {
+        "content": "rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules ",
+        "role": "system"
+       },
+       {
+        "content": "turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 ",
+        "role": "user"
+       },
+       {
+        "content": "turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 ",
+        "role": "user"
+       }
+      ],
+      [
+       {
+        "content": "rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules ",
+        "role": "system"
+       }
+      ]
+     ]
+    },
+    "valid": [
+     "gpt-4o",
+     "gpt-4o-mini",
+     "gpt-4-turbo",
+     "gpt-4",
+     "gpt-3.5-turbo",
+     "o1",
+     "o1-mini",
+     "o3-mini",
+     "text-embedding-3-small",
+     "text-embedding-3-large",
+     "text-embedding-ada-002",
+     "claude-sonnet-4-20250514",
+     "claude-3-5-sonnet-20241022",
+     "claude-3-5-haiku-20241022",
+     "claude-3-opus-20240229",
+     "claude-3-haiku-20240307",
+     "gemini-2.0-flash",
+     "gemini-1.5-pro",
+     "gemini-1.5-flash",
+     "llama-3.1-70b",
+     "llama-3.1-8b",
+     "mistral-large-latest",
+     "mistral-small-latest"
+    ],
+    "validateEnvironment": {
+     "keysMissing": [
+      "AGENTCC_API_KEY",
+      "AGENTCC_BASE_URL"
+     ],
+     "keysSet": [],
+     "ready": false
+    }
+   }
+  },
+  "utility.batch_completion": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "again",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": [
+    {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    },
+    {
+     "__exception__": "BadRequestError",
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "bad"
+       }
+      },
+      "headers": {
+       "__headers__": [
+        [
+         "content-type",
+         "application/json"
+        ]
+       ]
+      },
+      "name": "BadRequestError",
+      "requestId": null,
+      "statusCode": 400
+     },
+     "chain": [
+      "BadRequestError",
+      "APIStatusError",
+      "AgentCCError",
+      "Error"
+     ],
+     "class": "BadRequestError",
+     "message": "Request failed with status 400",
+     "toString": "BadRequestError: Request failed with status 400"
+    }
+   ]
+  },
+  "utility.batch_completion_models": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "claude-3-5-haiku"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": [
+    {
+     "completion": null,
+     "error": {
+      "__exception__": "BadRequestError",
+      "attrs": {
+       "body": {
+        "error": {
+         "message": "bad"
+        }
+       },
+       "headers": {
+        "__headers__": [
+         [
+          "content-type",
+          "application/json"
+         ]
+        ]
+       },
+       "name": "BadRequestError",
+       "requestId": null,
+       "statusCode": 400
+      },
+      "chain": [
+       "BadRequestError",
+       "APIStatusError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "BadRequestError",
+      "message": "Request failed with status 400",
+      "toString": "BadRequestError: Request failed with status 400"
+     },
+     "model": "gpt-4o-mini"
+    },
+    {
+     "completion": {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "role": "assistant"
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "prompt_tokens": 5,
+       "total_tokens": 8
+      }
+     },
+     "error": null,
+     "model": "claude-3-5-haiku"
+    }
+   ]
+  },
+  "utility.budget_manager": {
+   "requests": [],
+   "result": [
+    {
+     "ok": "<undefined>"
+    },
+    {
+     "ok": [
+      0.8,
+      0.19999999999999996,
+      0
+     ]
+    },
+    {
+     "ok": [
+      true,
+      false
+     ]
+    },
+    {
+     "raised": {
+      "__exception__": "AgentCCError",
+      "attrs": {
+       "name": "AgentCCError"
+      },
+      "chain": [
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "AgentCCError",
+      "message": "Budget exceeded: current spend $1.3000 + estimated $0.1000 > max $1.0000",
+      "toString": "AgentCCError: Budget exceeded: current spend $1.3000 + estimated $0.1000 > max $1.0000"
+     }
+    },
+    {
+     "ok": 0
+    }
+   ]
+  },
+  "utility.builtin_callbacks": {
+   "console": [
+    [
+     "log",
+     "[AgentCC] \u2192 POST https://gateway.example.test/v1/chat/completions model=gpt-4o-mini"
+    ],
+    [
+     "log",
+     "{\"timestamp\":\"2025-10-23T00:00:00.000Z\",\"event\":\"request_start\",\"method\":\"POST\",\"url\":\"https://gateway.example.test/v1/chat/completions\",\"model\":\"gpt-4o-mini\"}"
+    ],
+    [
+     "log",
+     "{\"timestamp\":\"2025-10-23T00:00:00.000Z\",\"event\":\"cost_update\",\"cost\":0.2,\"cumulativeCost\":0.2}"
+    ],
+    [
+     "log",
+     "[AgentCC] \u2190 200 latency=0ms cost=$0.2"
+    ],
+    [
+     "log",
+     "{\"timestamp\":\"2025-10-23T00:00:00.000Z\",\"event\":\"request_end\",\"url\":\"https://gateway.example.test/v1/chat/completions\",\"status\":200,\"latencyMs\":0,\"cost\":0.2,\"provider\":\"unknown\",\"cacheStatus\":null,\"traceId\":\"unknown\",\"requestId\":\"unknown\"}"
+    ]
+   ],
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "avgLatencyMs": 0,
+    "cacheHits": 0,
+    "errorCount": 0,
+    "guardrailBlocks": 0,
+    "guardrailWarnings": 0,
+    "requestCount": 1,
+    "retryCount": 0,
+    "totalCost": 0.2,
+    "totalTokens": 0
+   }
+  },
+  "utility.middleware_use": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "result": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    },
+    "seen": []
+   }
+  },
+  "utility.patch_openai": {
+   "requests": [],
+   "result": {
+    "ok": {
+     "__object__": "AgentCC",
+     "attrs": {
+      "_apiKey": "parity-gateway-key",
+      "_baseUrl": "http://localhost:8090",
+      "_callbacks": [],
+      "_config": "<undefined>",
+      "_defaultHeaders": {},
+      "_defaultQuery": {},
+      "_dropParams": false,
+      "_enableJsonSchemaValidation": false,
+      "_fetch": {
+       "__function__": "bound ",
+       "class": false
+      },
+      "_maxRetries": 2,
+      "_metadata": "<undefined>",
+      "_middlewares": [],
+      "_modifyParams": "<undefined>",
+      "_preCallRules": [],
+      "_redactMessages": false,
+      "_retryPolicy": "<undefined>",
+      "_sessionId": "<undefined>",
+      "_timeout": 600000,
+      "_totalCost": 0,
+      "_traceManager": "<undefined>",
+      "audio": {
+       "__object__": "Audio",
+       "attrs": {
+        "speech": {
+         "__object__": "Speech",
+         "attrs": {
+          "_client": {
+           "__object__": "AgentCC",
+           "attrs": {
+            "_apiKey": {
+             "__truncated__": "String"
+            },
+            "_baseUrl": {
+             "__truncated__": "String"
+            },
+            "_callbacks": {
+             "__truncated__": "Array"
+            },
+            "_config": {
+             "__truncated__": "String"
+            },
+            "_defaultHeaders": {
+             "__truncated__": "Object"
+            },
+            "_defaultQuery": {
+             "__truncated__": "Object"
+            },
+            "_dropParams": {
+             "__truncated__": "Boolean"
+            },
+            "_enableJsonSchemaValidation": {
+             "__truncated__": "Boolean"
+            },
+            "_fetch": {
+             "__truncated__": "Object"
+            },
+            "_maxRetries": {
+             "__truncated__": "Number"
+            },
+            "_metadata": {
+             "__truncated__": "String"
+            },
+            "_middlewares": {
+             "__truncated__": "Array"
+            },
+            "_modifyParams": {
+             "__truncated__": "String"
+            },
+            "_preCallRules": {
+             "__truncated__": "Array"
+            },
+            "_redactMessages": {
+             "__truncated__": "Boolean"
+            },
+            "_retryPolicy": {
+             "__truncated__": "String"
+            },
+            "_sessionId": {
+             "__truncated__": "String"
+            },
+            "_timeout": {
+             "__truncated__": "Number"
+            },
+            "_totalCost": {
+             "__truncated__": "Number"
+            },
+            "_traceManager": {
+             "__truncated__": "String"
+            },
+            "audio": {
+             "__truncated__": "Object"
+            },
+            "batches": {
+             "__truncated__": "Object"
+            },
+            "chat": {
+             "__truncated__": "Object"
+            },
+            "completions": {
+             "__truncated__": "Object"
+            },
+            "embeddings": {
+             "__truncated__": "Object"
+            },
+            "files": {
+             "__truncated__": "Object"
+            },
+            "images": {
+             "__truncated__": "Object"
+            },
+            "models": {
+             "__truncated__": "Object"
+            },
+            "moderations": {
+             "__truncated__": "Object"
+            },
+            "rerank": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        },
+        "transcriptions": {
+         "__object__": "Transcriptions",
+         "attrs": {
+          "_client": {
+           "__object__": "AgentCC",
+           "attrs": {
+            "_apiKey": {
+             "__truncated__": "String"
+            },
+            "_baseUrl": {
+             "__truncated__": "String"
+            },
+            "_callbacks": {
+             "__truncated__": "Array"
+            },
+            "_config": {
+             "__truncated__": "String"
+            },
+            "_defaultHeaders": {
+             "__truncated__": "Object"
+            },
+            "_defaultQuery": {
+             "__truncated__": "Object"
+            },
+            "_dropParams": {
+             "__truncated__": "Boolean"
+            },
+            "_enableJsonSchemaValidation": {
+             "__truncated__": "Boolean"
+            },
+            "_fetch": {
+             "__truncated__": "Object"
+            },
+            "_maxRetries": {
+             "__truncated__": "Number"
+            },
+            "_metadata": {
+             "__truncated__": "String"
+            },
+            "_middlewares": {
+             "__truncated__": "Array"
+            },
+            "_modifyParams": {
+             "__truncated__": "String"
+            },
+            "_preCallRules": {
+             "__truncated__": "Array"
+            },
+            "_redactMessages": {
+             "__truncated__": "Boolean"
+            },
+            "_retryPolicy": {
+             "__truncated__": "String"
+            },
+            "_sessionId": {
+             "__truncated__": "String"
+            },
+            "_timeout": {
+             "__truncated__": "Number"
+            },
+            "_totalCost": {
+             "__truncated__": "Number"
+            },
+            "_traceManager": {
+             "__truncated__": "String"
+            },
+            "audio": {
+             "__truncated__": "Object"
+            },
+            "batches": {
+             "__truncated__": "Object"
+            },
+            "chat": {
+             "__truncated__": "Object"
+            },
+            "completions": {
+             "__truncated__": "Object"
+            },
+            "embeddings": {
+             "__truncated__": "Object"
+            },
+            "files": {
+             "__truncated__": "Object"
+            },
+            "images": {
+             "__truncated__": "Object"
+            },
+            "models": {
+             "__truncated__": "Object"
+            },
+            "moderations": {
+             "__truncated__": "Object"
+            },
+            "rerank": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        },
+        "translations": {
+         "__object__": "Translations",
+         "attrs": {
+          "_client": {
+           "__object__": "AgentCC",
+           "attrs": {
+            "_apiKey": {
+             "__truncated__": "String"
+            },
+            "_baseUrl": {
+             "__truncated__": "String"
+            },
+            "_callbacks": {
+             "__truncated__": "Array"
+            },
+            "_config": {
+             "__truncated__": "String"
+            },
+            "_defaultHeaders": {
+             "__truncated__": "Object"
+            },
+            "_defaultQuery": {
+             "__truncated__": "Object"
+            },
+            "_dropParams": {
+             "__truncated__": "Boolean"
+            },
+            "_enableJsonSchemaValidation": {
+             "__truncated__": "Boolean"
+            },
+            "_fetch": {
+             "__truncated__": "Object"
+            },
+            "_maxRetries": {
+             "__truncated__": "Number"
+            },
+            "_metadata": {
+             "__truncated__": "String"
+            },
+            "_middlewares": {
+             "__truncated__": "Array"
+            },
+            "_modifyParams": {
+             "__truncated__": "String"
+            },
+            "_preCallRules": {
+             "__truncated__": "Array"
+            },
+            "_redactMessages": {
+             "__truncated__": "Boolean"
+            },
+            "_retryPolicy": {
+             "__truncated__": "String"
+            },
+            "_sessionId": {
+             "__truncated__": "String"
+            },
+            "_timeout": {
+             "__truncated__": "Number"
+            },
+            "_totalCost": {
+             "__truncated__": "Number"
+            },
+            "_traceManager": {
+             "__truncated__": "String"
+            },
+            "audio": {
+             "__truncated__": "Object"
+            },
+            "batches": {
+             "__truncated__": "Object"
+            },
+            "chat": {
+             "__truncated__": "Object"
+            },
+            "completions": {
+             "__truncated__": "Object"
+            },
+            "embeddings": {
+             "__truncated__": "Object"
+            },
+            "files": {
+             "__truncated__": "Object"
+            },
+            "images": {
+             "__truncated__": "Object"
+            },
+            "models": {
+             "__truncated__": "Object"
+            },
+            "moderations": {
+             "__truncated__": "Object"
+            },
+            "rerank": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      },
+      "batches": {
+       "__object__": "Batches",
+       "attrs": {
+        "_client": {
+         "__object__": "AgentCC",
+         "attrs": {
+          "_apiKey": "parity-gateway-key",
+          "_baseUrl": "http://localhost:8090",
+          "_callbacks": [],
+          "_config": "<undefined>",
+          "_defaultHeaders": {},
+          "_defaultQuery": {},
+          "_dropParams": false,
+          "_enableJsonSchemaValidation": false,
+          "_fetch": {
+           "__function__": "bound ",
+           "class": false
+          },
+          "_maxRetries": 2,
+          "_metadata": "<undefined>",
+          "_middlewares": [],
+          "_modifyParams": "<undefined>",
+          "_preCallRules": [],
+          "_redactMessages": false,
+          "_retryPolicy": "<undefined>",
+          "_sessionId": "<undefined>",
+          "_timeout": 600000,
+          "_totalCost": 0,
+          "_traceManager": "<undefined>",
+          "audio": {
+           "__object__": "Audio",
+           "attrs": {
+            "speech": {
+             "__truncated__": "Object"
+            },
+            "transcriptions": {
+             "__truncated__": "Object"
+            },
+            "translations": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "batches": {
+           "__object__": "Batches",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "chat": {
+           "__object__": "Chat",
+           "attrs": {
+            "completions": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "completions": {
+           "__object__": "Completions",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "embeddings": {
+           "__object__": "Embeddings",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "files": {
+           "__object__": "Files",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "images": {
+           "__object__": "Images",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "models": {
+           "__object__": "Models",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "moderations": {
+           "__object__": "Moderations",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "rerank": {
+           "__object__": "Rerank",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      },
+      "chat": {
+       "__object__": "Chat",
+       "attrs": {
+        "completions": {
+         "__object__": "ChatCompletions",
+         "attrs": {
+          "_client": {
+           "__object__": "AgentCC",
+           "attrs": {
+            "_apiKey": {
+             "__truncated__": "String"
+            },
+            "_baseUrl": {
+             "__truncated__": "String"
+            },
+            "_callbacks": {
+             "__truncated__": "Array"
+            },
+            "_config": {
+             "__truncated__": "String"
+            },
+            "_defaultHeaders": {
+             "__truncated__": "Object"
+            },
+            "_defaultQuery": {
+             "__truncated__": "Object"
+            },
+            "_dropParams": {
+             "__truncated__": "Boolean"
+            },
+            "_enableJsonSchemaValidation": {
+             "__truncated__": "Boolean"
+            },
+            "_fetch": {
+             "__truncated__": "Object"
+            },
+            "_maxRetries": {
+             "__truncated__": "Number"
+            },
+            "_metadata": {
+             "__truncated__": "String"
+            },
+            "_middlewares": {
+             "__truncated__": "Array"
+            },
+            "_modifyParams": {
+             "__truncated__": "String"
+            },
+            "_preCallRules": {
+             "__truncated__": "Array"
+            },
+            "_redactMessages": {
+             "__truncated__": "Boolean"
+            },
+            "_retryPolicy": {
+             "__truncated__": "String"
+            },
+            "_sessionId": {
+             "__truncated__": "String"
+            },
+            "_timeout": {
+             "__truncated__": "Number"
+            },
+            "_totalCost": {
+             "__truncated__": "Number"
+            },
+            "_traceManager": {
+             "__truncated__": "String"
+            },
+            "audio": {
+             "__truncated__": "Object"
+            },
+            "batches": {
+             "__truncated__": "Object"
+            },
+            "chat": {
+             "__truncated__": "Object"
+            },
+            "completions": {
+             "__truncated__": "Object"
+            },
+            "embeddings": {
+             "__truncated__": "Object"
+            },
+            "files": {
+             "__truncated__": "Object"
+            },
+            "images": {
+             "__truncated__": "Object"
+            },
+            "models": {
+             "__truncated__": "Object"
+            },
+            "moderations": {
+             "__truncated__": "Object"
+            },
+            "rerank": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      },
+      "completions": {
+       "__object__": "Completions",
+       "attrs": {
+        "_client": {
+         "__object__": "AgentCC",
+         "attrs": {
+          "_apiKey": "parity-gateway-key",
+          "_baseUrl": "http://localhost:8090",
+          "_callbacks": [],
+          "_config": "<undefined>",
+          "_defaultHeaders": {},
+          "_defaultQuery": {},
+          "_dropParams": false,
+          "_enableJsonSchemaValidation": false,
+          "_fetch": {
+           "__function__": "bound ",
+           "class": false
+          },
+          "_maxRetries": 2,
+          "_metadata": "<undefined>",
+          "_middlewares": [],
+          "_modifyParams": "<undefined>",
+          "_preCallRules": [],
+          "_redactMessages": false,
+          "_retryPolicy": "<undefined>",
+          "_sessionId": "<undefined>",
+          "_timeout": 600000,
+          "_totalCost": 0,
+          "_traceManager": "<undefined>",
+          "audio": {
+           "__object__": "Audio",
+           "attrs": {
+            "speech": {
+             "__truncated__": "Object"
+            },
+            "transcriptions": {
+             "__truncated__": "Object"
+            },
+            "translations": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "batches": {
+           "__object__": "Batches",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "chat": {
+           "__object__": "Chat",
+           "attrs": {
+            "completions": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "completions": {
+           "__object__": "Completions",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "embeddings": {
+           "__object__": "Embeddings",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "files": {
+           "__object__": "Files",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "images": {
+           "__object__": "Images",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "models": {
+           "__object__": "Models",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "moderations": {
+           "__object__": "Moderations",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "rerank": {
+           "__object__": "Rerank",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      },
+      "embeddings": {
+       "__object__": "Embeddings",
+       "attrs": {
+        "_client": {
+         "__object__": "AgentCC",
+         "attrs": {
+          "_apiKey": "parity-gateway-key",
+          "_baseUrl": "http://localhost:8090",
+          "_callbacks": [],
+          "_config": "<undefined>",
+          "_defaultHeaders": {},
+          "_defaultQuery": {},
+          "_dropParams": false,
+          "_enableJsonSchemaValidation": false,
+          "_fetch": {
+           "__function__": "bound ",
+           "class": false
+          },
+          "_maxRetries": 2,
+          "_metadata": "<undefined>",
+          "_middlewares": [],
+          "_modifyParams": "<undefined>",
+          "_preCallRules": [],
+          "_redactMessages": false,
+          "_retryPolicy": "<undefined>",
+          "_sessionId": "<undefined>",
+          "_timeout": 600000,
+          "_totalCost": 0,
+          "_traceManager": "<undefined>",
+          "audio": {
+           "__object__": "Audio",
+           "attrs": {
+            "speech": {
+             "__truncated__": "Object"
+            },
+            "transcriptions": {
+             "__truncated__": "Object"
+            },
+            "translations": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "batches": {
+           "__object__": "Batches",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "chat": {
+           "__object__": "Chat",
+           "attrs": {
+            "completions": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "completions": {
+           "__object__": "Completions",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "embeddings": {
+           "__object__": "Embeddings",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "files": {
+           "__object__": "Files",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "images": {
+           "__object__": "Images",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "models": {
+           "__object__": "Models",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "moderations": {
+           "__object__": "Moderations",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "rerank": {
+           "__object__": "Rerank",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      },
+      "files": {
+       "__object__": "Files",
+       "attrs": {
+        "_client": {
+         "__object__": "AgentCC",
+         "attrs": {
+          "_apiKey": "parity-gateway-key",
+          "_baseUrl": "http://localhost:8090",
+          "_callbacks": [],
+          "_config": "<undefined>",
+          "_defaultHeaders": {},
+          "_defaultQuery": {},
+          "_dropParams": false,
+          "_enableJsonSchemaValidation": false,
+          "_fetch": {
+           "__function__": "bound ",
+           "class": false
+          },
+          "_maxRetries": 2,
+          "_metadata": "<undefined>",
+          "_middlewares": [],
+          "_modifyParams": "<undefined>",
+          "_preCallRules": [],
+          "_redactMessages": false,
+          "_retryPolicy": "<undefined>",
+          "_sessionId": "<undefined>",
+          "_timeout": 600000,
+          "_totalCost": 0,
+          "_traceManager": "<undefined>",
+          "audio": {
+           "__object__": "Audio",
+           "attrs": {
+            "speech": {
+             "__truncated__": "Object"
+            },
+            "transcriptions": {
+             "__truncated__": "Object"
+            },
+            "translations": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "batches": {
+           "__object__": "Batches",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "chat": {
+           "__object__": "Chat",
+           "attrs": {
+            "completions": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "completions": {
+           "__object__": "Completions",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "embeddings": {
+           "__object__": "Embeddings",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "files": {
+           "__object__": "Files",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "images": {
+           "__object__": "Images",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "models": {
+           "__object__": "Models",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "moderations": {
+           "__object__": "Moderations",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "rerank": {
+           "__object__": "Rerank",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      },
+      "images": {
+       "__object__": "Images",
+       "attrs": {
+        "_client": {
+         "__object__": "AgentCC",
+         "attrs": {
+          "_apiKey": "parity-gateway-key",
+          "_baseUrl": "http://localhost:8090",
+          "_callbacks": [],
+          "_config": "<undefined>",
+          "_defaultHeaders": {},
+          "_defaultQuery": {},
+          "_dropParams": false,
+          "_enableJsonSchemaValidation": false,
+          "_fetch": {
+           "__function__": "bound ",
+           "class": false
+          },
+          "_maxRetries": 2,
+          "_metadata": "<undefined>",
+          "_middlewares": [],
+          "_modifyParams": "<undefined>",
+          "_preCallRules": [],
+          "_redactMessages": false,
+          "_retryPolicy": "<undefined>",
+          "_sessionId": "<undefined>",
+          "_timeout": 600000,
+          "_totalCost": 0,
+          "_traceManager": "<undefined>",
+          "audio": {
+           "__object__": "Audio",
+           "attrs": {
+            "speech": {
+             "__truncated__": "Object"
+            },
+            "transcriptions": {
+             "__truncated__": "Object"
+            },
+            "translations": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "batches": {
+           "__object__": "Batches",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "chat": {
+           "__object__": "Chat",
+           "attrs": {
+            "completions": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "completions": {
+           "__object__": "Completions",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "embeddings": {
+           "__object__": "Embeddings",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "files": {
+           "__object__": "Files",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "images": {
+           "__object__": "Images",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "models": {
+           "__object__": "Models",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "moderations": {
+           "__object__": "Moderations",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "rerank": {
+           "__object__": "Rerank",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      },
+      "models": {
+       "__object__": "Models",
+       "attrs": {
+        "_client": {
+         "__object__": "AgentCC",
+         "attrs": {
+          "_apiKey": "parity-gateway-key",
+          "_baseUrl": "http://localhost:8090",
+          "_callbacks": [],
+          "_config": "<undefined>",
+          "_defaultHeaders": {},
+          "_defaultQuery": {},
+          "_dropParams": false,
+          "_enableJsonSchemaValidation": false,
+          "_fetch": {
+           "__function__": "bound ",
+           "class": false
+          },
+          "_maxRetries": 2,
+          "_metadata": "<undefined>",
+          "_middlewares": [],
+          "_modifyParams": "<undefined>",
+          "_preCallRules": [],
+          "_redactMessages": false,
+          "_retryPolicy": "<undefined>",
+          "_sessionId": "<undefined>",
+          "_timeout": 600000,
+          "_totalCost": 0,
+          "_traceManager": "<undefined>",
+          "audio": {
+           "__object__": "Audio",
+           "attrs": {
+            "speech": {
+             "__truncated__": "Object"
+            },
+            "transcriptions": {
+             "__truncated__": "Object"
+            },
+            "translations": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "batches": {
+           "__object__": "Batches",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "chat": {
+           "__object__": "Chat",
+           "attrs": {
+            "completions": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "completions": {
+           "__object__": "Completions",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "embeddings": {
+           "__object__": "Embeddings",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "files": {
+           "__object__": "Files",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "images": {
+           "__object__": "Images",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "models": {
+           "__object__": "Models",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "moderations": {
+           "__object__": "Moderations",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "rerank": {
+           "__object__": "Rerank",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      },
+      "moderations": {
+       "__object__": "Moderations",
+       "attrs": {
+        "_client": {
+         "__object__": "AgentCC",
+         "attrs": {
+          "_apiKey": "parity-gateway-key",
+          "_baseUrl": "http://localhost:8090",
+          "_callbacks": [],
+          "_config": "<undefined>",
+          "_defaultHeaders": {},
+          "_defaultQuery": {},
+          "_dropParams": false,
+          "_enableJsonSchemaValidation": false,
+          "_fetch": {
+           "__function__": "bound ",
+           "class": false
+          },
+          "_maxRetries": 2,
+          "_metadata": "<undefined>",
+          "_middlewares": [],
+          "_modifyParams": "<undefined>",
+          "_preCallRules": [],
+          "_redactMessages": false,
+          "_retryPolicy": "<undefined>",
+          "_sessionId": "<undefined>",
+          "_timeout": 600000,
+          "_totalCost": 0,
+          "_traceManager": "<undefined>",
+          "audio": {
+           "__object__": "Audio",
+           "attrs": {
+            "speech": {
+             "__truncated__": "Object"
+            },
+            "transcriptions": {
+             "__truncated__": "Object"
+            },
+            "translations": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "batches": {
+           "__object__": "Batches",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "chat": {
+           "__object__": "Chat",
+           "attrs": {
+            "completions": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "completions": {
+           "__object__": "Completions",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "embeddings": {
+           "__object__": "Embeddings",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "files": {
+           "__object__": "Files",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "images": {
+           "__object__": "Images",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "models": {
+           "__object__": "Models",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "moderations": {
+           "__object__": "Moderations",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "rerank": {
+           "__object__": "Rerank",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      },
+      "rerank": {
+       "__object__": "Rerank",
+       "attrs": {
+        "_client": {
+         "__object__": "AgentCC",
+         "attrs": {
+          "_apiKey": "parity-gateway-key",
+          "_baseUrl": "http://localhost:8090",
+          "_callbacks": [],
+          "_config": "<undefined>",
+          "_defaultHeaders": {},
+          "_defaultQuery": {},
+          "_dropParams": false,
+          "_enableJsonSchemaValidation": false,
+          "_fetch": {
+           "__function__": "bound ",
+           "class": false
+          },
+          "_maxRetries": 2,
+          "_metadata": "<undefined>",
+          "_middlewares": [],
+          "_modifyParams": "<undefined>",
+          "_preCallRules": [],
+          "_redactMessages": false,
+          "_retryPolicy": "<undefined>",
+          "_sessionId": "<undefined>",
+          "_timeout": 600000,
+          "_totalCost": 0,
+          "_traceManager": "<undefined>",
+          "audio": {
+           "__object__": "Audio",
+           "attrs": {
+            "speech": {
+             "__truncated__": "Object"
+            },
+            "transcriptions": {
+             "__truncated__": "Object"
+            },
+            "translations": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "batches": {
+           "__object__": "Batches",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "chat": {
+           "__object__": "Chat",
+           "attrs": {
+            "completions": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "completions": {
+           "__object__": "Completions",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "embeddings": {
+           "__object__": "Embeddings",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "files": {
+           "__object__": "Files",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "images": {
+           "__object__": "Images",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "models": {
+           "__object__": "Models",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "moderations": {
+           "__object__": "Moderations",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          },
+          "rerank": {
+           "__object__": "Rerank",
+           "attrs": {
+            "_client": {
+             "__truncated__": "Object"
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "format": 1
+}

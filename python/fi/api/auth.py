@@ -1,15 +1,33 @@
 import os
-import threading as _threading
 import time
+import warnings
 from abc import ABC, abstractmethod
-from typing import Dict, Generic, Optional, TypeVar, Union
+from collections.abc import Iterable
+from typing import Dict, Generic, Mapping, Optional, TypeVar, Union
 
-
-import requests as _requests
 from requests import Response
 from requests_futures.sessions import FuturesSession
 
+from fi._core.proxy_routing import carries_credentials, env_proxied, header_pairs
+from fi._core.requests_hook_sends import judging_sends, may_add_key_later, proxy_selected, sending_sessions
+from fi._core.requests_hook_sends import prepare as prepare_hook_sends
+from fi._core.requests_session import (
+    LoopbackDirectSession,
+    has_callable_auth,
+    prepared_headers,
+    same_origin_redirect_target,
+    sending_chain,
+    session_chain,
+)
+from fi._core.http_security import (
+    require_secure_credential_headers,
+    require_secure_credentials_url,
+    requests_session_proxied,
+    requests_session_sdk_built,
+)
+from fi._extra_headers import ExtraHeaders, ExtraHeadersError, ExtraHeadersInput, on_platform
 from fi.api.types import RequestConfig
+from fi.errors import KeyedRedirectRefusedError
 from fi.utils.constants import (
     API_KEY_ENVVAR_NAME,
     get_base_url,
@@ -18,13 +36,24 @@ from fi.utils.constants import (
     DEFAULT_TIMEOUT,
     SECRET_KEY_ENVVAR_NAME,
 )
-from fi.utils.errors import MissingAuthError
+# Published 0.6.13 re-export; keep the same class object at this import path.
+from fi.utils.errors import MissingAuthError, DatasetNotFoundError
+from fi._credentials import resolve as resolve_credentials
 from fi.utils.executor import BoundedExecutor
-from fi.utils import _http_guard as _guard
 from fi.utils.utils import ApiKeyName
 
 T = TypeVar("T")
 U = TypeVar("U")
+
+
+
+class _SdkFuturesSession(FuturesSession, LoopbackDirectSession):
+    """The session the SDK builds for itself: loopback and plain ``http://`` requests go straight to their host
+    (``LoopbackDirectSession.send``), whatever the proxy variables say. A keyed request goes out with redirects off; a
+    redirect on its own origin is returned to ``HttpClient.request``, which follows it, and any other 3xx answer is
+    refused by the session."""
+
+    returns_same_origin_redirects = True
 
 
 class ResponseHandler(Generic[T, U], ABC):
@@ -51,7 +80,11 @@ class ResponseHandler(Generic[T, U], ABC):
 
 
 class HttpClient:
-    """Base HTTP client with improved request handling"""
+    """Base HTTP client with improved request handling.
+
+    ``FI_EXTRA_HEADERS`` (``Name=value`` entries) and ``extra_headers=`` (which wins for the same
+    name) are added to every request whose URL is under the base URL, read when the request is sent;
+    any other URL, and a redirect to one, does not get them (``fi._extra_headers``)."""
 
     def __init__(
         self,
@@ -59,11 +92,12 @@ class HttpClient:
         session: Optional[FuturesSession] = None,
         default_headers: Optional[Dict[str, str]] = None,
         allow_insecure_http: Optional[bool] = None,
+        *,
+        extra_headers: ExtraHeadersInput = None,
         **kwargs,
     ):
-        self._allow_insecure_http = allow_insecure_http
         self._base_url = base_url.rstrip("/") if base_url else get_base_url().rstrip("/")
-        self._session = session or FuturesSession(
+        self._session = session or _SdkFuturesSession(
             executor=BoundedExecutor(
                 bound=kwargs.get("max_queue", DEFAULT_MAX_QUEUE),
                 max_workers=kwargs.get("max_workers", DEFAULT_MAX_WORKERS),
@@ -71,53 +105,40 @@ class HttpClient:
         )
         self._default_headers = default_headers or {}
         self._default_timeout = kwargs.get("timeout", DEFAULT_TIMEOUT)
-        _judge_session_chain(self._session)
+        self._extra_headers = ExtraHeaders(self._base_url, extra_headers)
+        # ``allow_insecure_http``: ``True`` opts in to plain http to a host that is not loopback; any other value given
+        # (such as ``False``) turns the opt-in off whatever FI_ALLOW_INSECURE_HTTP says; not given, the variable decides.
+        self._allow_insecure_http = None if allow_insecure_http is None else allow_insecure_http is True
+        _guard_redirects(self._session, self._extra_headers)
+        if not requests_session_sdk_built(self._session):
+            prepare_hook_sends(sending_sessions(self._session))
 
-    def _session_for_headers(self) -> Optional[_requests.Session]:
-        """The ``requests`` session whose headers, cookies and authentication apply to a request."""
-        session: object = self._session
-        for _ in range(8):
-            inner = getattr(session, "session", None)
-            if not isinstance(inner, _requests.Session):
-                break
-            session = inner
-        return session if isinstance(session, _requests.Session) else None
+    def _platform_headers(self, url: str, headers: Dict[str, str]) -> Dict[str, str]:
+        """``headers`` plus the extra headers for ``url`` (none off the base URL); for the few
+        modules that send with ``requests`` directly (file uploads)."""
+        extra = getattr(self, "_extra_headers", None)  # a subclass that skipped __init__ sends none
+        if extra is not None:
+            extra.apply(headers, url)
+        return headers
 
-    def _send(self, method: str, url: str, headers: Dict[str, str], params: Dict, json, data, files, timeout) -> Response:
-        """Send one attempt. With a ``requests`` session, the session's authentication runs once, while the session
-        prepares the request, and the prepared request is judged right after it, on the object that is sent."""
-        session = self._session_for_headers()
-        _judge_session_chain(self._session)
-        kwargs: Dict
-        if session is None:
-            kwargs = _unprepared_kwargs(url, headers, self._allow_insecure_http)
-        else:
-            keyed = _guard.carries_key(headers) or _guard.carries_key(session.headers)
-            _guard.requires_direct(url, keyed, self._allow_insecure_http, ValueError)
-            may_add_key = _may_add_key_later(session, url)
-            if may_add_key:
-                _guard.requires_direct(url, True, self._allow_insecure_http, ValueError)
-            maybe_keyed = (
-                keyed or may_add_key or session.auth is not None or _session_has_key_cookie(session) or session.trust_env
-            )
-            try:
-                direct = _guard.requires_direct(url, maybe_keyed, self._allow_insecure_http, ValueError) is not None
-            except ValueError:
-                direct = False
-            kwargs = {"auth": _Judging(session, url, self._allow_insecure_http, direct)}
-            if direct:
-                kwargs["proxies"] = _guard.requests_direct_proxies(url)
-        return self._session.request(
-            method=method,
-            url=url,
-            headers=headers,
-            params=params,
-            json=json,
-            data=data,
-            files=files,
-            timeout=timeout,
-            **kwargs,
-        ).result()
+    def _direct_kwargs(self, request_kwargs: Dict) -> Dict:
+        """``requests.<method>(**kwargs)`` arguments for a one-off call (file uploads) with the extra
+        headers for its URL. When any was added, redirects are not followed, so they do not reach
+        another host. A call that carries the SDK's keys is decided like any other request
+        (the shared checks); it is sent without a session, so a plain request goes directly."""
+        headers = dict(request_kwargs.get("headers") or {})
+        outgoing = {**headers, "Authorization": ""} if request_kwargs.get("auth") is not None else headers
+        # These calls go out on a session the SDK builds (``LoopbackDirectSession``), which sends a plain-HTTP request
+        # direct whatever the proxy variables say.
+        url = str(request_kwargs["url"])
+        require_secure_credential_headers(url, outgoing, proxies_disabled=url[:7].lower() == "http://",
+                                          allow_insecure_http=getattr(self, "_allow_insecure_http", None))
+        before = len(headers)
+        request_kwargs["headers"] = self._platform_headers(request_kwargs["url"], headers)
+        # A request that carries keys or extra headers does not follow a redirect: the keys go to the URL asked for only.
+        if len(headers) > before or carries_credentials(outgoing):
+            request_kwargs["allow_redirects"] = False
+        return request_kwargs
 
     def request(
         self,
@@ -128,30 +149,159 @@ class HttpClient:
 
         The network round-trip is the only thing retried. Response parsing runs
         once, after the loop, so a parse/deserialization error (or an HTTP error
-        status) never re-sends the request — retrying a non-idempotent POST on a
-        parse failure silently duplicates server-side writes. A request refused
-        for plain http (``.code`` ``insecure_http_origin``) is raised at once.
+        status) does not re-send the request — retrying a non-idempotent POST on a
+        parse failure silently duplicates server-side writes.
         """
 
         url = config.url
-        headers = {**self._default_headers, **(config.headers or {})}
-        params = config.params or {}
+        method = config.method.value
+        session = getattr(self, "_session", None)
+        params = config.params
+        # Request preparation and retries can each read the query pairs.
+        if isinstance(params, Iterable) and not isinstance(params, (Mapping, str, bytes)):
+            params = list(params)
+        params = params or {}
         json = config.json or {}
         timeout = config.timeout or self._default_timeout
-        files = config.files or {}
+        files = _replayable_files(config.files) or {}
         data = config.data or {}
-        response: Optional[Response] = None
-        for attempt in range(config.retry_attempts):
-            try:
-                response = self._send(config.method.value, url, headers, params, json, data, files, timeout)
+        headers = self._platform_headers(url, {**self._default_headers, **(config.headers or {})})
+        # One budget of retries for the whole call, its redirect hops included: a hop that fails is sent again only
+        # while the call has retries left, as 0.8.1 sent the call again (its redirects included) at most that often.
+        failures: list[int] = [0]
+        limit = _redirect_limit(session)
+        redirects, auth, history = 0, None, []
+        while True:
+            response = self._judged_send(config, session, method, url, headers, params, json, data, files, timeout,
+                                         failures=failures, auth=auth)
+            # A 301, 302, 303, 307 or 308 to the origin of the request it answers and of ``config.url`` (scheme, host and
+            # port) is followed, as 0.8.1 follows it, and the next hop is judged as any request; any other 3xx answer is
+            # an error that names the target's host only (``refuse_redirect``).
+            target = same_origin_redirect_target(response, config.url) if response is not None else None
+            if target is None:
                 break
-            except Exception as exc:
-                if getattr(exc, "code", None) == _guard.ERROR_CODE or attempt == config.retry_attempts - 1:
-                    raise
-                time.sleep(config.retry_delay)
+            redirects += 1
+            if redirects > limit:
+                import requests
 
+                response.close()
+                raise requests.TooManyRedirects(f"Exceeded {limit} redirects.", response=response)
+            status = response.status_code
+            history.append(response)
+            response.close()
+            url, method, params = target, _redirect_method(status, method), None  # the target carries its query
+            # As ``requests`` sends a redirect: the headers the last request went out with (its authentication's
+            # included, which is not run again), the cookies from the session's jar, and the body only for a 307 or 308.
+            body = getattr(response.request, "body", None)
+            replay = status in (307, 308) and isinstance(body, (bytes, str))
+            headers = self._hop_headers(response.request.headers, url, keep_body=status in (307, 308),
+                                        files=None if replay else files)
+            auth = _keep_prepared_auth
+            if status not in (307, 308):
+                json = data = files = None
+            elif replay:
+                json, data, files = None, body, None  # the same bytes and media type go again
+        if response is not None and history:
+            response.history = history
+        if response is not None:
+            refuse_redirect(response)
         if response_handler:
             return response_handler.parse(response=response)
+        return response
+
+    def _hop_headers(self, sent: Mapping, url: str, *, keep_body: bool, files) -> Dict[str, Optional[str]]:
+        headers: Dict[str, Optional[str]] = {
+            str(name): value for name, value in sent.items()
+            if str(name).lower() not in ("cookie", "content-length", "transfer-encoding")
+        }
+        extra = getattr(self, "_extra_headers", None)
+        if extra is not None:
+            try:
+                names = {name.lower() for name in extra.names()}
+            except ExtraHeadersError:
+                names = set()
+            headers = {name: value for name, value in headers.items() if name.lower() not in names}
+            extra.apply(headers, url)
+        if not keep_body or files:
+            # A redirect without the body sends no body headers, whatever the session's defaults hold; a multipart
+            # body is encoded again with its own boundary.
+            headers = {name: value for name, value in headers.items() if name.lower() != "content-type"}
+            if not keep_body:
+                headers.update({"Content-Type": None, "Content-Length": None, "Transfer-Encoding": None})
+        return headers
+
+    def _judged_send(self, config: RequestConfig, session, method: str, url: str, headers: Dict[str, str], params, json,
+                     data, files, timeout, *, failures: Optional[list] = None, auth=None) -> Optional[Response]:
+        # The headers that go out are what the request holds once the session has added its own headers, its auth and its
+        # cookies, and the call's headers have won over them: the prepared request, judged before any byte is sent. The
+        # sessions judged are the ones that can send it (``session_chain``): a ``FuturesSession`` hands its requests to the
+        # session it wraps, and a session that sends through itself is judged on its own headers.
+        judged: list = []
+        for each in session_chain(session):
+            session_headers = getattr(each, "headers", None)
+            if isinstance(session_headers, Mapping):
+                judged.extend(header_pairs(session_headers))
+        judged.extend((name, value) for name, value in header_pairs(headers) if value is not None)
+        if has_callable_auth(session):
+            judged.append(("Authorization", ""))  # what a callable auth adds is not known before the send: judged as a key
+        for prepared in prepared_headers(session, method, url, headers, params=params):
+            judged.extend(header_pairs(prepared))
+        built = requests_session_sdk_built(session)  # the SDK's own session sends plain HTTP direct
+        chain = [] if built else sending_sessions(session)
+        allow = getattr(self, "_allow_insecure_http", None)
+        # A caller's session is judged by the proxies it sends through, as ``requests`` picks them for it (its
+        # ``proxies``, and the environment while ``trust_env`` is on); a session with ``trust_env=False`` reads no proxy
+        # variable, so the environment is not judged for it (0.8.1).
+        require_secure_credential_headers(
+            url, judged, caller_proxied=not built and requests_session_proxied(session, url), proxies_disabled=True,
+            allow_insecure_http=allow,
+        )
+        if may_add_key_later(chain, url):
+            # A response hook or a custom adapter may add a key after this judgement (the 0.8.1 rule): the URL is judged
+            # as keyed, and so is a proxy the session that sends it would use; each send is judged as it is made.
+            senders = sending_chain(session)
+            require_secure_credentials_url(url, allow_insecure_http=allow,
+                                           caller_proxied=senders is None or proxy_selected(senders[-1:], url),
+                                           proxies_disabled=True)
+        with judging_sends(chain, allow):
+            return self._send_with_retries(config, url, headers, params, json, data, files, timeout, method=method,
+                                           failures=failures, auth=auth)
+
+    def _send_with_retries(self, config: RequestConfig, url: str, headers: Dict[str, str], params, json, data, files,
+                           timeout, *, method: Optional[str] = None, failures: Optional[list] = None,
+                           auth=None) -> Optional[Response]:
+        response: Optional[Response] = None
+        failures = [0] if failures is None else failures
+        extra = {} if auth is None else {"auth": auth}
+        while failures[0] < config.retry_attempts:
+            try:
+                sent = self._session.request(
+                    method=method or config.method.value,
+                    url=url,
+                    headers=headers,
+                    params=params,
+                    json=json,
+                    data=data,
+                    files=files,
+                    timeout=timeout,
+                    allow_redirects=False,
+                    **extra,
+                )
+                # A ``FuturesSession`` answers with a future; a plain ``requests.Session`` answers with the response.
+                wait = getattr(sent, "result", None)
+                response = wait() if callable(wait) else sent
+                break
+            except KeyedRedirectRefusedError:
+                # A refused redirect is an answer, not a transient failure: the request is not sent again.
+                raise
+            except Exception as exc:
+                # A key refusal (a send a response hook made, judged as it was made) is not sent again either, and
+                # neither is a request the server answered: an error raised while reading the answer (a body cut
+                # short, a Location header that cannot be read) comes after the keys reached the server.
+                failures[0] += 1
+                if failures[0] >= config.retry_attempts or _is_key_refusal(exc) or not _before_answer(exc):
+                    raise
+                time.sleep(config.retry_delay)
         return response
 
     def close(self):
@@ -159,13 +309,128 @@ class HttpClient:
         self._session.close()
 
 
-class APIKeyAuth(HttpClient):
-    """An ``HttpClient`` that sends ``X-Api-Key`` and ``X-Secret-Key`` with each request. The keys are held by the
-    instance, so each client sends its own keys, whichever clients exist in the process or are created at the same
-    time on other threads."""
+_REDIRECT_STATUSES = frozenset({301, 302, 303, 307, 308})
 
-    _fi_api_key: Optional[str] = None
-    _fi_secret_key: Optional[str] = None
+
+def _before_answer(exc: BaseException) -> bool:
+    """Whether ``exc`` is a connection failure or a timeout, the failures a retry is for."""
+    import requests
+
+    if isinstance(exc, (requests.exceptions.ChunkedEncodingError, requests.exceptions.ContentDecodingError)):
+        return False
+    return isinstance(exc, (requests.exceptions.ConnectionError, requests.exceptions.Timeout, ConnectionError, TimeoutError))
+
+
+def _is_key_refusal(exc: BaseException) -> bool:
+    from fi.errors import InsecureHttpRefusedError, KeyedProxyRefusedError
+
+    return isinstance(exc, (InsecureHttpRefusedError, KeyedProxyRefusedError)) or (
+        getattr(exc, "code", None) == "insecure_http_origin"
+    )
+
+
+def refuse_redirect(response: Response) -> None:
+    """Raise ``KeyedRedirectRefusedError`` for a 3xx answer to a request that carries the keys: it was not followed, so
+    the keys went to the requested URL only. The error names the target's host, not its path, query or user info."""
+    if response.status_code in _REDIRECT_STATUSES:
+        raise KeyedRedirectRefusedError(
+            f"The server answered {response.status_code} with a redirect; the request was not repeated, so the keys went to the requested URL only.",
+            status_code=response.status_code,
+            target_host=_redirect_host(response),
+        )
+
+
+MAX_REDIRECTS = 5  # a sixth redirect in a row raises requests.TooManyRedirects
+_BODY_HEADERS = frozenset({"content-length", "content-type", "transfer-encoding"})
+
+
+def _redirect_method(status: int, method: str) -> str:
+    """The method ``requests`` sends a redirect with: 303 and 302 as ``GET`` (``HEAD`` stays), 301 ``POST`` as ``GET``."""
+    if (status in (302, 303) and method != "HEAD") or (status == 301 and method == "POST"):
+        return "GET"
+    return method
+
+
+def _keep_prepared_auth(request):
+    """The authentication of a followed redirect hop: the headers the last request went out with already hold what the
+    session's authentication added, so it is not run again (as ``requests`` sends a redirect)."""
+    return request
+
+
+def _redirect_limit(session) -> int:
+    """At most five redirects in a row, or fewer when the session that sends allows fewer (``max_redirects``)."""
+    senders = sending_chain(session) or [session]
+    value = getattr(senders[-1], "max_redirects", MAX_REDIRECTS)
+    return min(MAX_REDIRECTS, value) if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else MAX_REDIRECTS
+
+
+def _replayable_files(files):
+    """``files`` with each open file read into bytes, so a 307 or 308 sends the same content again."""
+    if not files:
+        return files
+
+    def read(value):
+        if isinstance(value, tuple) and len(value) >= 2 and hasattr(value[1], "read"):
+            return (value[0], value[1].read(), *value[2:])
+        if hasattr(value, "read"):
+            name = getattr(value, "name", None)
+            return (os.path.basename(name) if isinstance(name, str) else None, value.read())
+        return value
+
+    if isinstance(files, Mapping):
+        return {field: read(value) for field, value in files.items()}
+    return [(field, read(value)) for field, value in files]
+
+
+def _redirect_host(response: Response) -> Optional[str]:
+    """The host a redirect names (not its path, query or user info), else ``None``."""
+    from urllib.parse import urlsplit
+
+    try:
+        return urlsplit(str(response.headers.get("Location") or "")).hostname
+    except ValueError:
+        return None
+
+
+def _guard_redirects(session, extra: ExtraHeaders) -> None:
+    """On a redirect ``requests`` keeps custom headers for any host and drops ``Proxy-Authorization``
+    even on the same host. So: a redirect off the base URL loses every extra header, and one that
+    stays under it gets them back."""
+    original = getattr(session, "rebuild_auth", None)
+    if original is None:
+        return
+
+    def rebuild_auth(prepared_request, response):
+        original(prepared_request, response)
+        if on_platform(prepared_request.url, extra.base_url):
+            extra.apply(prepared_request.headers, prepared_request.url)
+            return
+        try:
+            names = extra.names()
+        except ExtraHeadersError:
+            names = []
+        for name in names:
+            prepared_request.headers.pop(name, None)
+
+    session.rebuild_auth = rebuild_auth
+
+
+class _InstanceCredential:
+    """Value-free class access; instance attributes shadow this non-data descriptor."""
+
+    def __get__(self, instance, owner=None) -> Optional[str]:
+        if instance is None:
+            warnings.warn(
+                "Class-level credential access is deprecated; read credentials from the client instance.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        return None
+
+
+class APIKeyAuth(HttpClient):
+    _fi_api_key = _InstanceCredential()
+    _fi_secret_key = _InstanceCredential()
 
     def __init__(
         self,
@@ -174,27 +439,36 @@ class APIKeyAuth(HttpClient):
         fi_base_url: Optional[str] = None,
         **kwargs,
     ):
-        api_key = fi_api_key or os.environ.get(API_KEY_ENVVAR_NAME)
-        secret_key = fi_secret_key or os.environ.get(SECRET_KEY_ENVVAR_NAME)
-        if api_key is None or secret_key is None:
-            raise MissingAuthError(api_key, secret_key)
-        self._fi_api_key = api_key
-        self._fi_secret_key = secret_key
+        # One resolver for every platform module (fi._credentials): arguments, then the
+        # environment, then one saved login whose keys are bound to its base URL.
+        creds = resolve_credentials(fi_api_key, fi_secret_key, fi_base_url)
+        # Credentials stay on the instance, including for subclasses and the evals registry lookup.
+        self._fi_api_key = creds.api_key
+        self._fi_secret_key = creds.secret_key
+        if self._fi_api_key is None or self._fi_secret_key is None:
+            raise MissingAuthError(self._fi_api_key, self._fi_secret_key)
 
+        # a caller's default_headers are kept; the SDK's own keys win over them
+        caller_headers = dict(kwargs.pop("default_headers", None) or {})
+        for name in [k for k in caller_headers if str(k).lower() in ("x-api-key", "x-secret-key")]:
+            del caller_headers[name]
         super().__init__(
-            base_url=fi_base_url,
+            base_url=fi_base_url or (creds.base_url if creds.base_url_source == "login" else None),
             default_headers={
-                "X-Api-Key": api_key,
-                "X-Secret-Key": secret_key,
+                **caller_headers,
+                "X-Api-Key": self._fi_api_key,
+                "X-Secret-Key": self._fi_secret_key,
             },
             **kwargs,
         )
 
 
 class APIKeyManager(APIKeyAuth):
-    """A process-wide manager of provider keys. Its own keys come from ``FI_API_KEY`` and ``FI_SECRET_KEY``, read
-    each time it is created; without them it raises ``MissingAuthError``, and so does reading its ``headers``. It
-    does not take the keys of other clients."""
+    """Process-scoped singleton with environment-derived provider keys and
+    environment- or login-derived client credentials, and is not a per-tenant store.
+    ``set_api_key`` changes provider keys for the whole process. For per-tenant
+    credentials, use a separate ``APIKeyAuth`` client instance for each tenant.
+    """
 
     _instance = None
 
@@ -204,28 +478,15 @@ class APIKeyManager(APIKeyAuth):
             cls._instance._initialize()
         return cls._instance
 
-    def __init__(self):
-        try:
-            super().__init__()
-        except MissingAuthError:
-            self._fi_api_key = None
-            self._fi_secret_key = None
-            self._default_headers = {}
-            raise
-
     @property
     def url(self) -> str:
         return get_base_url() + "/model_hub/api-keys"
 
     @property
     def headers(self) -> dict:
-        api_key = getattr(self, "_fi_api_key", None)
-        secret_key = getattr(self, "_fi_secret_key", None)
-        if api_key is None or secret_key is None:
-            raise MissingAuthError(api_key, secret_key)
         return {
-            "X-Api-Key": api_key,
-            "X-Secret-Key": secret_key,
+            "X-Api-Key": self._fi_api_key,
+            "X-Secret-Key": self._fi_secret_key,
         }
 
     def _initialize(self):
@@ -239,6 +500,10 @@ class APIKeyManager(APIKeyAuth):
         return self._api_keys[provider]
 
     def set_api_key(self, provider: ApiKeyName, key: str) -> None:
+        """Set a provider key for the whole process, not for a single tenant.
+        For per-tenant credentials, use a separate ``APIKeyAuth`` client instance
+        for each tenant.
+        """
         self._api_keys[provider] = key
 
     def validate_required_keys(self, required_providers: list[ApiKeyName]) -> bool:
@@ -254,343 +519,3 @@ class APIKeyManager(APIKeyAuth):
         if missing_keys:
             raise ValueError(f"Missing required API keys: {', '.join(missing_keys)}")
         return True
-
-
-def _prepare(session: _requests.Session, request: _requests.Request, allow_insecure_http: Optional[bool] = None) -> _requests.PreparedRequest:
-    """``session.prepare_request(request)``. A URL ``requests`` cannot read is judged as written first, so a plain
-    ``http://`` URL that a key may not be sent to is reported as that refusal."""
-    try:
-        return session.prepare_request(request)
-    except _requests.exceptions.InvalidURL:
-        _guard.requires_direct(request.url, True, allow_insecure_http, ValueError)
-        raise
-
-
-def _session_has_key_cookie(session: _requests.Session) -> bool:
-    try:
-        return any(_guard.header_name(cookie.name) in ("x-api-key", "x-secret-key") for cookie in session.cookies)
-    except Exception:
-        return True
-
-
-class _Judging(_requests.auth.AuthBase):
-    """Authentication for a send through a ``requests`` session: it runs the session's own authentication (or the
-    ``.netrc`` credentials ``requests`` would use) once, then judges the prepared request (see
-    :func:`_judge_prepared`) and registers the redirect check and :func:`_judged_connection_hook`. A response hook
-    the authentication registered may send the request again with a key, so plain ``http://`` that a key may not be
-    sent to is then refused; a send through ``session.send`` that such a hook makes is judged as it is sent (see
-    :class:`_InFlightHook`). ``direct`` says whether the send goes through no proxy;
-    when it does not, a keyed plain-http request that a proxy setting would carry is refused. Response hooks added
-    to the request after it (the session's, and those given to ``Session.request``, which a session subclass may
-    add there) are judged as they are added (see :class:`_JudgedHooks`)."""
-
-    def __init__(self, session: _requests.Session, url: str, allow_insecure_http: Optional[bool], direct: bool) -> None:
-        self._session = session
-        self._url = url
-        self._allow = allow_insecure_http
-        self._direct = direct
-
-    def __call__(self, request: _requests.PreparedRequest) -> _requests.PreparedRequest:
-        _judge_session_sends(self._session)
-        auth = self._session.auth
-        if auth is None and self._session.trust_env:
-            auth = _requests.utils.get_netrc_auth(request.url)
-        if isinstance(auth, tuple) and len(auth) == 2:
-            auth = _requests.auth.HTTPBasicAuth(*auth)
-        if auth is not None:
-            request = auth(request)
-        if _guard._has_response_hooks((request.hooks or {}).get("response")):
-            self._judge_hooked(request)
-        keyed, mode = _judge_prepared(self._session, request, self._allow, self._url)
-        if mode is not None and not self._direct:
-            _guard.refuse_requests_proxy(request.url, dict(self._session.proxies or {}), self._session)
-        request.register_hook("response", _guard.requests_redirect_check(keyed, self._allow, self._session))
-        request.hooks["response"].insert(0, _judged_connection_hook(self._allow))
-        request.hooks["response"] = _JudgedHooks(request.hooks["response"], lambda: self._judge_hooked(request, True), self._allow)
-        return request
-
-    def _judge_hooked(self, request: _requests.PreparedRequest, proxy: bool = False) -> None:
-        """Judge ``request``, which has a response hook that may send it again with a key, as keyed. With
-        ``proxy``, a send that is not direct is refused as well when a proxy of the session would carry it."""
-        _guard.requires_direct(self._url, True, self._allow, ValueError)
-        mode = _guard.requires_direct(request.url, True, self._allow, ValueError)
-        if proxy and mode is not None and not self._direct:
-            _guard._refuse_proxy(request.url, dict(self._session.proxies or {}), self._session)
-
-
-class _JudgedHooks(list):
-    """The response hooks of a request :class:`_Judging` judged. ``Session.prepare_request`` adds the session's
-    hooks and those given to ``Session.request`` after the authentication ran; when a hook that is not one of the
-    SDK's is added, ``judge`` runs first, so a request that may not be sent with a key is refused before it
-    connects. Each hook that is not one of the SDK's is held in an :class:`_InFlightHook`, so a send through the
-    session that it makes is judged as well."""
-
-    def __init__(self, hooks, judge, allow_insecure_http: Optional[bool] = None) -> None:
-        super().__init__(_in_flight_hooks(hooks, allow_insecure_http))
-        self._judge = judge
-        self._allow = allow_insecure_http
-
-    def _judged(self, hooks) -> list:
-        hooks = list(hooks)
-        if _guard._has_response_hooks(hooks, foreign_only=True):
-            self._judge()
-        return _in_flight_hooks(hooks, self._allow)
-
-    def append(self, hook) -> None:
-        super().extend(self._judged([hook]))
-
-    def extend(self, hooks) -> None:
-        super().extend(self._judged(hooks))
-
-    def insert(self, index, hook) -> None:
-        super().insert(index, *self._judged([hook]))
-
-    def __iadd__(self, hooks):
-        self.extend(hooks)
-        return self
-
-
-def _judge_prepared(
-    session: _requests.Session,
-    prepared: _requests.PreparedRequest,
-    allow_insecure_http: Optional[bool] = None,
-    url: Optional[str] = None,
-):
-    """``(keyed, mode)`` for ``prepared`` (see ``requires_direct``). ``url`` is the URL as the caller wrote it, judged
-    as well as the prepared one. Raises ``ValueError`` (with ``.code``) when the request is refused, including a
-    keyed plain-http request that ``session`` would send through a custom adapter."""
-    from requests.adapters import HTTPAdapter
-
-    keyed = _guard.carries_key(prepared.headers)
-    if url is not None:
-        _guard.requires_direct(url, keyed, allow_insecure_http, ValueError)
-    mode = _guard.requires_direct(prepared.url, keyed, allow_insecure_http, ValueError)
-    if mode is not None and type(session.get_adapter(prepared.url)) is not HTTPAdapter:
-        raise _guard.refuse(ValueError, "API keys are not sent over http:// through a custom adapter. Use an https:// base URL.")
-    return keyed, mode
-
-
-def _send_prepared(
-    session: _requests.Session,
-    prepared: _requests.PreparedRequest,
-    timeout,
-    allow_insecure_http: Optional[bool] = None,
-    url: Optional[str] = None,
-) -> Response:
-    """Judge ``prepared`` (see :func:`_judge_prepared`) and send that object with ``session`` as ``Session.request``
-    would. A keyed request goes over plain ``http://`` through no proxy, and its redirects are judged the same way
-    before they are followed. A send through ``session`` that a response hook of ``prepared`` makes is judged as
-    well (see :class:`_InFlightHook`)."""
-    keyed, _mode = _judge_prepared(session, prepared, allow_insecure_http, url)
-    may_add_key = _may_add_key_later(session, prepared.url, (prepared.hooks or {}).get("response"))
-    if may_add_key:
-        if url is not None:
-            _guard.requires_direct(url, True, allow_insecure_http, ValueError)
-        _guard.requires_direct(prepared.url, True, allow_insecure_http, ValueError)
-    settings = session.merge_environment_settings(prepared.url, {}, None, None, None)
-    if keyed or may_add_key:
-        settings["proxies"] = _guard.requests_keyed_proxies(settings.get("proxies"))
-    hooks = _in_flight_hooks(prepared.hooks.get("response"), allow_insecure_http)
-    prepared.hooks["response"] = hooks
-    _judge_session_sends(session)
-    hooks.insert(0, _guard.requests_redirect_check(keyed, allow_insecure_http, session))
-    hooks.insert(0, _judged_connection_hook(allow_insecure_http))
-    return session.send(prepared, timeout=timeout, allow_redirects=True, **settings)
-
-
-def _may_add_key_later(session: _requests.Session, url: str, hooks=None) -> bool:
-    """Whether something that runs after the request is judged may add a key to it: a response hook of the session,
-    one of ``hooks`` (the request's response hooks, among them those its authentication registered), or a mounted
-    adapter for ``url`` that is not exactly ``HTTPAdapter``. A key added inside a custom adapter cannot be judged,
-    and a send through ``session.send`` is judged only while a response hook of a judged request runs on that
-    thread, so such a send is judged as keyed. Hook containers are judged by
-    their items. The same holds for each redirect hop (see ``requests_redirect_check``)."""
-    from requests.adapters import HTTPAdapter
-
-    if _guard._has_response_hooks((session.hooks or {}).get("response")) or _guard._has_response_hooks(hooks):
-        return True
-    try:
-        return type(session.get_adapter(url)) is not HTTPAdapter
-    except Exception:
-        return True
-
-
-class _JudgedConnection:
-    """Stands in for ``response.connection`` (the adapter that sent the response), so that a request a response hook
-    sends again through it (as ``HTTPDigestAuth.handle_401`` does) is judged first: a keyed request to plain
-    ``http://`` that may not be sent is refused, and so is one the adapter would send through a proxy (``proxies`` as
-    given to that send) or one sent through an adapter that is not exactly ``HTTPAdapter``. Other attributes are the
-    adapter's."""
-
-    def __init__(self, adapter, allow_insecure_http: Optional[bool]) -> None:
-        self._adapter = adapter
-        self._allow = allow_insecure_http
-
-    def send(self, request, **kwargs):
-        from requests.adapters import HTTPAdapter
-        from requests.utils import select_proxy
-
-        mode = _guard.requires_direct(request.url, _guard.carries_key(request.headers), self._allow, ValueError)
-        if mode is not None:
-            if select_proxy(request.url, kwargs.get("proxies") or {}):
-                raise _guard.refuse(
-                    ValueError, "API keys are not sent over http:// through a proxy. Send without a proxy, or use an https:// base URL."
-                )
-            if type(self._adapter) is not HTTPAdapter:
-                raise _guard.refuse(ValueError, "API keys are not sent over http:// through a custom adapter. Use an https:// base URL.")
-        response = self._adapter.send(request, **kwargs)
-        try:
-            response.connection = self
-        except Exception:
-            pass
-        return response
-
-    def __getattr__(self, name):
-        return getattr(self._adapter, name)
-
-
-_IN_FLIGHT = _threading.local()
-
-
-class _InFlightHook:
-    """A response hook of a judged request, called as the hook it holds and returning what that hook returns. While
-    it runs, a send that a response hook makes on this thread through a session whose ``send`` is a
-    :class:`_JudgedSessionSend` is judged with the hook's ``allow_insecure_http``. It compares equal to the hook it
-    holds."""
-
-    __slots__ = ("hook", "allow")
-
-    def __init__(self, hook, allow_insecure_http: Optional[bool]) -> None:
-        self.hook = hook
-        self.allow = allow_insecure_http
-
-    def __call__(self, *args, **kwargs):
-        stack = getattr(_IN_FLIGHT, "allow", None)
-        if stack is None:
-            stack = _IN_FLIGHT.allow = []
-        stack.append(self.allow)
-        try:
-            return self.hook(*args, **kwargs)
-        finally:
-            stack.pop()
-
-    def __eq__(self, other) -> bool:
-        if isinstance(other, _InFlightHook):
-            other = other.hook
-        return bool(self.hook == other)
-
-    def __hash__(self) -> int:
-        return hash(self.hook)
-
-    def __repr__(self) -> str:
-        return repr(self.hook)
-
-
-def _in_flight_hook(hook, allow_insecure_http: Optional[bool]):
-    """``hook`` held in an :class:`_InFlightHook`, unless it is one of the SDK's hooks, already held, or not callable."""
-    if not callable(hook) or isinstance(hook, _InFlightHook) or getattr(hook, _guard._OWN_HOOK, False):
-        return hook
-    return _InFlightHook(hook, allow_insecure_http)
-
-
-def _in_flight_hooks(hooks, allow_insecure_http: Optional[bool]) -> list:
-    """The response hooks ``hooks`` (a hook, or a container of them) as a list, each held by :func:`_in_flight_hook`."""
-    if hooks is None:
-        return []
-    if callable(hooks) and not hasattr(hooks, "__iter__"):
-        hooks = [hooks]
-    return [_in_flight_hook(hook, allow_insecure_http) for hook in hooks]
-
-
-class _JudgedSessionSend:
-    """Stands in for ``session.send`` on the session object. While an :class:`_InFlightHook` runs on the current
-    thread, a send is judged first: a keyed request to plain ``http://`` that may not be sent is refused, and so is
-    one that ``Session.send`` would send through a proxy (``proxies`` as given to the send, else the session's
-    proxies and, when it trusts the environment, the environment) or through an adapter that is not exactly
-    ``HTTPAdapter``. Each send then goes to the ``send`` the session's class has at that time (so a ``send``
-    replaced on the class applies), or to the ``send`` set on the session object before this one."""
-
-    def __init__(self, session: _requests.Session, own_send=None) -> None:
-        self._session = session
-        self._own_send = own_send
-
-    def __call__(self, *args, **kwargs):
-        stack = getattr(_IN_FLIGHT, "allow", None)
-        if stack:
-            request = args[0] if args else kwargs.get("request")
-            _judge_hook_send(self._session, request, kwargs, stack[-1])
-        if self._own_send is not None:
-            return self._own_send(*args, **kwargs)
-        return type(self._session).send(self._session, *args, **kwargs)
-
-
-def _judge_hook_send(session: _requests.Session, request, kwargs: Dict, allow_insecure_http: Optional[bool]) -> None:
-    """Judge ``request``, sent through ``session.send`` with ``kwargs`` by a response hook (see
-    :class:`_JudgedSessionSend`). Raises ``ValueError`` (with ``.code``) when it is refused."""
-    from requests.adapters import HTTPAdapter
-    from requests.utils import resolve_proxies, select_proxy
-
-    url = getattr(request, "url", None)
-    mode = _guard.requires_direct(url, _guard.carries_key(getattr(request, "headers", None)), allow_insecure_http, ValueError)
-    if mode is None:
-        return
-    if "proxies" in kwargs:
-        proxies = kwargs["proxies"] or {}
-    else:
-        proxies = resolve_proxies(request, session.proxies, session.trust_env)
-    if select_proxy(url, proxies):
-        raise _guard.refuse(
-            ValueError, "API keys are not sent over http:// through a proxy. Send without a proxy, or use an https:// base URL."
-        )
-    if type(session.get_adapter(url)) is not HTTPAdapter:
-        raise _guard.refuse(ValueError, "API keys are not sent over http:// through a custom adapter. Use an https:// base URL.")
-
-
-def _judge_session_sends(session: _requests.Session) -> None:
-    """Put a :class:`_JudgedSessionSend` on ``session.send``. A ``send`` set on the session object itself is held
-    and called; otherwise each send goes to the class's ``send`` (a subclass's own included). A session that has
-    one keeps it."""
-    send = getattr(session, "send", None)
-    if send is None or isinstance(send, _JudgedSessionSend):
-        return
-    try:
-        session.send = _JudgedSessionSend(session, vars(session).get("send"))
-    except Exception:
-        pass
-
-
-def _judge_session_chain(session: object) -> None:
-    """:func:`_judge_session_sends` for ``session`` and each ``requests`` session it wraps as ``.session``."""
-    for _ in range(8):
-        if isinstance(session, _requests.Session):
-            _judge_session_sends(session)
-        inner = getattr(session, "session", None)
-        if inner is None or inner is session:
-            return
-        session = inner
-
-
-def _judged_connection_hook(allow_insecure_http: Optional[bool]):
-    """A response hook, registered first, that puts a :class:`_JudgedConnection` on ``response.connection``."""
-
-    def hook(response, *args, **kwargs):
-        connection = getattr(response, "connection", None)
-        if connection is not None and not isinstance(connection, _JudgedConnection):
-            try:
-                response.connection = _JudgedConnection(connection, allow_insecure_http)
-            except Exception:
-                pass
-        return response
-
-    return _guard._own_hook(hook)
-
-
-def _unprepared_kwargs(url: str, headers: Dict[str, str], allow_insecure_http: Optional[bool]) -> Dict:
-    """Extra arguments for a session object that is not a ``requests`` session: judged on ``headers`` alone."""
-    keyed = _guard.carries_key(headers)
-    if not keyed:
-        return {}
-    kwargs: Dict = {"hooks": {"response": _guard.requests_redirect_check(keyed, allow_insecure_http)}}
-    if _guard.requires_direct(url, keyed, allow_insecure_http, ValueError):
-        kwargs["proxies"] = _guard.requests_direct_proxies(url)
-    return kwargs

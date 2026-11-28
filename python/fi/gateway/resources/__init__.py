@@ -1,17 +1,10 @@
-"""Resource classes — chat, completions, embeddings, moderations, rerank,
-images, audio, files, batches, responses, feedback, models."""
+"""Gateway resources, including the released batches and moderations APIs."""
 
 from __future__ import annotations
 
 from fi.gateway.resources.audio import (
-    AsyncAudio,
-    AsyncSpeech,
-    AsyncTranscriptions,
-    AsyncTranslations,
-    Audio,
-    Speech,
-    Transcriptions,
-    Translations,
+    AsyncAudio, AsyncSpeech, AsyncTranscriptions, AsyncTranslations,
+    Audio, Speech, Transcriptions, Translations,
 )
 from fi.gateway.resources.batches import AsyncBatches, Batches
 from fi.gateway.resources.chat import AsyncChat, Chat
@@ -25,32 +18,9 @@ from fi.gateway.resources.rerank import AsyncRerank, Rerank
 from fi.gateway.resources.responses import AsyncResponses, Responses
 
 __all__ = [
-    "AsyncAudio",
-    "AsyncBatches",
-    "AsyncChat",
-    "AsyncCompletions",
-    "AsyncEmbeddings",
-    "AsyncFiles",
-    "AsyncImages",
-    "AsyncModels",
-    "AsyncModerations",
-    "AsyncRerank",
-    "AsyncResponses",
-    "AsyncSpeech",
-    "AsyncTranscriptions",
-    "AsyncTranslations",
-    "Audio",
-    "Batches",
-    "Chat",
-    "Completions",
-    "Embeddings",
-    "Files",
-    "Images",
-    "Models",
-    "Moderations",
-    "Rerank",
-    "Responses",
-    "Speech",
-    "Transcriptions",
-    "Translations",
+    "AsyncAudio", "AsyncBatches", "AsyncChat", "AsyncCompletions", "AsyncEmbeddings",
+    "AsyncFiles", "AsyncImages", "AsyncModels", "AsyncModerations", "AsyncRerank",
+    "AsyncResponses", "AsyncSpeech", "AsyncTranscriptions", "AsyncTranslations",
+    "Audio", "Batches", "Chat", "Completions", "Embeddings", "Files", "Images",
+    "Models", "Moderations", "Rerank", "Responses", "Speech", "Transcriptions", "Translations",
 ]

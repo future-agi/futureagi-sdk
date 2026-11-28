@@ -385,7 +385,7 @@ def test_a_consumed_stream_counts_in_the_session_and_reaches_the_callbacks():
 
 
 @respx.mock
-def test_a_stream_closed_early_or_failing_is_still_reported_once():
+def test_a_stream_closed_early_or_failing_is_reported_once():
     headers = {"content-type": "text/event-stream", "x-agentcc-cost": "0.5"}
     respx.post(f"{BASE}/v1/chat/completions").mock(return_value=httpx.Response(200, content=_sse(_chunk("a"), _usage_chunk("b")), headers=headers))
     seen = _StreamSeen()

@@ -16,8 +16,9 @@ def _reattach_parent() -> None:
 def test_import_agentcc() -> None:
     """import agentcc should succeed without error."""
     import fi.gateway as agentcc
+    from fi.gateway._version import futureagi_version
 
-    assert agentcc.__version__ == "0.1.0"
+    assert agentcc.__version__ == futureagi_version()
 
 
 def test_import_time_under_50ms() -> None:

@@ -6,8 +6,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
-from fi.gateway.types.chat.chat_completion_message import ChatCompletionMessage
 from fi.gateway.types.agentcc_metadata import AgentCCMetadata
+from fi.gateway.types.chat.chat_completion_message import ChatCompletionMessage
 from fi.gateway.types.shared import Usage
 
 

@@ -1,0 +1,81 @@
+{
+ "anthropic_tool_use": [
+  {
+   "attributes": {
+    "gen_ai.input.messages.0.message.content": "Where is order A101?",
+    "gen_ai.input.messages.0.message.role": "user",
+    "gen_ai.output.messages.0.message.content": "Let me check.",
+    "gen_ai.output.messages.0.message.role": "assistant",
+    "gen_ai.output.messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"order_id\": \"A101\"}",
+    "gen_ai.output.messages.0.message.tool_calls.0.tool_call.function.name": "lookup_order",
+    "gen_ai.prompts": "null",
+    "gen_ai.provider.name": "anthropic",
+    "gen_ai.request.model": "claude-haiku-5-5",
+    "gen_ai.request.parameters": "{\"model\": \"claude-haiku-5-5\", \"max_tokens\": 100, \"tools\": [{\"name\": \"lookup_order\", \"description\": \"Look up an order by id\", \"input_schema\": {\"type\": \"object\", \"properties\": {\"order_id\": {\"type\": \"string\"}}}}]}",
+    "gen_ai.span.kind": "LLM",
+    "gen_ai.usage.input_tokens": 380,
+    "gen_ai.usage.output_tokens": 54,
+    "gen_ai.usage.total_tokens": 434,
+    "input.mime_type": "application/json",
+    "output.mime_type": "application/json",
+    "output.value": "{\"id\":\"msg_F1fixture\",\"container\":null,\"content\":[{\"citations\":null,\"text\":\"Let me check.\",\"type\":\"text\"},{\"id\":\"toolu_F1a\",\"caller\":null,\"input\":{\"order_id\":\"A101\"},\"name\":\"lookup_order\",\"type\":\"tool_use\",\"toolset_name\":null}],\"model\":\"claude-haiku-5-5\",\"role\":\"assistant\",\"stop_details\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"type\":\"message\",\"usage\":{\"cache_creation\":null,\"cache_creation_input_tokens\":null,\"cache_read_input_tokens\":null,\"inference_geo\":null,\"input_tokens\":380,\"output_tokens\":54,\"output_tokens_details\":null,\"server_tool_use\":null,\"service_tier\":null}}"
+   },
+   "name": "Messages"
+  }
+ ],
+ "openai_tool_loop": [
+  {
+   "attributes": {
+    "gen_ai.input.messages.0.message.content": "Where is order A101?",
+    "gen_ai.input.messages.0.message.role": "user",
+    "gen_ai.output.messages.0.message.role": "assistant",
+    "gen_ai.output.messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"order_id\": \"A101\"}",
+    "gen_ai.output.messages.0.message.tool_calls.0.tool_call.function.name": "lookup_order",
+    "gen_ai.output.messages.0.message.tool_calls.0.tool_call.id": "call_F1a",
+    "gen_ai.provider.name": "openai",
+    "gen_ai.request.model": "gpt-4.1-nano-2025-04-14",
+    "gen_ai.request.parameters": "{\"model\": \"gpt-4.1-nano\"}",
+    "gen_ai.span.kind": "LLM",
+    "gen_ai.usage.input_tokens": 71,
+    "gen_ai.usage.output_tokens": 17,
+    "gen_ai.usage.total_tokens": 88,
+    "input.mime_type": "application/json",
+    "output.value": "Function: lookup_order({\"order_id\": \"A101\"})"
+   },
+   "name": "ChatCompletion"
+  },
+  {
+   "attributes": {
+    "gen_ai.input.messages.0.message.content": "Where is order A101?",
+    "gen_ai.input.messages.0.message.role": "user",
+    "gen_ai.input.messages.1.message.role": "assistant",
+    "gen_ai.input.messages.1.message.tool_calls.0.tool_call.function.arguments": "{\"order_id\": \"A101\"}",
+    "gen_ai.input.messages.1.message.tool_calls.0.tool_call.function.name": "lookup_order",
+    "gen_ai.input.messages.1.message.tool_calls.0.tool_call.id": "call_F1a",
+    "gen_ai.input.messages.2.message.content": "{\"status\": \"shipped\"}",
+    "gen_ai.input.messages.2.message.role": "tool",
+    "gen_ai.input.messages.2.message.tool_call_id": "call_F1a",
+    "gen_ai.output.messages.0.message.content": "Order A101 has shipped.",
+    "gen_ai.output.messages.0.message.role": "assistant",
+    "gen_ai.provider.name": "openai",
+    "gen_ai.request.model": "gpt-4.1-nano-2025-04-14",
+    "gen_ai.request.parameters": "{\"model\": \"gpt-4.1-nano\"}",
+    "gen_ai.span.kind": "LLM",
+    "gen_ai.usage.input_tokens": 102,
+    "gen_ai.usage.output_tokens": 8,
+    "gen_ai.usage.total_tokens": 110,
+    "input.mime_type": "application/json",
+    "output.value": "Order A101 has shipped."
+   },
+   "name": "ChatCompletion"
+  }
+ ],
+ "provenance": "recorded by cache/l-sdk-w2b/f1/record_spans.py: the real instrumentors over canned provider responses (httpx.MockTransport; no network, no model call); tool definitions and raw input/output values dropped to keep the file small",
+ "versions": {
+  "anthropic": "0.125.0",
+  "fi-instrumentation-otel": "1.1.0",
+  "openai": "3.36.1",
+  "traceAI-anthropic": "0.1.10",
+  "traceAI-openai": "0.1.10"
+ }
+}

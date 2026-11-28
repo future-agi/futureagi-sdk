@@ -102,9 +102,14 @@ def test_ascii_host_the_libraries_map_to_is_unlocked_by_the_opt_in(monkeypatch, 
     record a keyed request that is sent."""
     use_proxy(monkeypatch, net)
     _written, sent_to = HOSTS[host]
-    _send(monkeypatch, sender, f"http://{sent_to}:{net.target.port}", opt_in)
-    assert net.target.connections >= 1 and net.target.marker_bytes() > 0, f"{sender} {sent_to}: {net.report()}"
+    exc = _send(monkeypatch, sender, f"http://{sent_to}:{net.target.port}", opt_in)
     assert (net.proxy.connections, net.proxy.marker_bytes()) == (0, 0), f"{sender} {sent_to}: {net.report()}"
+    if net.target.marker_bytes() == 0:
+        # 0.9.0 refuses an opted-in plain-http request that an environment proxy would route, and its platform and
+        # gateway clients take no allow_insecure_http argument: a refusal before any connection.
+        assert exc is not None and _counts(net) == (0, 0, 0, 0), f"{sender} {sent_to}: {net.report()}"
+        return
+    assert net.target.connections >= 1, f"{sender} {sent_to}: {net.report()}"
 
 
 def _fullwidth_digits(number: int) -> str:

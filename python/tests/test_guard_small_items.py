@@ -15,11 +15,14 @@ import pytest
 
 from fi.datasets.dataset import Dataset, LRUCache
 from fi.datasets.types import DatasetConfig, ModelTypes
-from fi.gateway._utils import check_valid_key
+from fi.errors import InsecureHttpRefusedError
+from fi.gateway._http_security import validate_destination
 from fi.prompt import Prompt
 from fi.prompt.cache import PromptCache
 from fi.utils.errors import DatasetError
-from tests.test_plain_http_key_guards import CODE, KEY, SECRET, Sink, net, use_proxy  # noqa: F401
+from tests.test_plain_http_key_guards import KEY, PLAIN, SECRET, Sink, net, use_proxy  # noqa: F401
+
+FUTURE_AGI_REFUSAL_CODE = "INSECURE_HTTP_REFUSED"
 
 
 def _attempt(call):
@@ -34,18 +37,20 @@ def _attempt(call):
 # ---------------------------------------------------------------------------------------------
 
 
-def test_refusal_names_the_environment_variable_and_the_argument_only_where_accepted(net):
-    _, error = _attempt(lambda: check_valid_key(KEY, f"http://api.futureagi.com:{net.target.port}"))
+def test_refusal_explains_that_the_environment_does_not_opt_in_future_agi_hosts(net):
+    url = f"http://api.futureagi.com:{net.target.port}"
+    _, error = _attempt(lambda: validate_destination(url, url))
 
     net.nothing_sent()
-    assert getattr(error, "code", None) == CODE, repr(error)
+    assert isinstance(error, InsecureHttpRefusedError), repr(error)
+    assert error.code == FUTURE_AGI_REFUSAL_CODE
     message = str(error)
-    assert "FI_ALLOW_INSECURE_HTTP=1" in message, message
-    assert "(or pass allow_insecure_http=True where the client accepts it)" in message, message
+    assert "FI_ALLOW_INSECURE_HTTP does not apply to a Future AGI host" in message, message
+    assert "allow_insecure_http=True" not in message, message
 
 
 # ---------------------------------------------------------------------------------------------
-# fi.datasets wraps a refusal in DatasetError, which keeps the refusal code and has it as its context
+# fi.datasets wraps the origin refusal in DatasetError and retains it as exception context
 # ---------------------------------------------------------------------------------------------
 
 
@@ -75,11 +80,12 @@ def test_dataset_call_without_opt_in_raises_dataset_error_with_the_refusal_code(
 
     net.nothing_sent()
     assert isinstance(error, DatasetError), repr(error)
-    assert getattr(error, "code", None) == CODE, repr(error)
+    assert error.get_error_code() == "DATASET_OPERATION_INVALID", repr(error)
     context = error.__context__
     while context is not None and isinstance(context, DatasetError):
         context = context.__context__
-    assert isinstance(context, ValueError) and getattr(context, "code", None) == CODE, repr(context)
+    assert isinstance(context, InsecureHttpRefusedError), repr(context)
+    assert context.code == FUTURE_AGI_REFUSAL_CODE, repr(context)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -167,17 +173,18 @@ def _sink_base(host: str, sink: Sink) -> str:
 @pytest.mark.parametrize(
     "pair", [(KEY_B, SECRET_B), (KEY_B, SECRET), (KEY, SECRET_B)], ids=["both-keys", "api-key", "secret-key"]
 )
-def test_template_call_with_other_keys_sends_its_own_request(net, own_prompt_cache, lookup, pair):
+def test_template_call_with_other_keys_sends_its_own_request(net, monkeypatch, own_prompt_cache, lookup, pair):
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     api_b, secret_b = pair
     id_a, id_b = uuid.uuid4(), uuid.uuid4()
     sink = TemplateSink(ids={(KEY, SECRET): id_a, (api_b, secret_b): id_b})
     try:
-        base = _sink_base("api.futureagi.com", sink)
-        a = _template(base, lookup=lookup, allow_insecure_http=True)
+        base = _sink_base(PLAIN, sink)
+        a = _template(base, lookup=lookup)
         assert a.template.id == id_a
         before = len(sink.requests)
 
-        b = _template(base, api_b, secret_b, lookup=lookup, allow_insecure_http=True)
+        b = _template(base, api_b, secret_b, lookup=lookup)
 
         assert sink.requests[before:] == [(api_b, secret_b)], sink.requests
         assert b.template.id == id_b
@@ -187,14 +194,15 @@ def test_template_call_with_other_keys_sends_its_own_request(net, own_prompt_cac
 
 
 @lookups
-def test_template_call_with_other_base_url_sends_to_its_own_base_url(net, own_prompt_cache, lookup):
+def test_template_call_with_other_base_url_sends_to_its_own_base_url(net, monkeypatch, own_prompt_cache, lookup):
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     first, second = TemplateSink(), TemplateSink()
     try:
-        a = _template(_sink_base("api.futureagi.com", first), lookup=lookup, allow_insecure_http=True)
+        a = _template(_sink_base("127.0.0.1", first), lookup=lookup)
         assert a.template.id == first.default_id
         first_before = len(first.requests)
 
-        b = _template(_sink_base("plain.example.test", second), lookup=lookup, allow_insecure_http=True)
+        b = _template(_sink_base(PLAIN, second), lookup=lookup)
 
         assert len(first.requests) == first_before, first.requests
         assert second.requests == [(KEY, SECRET)], second.requests
@@ -207,41 +215,50 @@ def test_template_call_with_other_base_url_sends_to_its_own_base_url(net, own_pr
 @lookups
 @pytest.mark.parametrize(
     "opt, environment",
-    [({}, None), ({"allow_insecure_http": None}, None), ({"allow_insecure_http": False}, None),
+    [({}, None), ({}, "1"), ({"allow_insecure_http": None}, None), ({"allow_insecure_http": False}, None),
      ({"allow_insecure_http": False}, "1")],
-    ids=["absent", "none", "false", "false-over-environment"],
+    ids=["absent", "environment-opt-in", "none", "false", "false-over-environment"],
 )
-def test_template_call_without_opt_in_after_opted_in_call_is_refused(
+def test_template_call_to_future_agi_host_is_refused_with_a_warm_cache(
     net, monkeypatch, own_prompt_cache, lookup, opt, environment
 ):
     use_proxy(monkeypatch, net)
     sink = TemplateSink()
     try:
-        base = _sink_base("api.futureagi.com", sink)
-        _template(base, lookup=lookup, allow_insecure_http=True)
+        monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
+        warmed = _template(_sink_base(PLAIN, sink), lookup=lookup)
+        assert warmed.template.id == sink.default_id
+        assert sink.requests == [(KEY, SECRET)]
+        (cache_key,) = own_prompt_cache._store
+        cached = own_prompt_cache.get(cache_key)
+        assert cached is not None and cached.id == sink.default_id
         before = (sink.connections, sink.key_bytes(KEY, SECRET))
-        assert before[0] >= 1 and before[1] > 0
-        if environment is not None:
-            monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", environment)
+        assert before[0] == 1 and before[1] > 0
+        assert (net.proxy.connections, net.proxy.marker_bytes()) == (0, 0)
+        if environment is None:
+            monkeypatch.delenv("FI_ALLOW_INSECURE_HTTP")
 
+        base = _sink_base("api.futureagi.com", sink)
         _, error = _attempt(lambda: _template(base, lookup=lookup, **opt))
 
-        assert getattr(error, "code", None) == CODE, repr(error)
         assert (sink.connections, sink.key_bytes(KEY, SECRET)) == before
         assert (net.proxy.connections, net.proxy.marker_bytes()) == (0, 0)
+        assert isinstance(error, InsecureHttpRefusedError), repr(error)
+        assert error.code == FUTURE_AGI_REFUSAL_CODE
     finally:
         sink.close()
 
 
 @lookups
-def test_repeated_template_call_with_same_settings_is_served_from_the_cache(net, own_prompt_cache, lookup):
+def test_repeated_template_call_with_same_settings_is_served_from_the_cache(net, monkeypatch, own_prompt_cache, lookup):
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     sink = TemplateSink()
     try:
-        base = _sink_base("api.futureagi.com", sink)
-        a = _template(base, lookup=lookup, allow_insecure_http=True)
+        base = _sink_base(PLAIN, sink)
+        a = _template(base, lookup=lookup)
         before = sink.connections
 
-        b = _template(base, lookup=lookup, allow_insecure_http=True)
+        b = _template(base, lookup=lookup)
 
         assert sink.connections == before
         assert b.template.id == a.template.id
@@ -249,10 +266,11 @@ def test_repeated_template_call_with_same_settings_is_served_from_the_cache(net,
         sink.close()
 
 
-def test_template_cache_keys_hold_no_raw_key(net, own_prompt_cache):
+def test_template_cache_keys_hold_no_raw_key(net, monkeypatch, own_prompt_cache):
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     sink = TemplateSink()
     try:
-        _template(_sink_base("api.futureagi.com", sink), allow_insecure_http=True)
+        _template(_sink_base(PLAIN, sink))
     finally:
         sink.close()
     stored = list(own_prompt_cache._store)

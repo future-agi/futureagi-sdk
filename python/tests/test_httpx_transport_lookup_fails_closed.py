@@ -4,7 +4,7 @@
 client's ``_transport_for_url``, to tell a direct transport from a proxied one. When that lookup is missing,
 raises, or returns something that is not an ``httpx`` transport, or when an ``httpx.HTTPTransport`` holds no
 connection pool, a keyed plain-``http://`` request to a loopback listener is refused with the code
-``insecure_http_origin`` and makes no connection. A pin case checks that, for the ``httpx`` installed, a client
+``KEYED_PROXY_REFUSED`` and makes no connection. A pin case checks that, for the ``httpx`` installed, a client
 built with an environment proxy is read as proxied.
 """
 
@@ -13,10 +13,11 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from fi.gateway import AgentCCError, Gateway
+from fi._core.proxy_routing import httpx_client_proxied
+from fi.errors import ConfigurationError, KeyedProxyRefusedError
+from fi.gateway import Gateway
 from fi.platform import Client
-from fi.utils import _http_guard as _guard
-from tests.test_plain_http_key_guards import KEY, SECRET, _attempt, net, refused  # noqa: F401
+from tests.test_plain_http_key_guards import CODE, KEY, SECRET, _attempt, net  # noqa: F401
 
 
 class _NoLookup(httpx.Client):
@@ -57,25 +58,32 @@ def _send(sender: str, base: str, http_client: httpx.Client):
     return _attempt(lambda: gw.chat.completions.create(model="m", messages=[{"role": "user", "content": "hi"}]))
 
 
-ERRORS = {"platform": ValueError, "gateway": AgentCCError}
+def _refused(exc, error_type, code):
+    assert exc is not None, "no error was raised"
+    assert isinstance(exc, error_type), f"{type(exc).__name__}: {exc}"
+    assert getattr(exc, "code", None) == code, f"code: {getattr(exc, 'code', None)!r}"
+    assert KEY not in str(exc) and SECRET not in str(exc)
+
+
+SENDERS = ("platform", "gateway")
 
 
 @pytest.mark.parametrize("lookup", list(LOOKUPS))
-@pytest.mark.parametrize("sender", list(ERRORS))
+@pytest.mark.parametrize("sender", SENDERS)
 def test_keyed_loopback_request_is_refused_when_the_transport_lookup_cannot_be_read(net, sender, lookup):  # noqa: F811
     exc = _send(sender, f"http://127.0.0.1:{net.target.port}", _client(lookup))
     net.nothing_sent()
-    refused(exc, ERRORS[sender])
+    _refused(exc, KeyedProxyRefusedError, "KEYED_PROXY_REFUSED")
 
 
 @pytest.mark.parametrize("transport_class", [httpx.HTTPTransport])
-@pytest.mark.parametrize("sender", list(ERRORS))
+@pytest.mark.parametrize("sender", SENDERS)
 def test_keyed_loopback_request_is_refused_when_an_http_transport_holds_no_pool(net, sender, transport_class):  # noqa: F811
     transport = transport_class()
     del transport._pool
     exc = _send(sender, f"http://127.0.0.1:{net.target.port}", httpx.Client(transport=transport))
     net.nothing_sent()
-    refused(exc, ERRORS[sender])
+    _refused(exc, KeyedProxyRefusedError, "KEYED_PROXY_REFUSED")
 
 
 def test_lookup_of_the_installed_httpx_reads_an_environment_proxy_as_proxied(monkeypatch, net):  # noqa: F811
@@ -87,8 +95,8 @@ def test_lookup_of_the_installed_httpx_reads_an_environment_proxy_as_proxied(mon
     without_proxy = httpx.Client(trust_env=False)
     version = httpx.__version__
     assert callable(getattr(httpx.Client, "_transport_for_url", None)), version
-    assert _guard.httpx_client_may_use_proxy(with_proxy, url) is True, version
-    assert _guard.httpx_client_may_use_proxy(without_proxy, url) is False, version
+    assert httpx_client_proxied(with_proxy, url) is True, version
+    assert httpx_client_proxied(without_proxy, url) is False, version
     exc = _send("platform", "http://plain.example.test", with_proxy)
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, ConfigurationError, CODE)

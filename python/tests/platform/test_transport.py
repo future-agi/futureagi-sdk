@@ -11,7 +11,7 @@ import fi.platform as fp
 import httpx
 import pytest
 from fi.platform import _transport
-from fi.utils.errors import SDKException
+from fi.utils.errors import KeyedRedirectRefusedError, SDKException
 
 BASE = "http://backend.test"
 
@@ -98,38 +98,38 @@ def test_non_json_success_body_is_an_api_error():
         client.datasets.create(new_dataset_name="x")
 
 
-def test_redirect_without_a_target_is_an_error_not_an_empty_result():
+def test_redirect_without_a_target_is_refused_not_an_empty_result():
     client = _client(lambda r: httpx.Response(301))
-    with pytest.raises(fp.APIError) as exc:
+    with pytest.raises(KeyedRedirectRefusedError) as exc:
         client.datasets.list().first_page()
     assert exc.value.status_code == 301
 
 
-def test_redirect_within_the_origin_is_followed_with_credentials():
+def test_redirect_within_the_origin_keeps_keys_and_workspace_on_each_hop():
     seen: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
-        if len(seen) == 1:
-            return httpx.Response(307, headers={"location": "/model-hub/develops/get-datasets/"})
-        return httpx.Response(200, json={"status": True, "result": {"datasets": [], "total_pages": 1}})
+        return seen.append(request) or httpx.Response(307, headers={"location": "/model-hub/develops/get-datasets/"})
 
-    _client(handler, workspace_id="w1").datasets.list().first_page()
-    assert [str(r.url) for r in seen] == [f"{BASE}/model-hub/develops/get-datasets/?page=0", f"{BASE}/model-hub/develops/get-datasets/"]
-    assert seen[1].headers["x-api-key"] == "k" and seen[1].headers["x-workspace-id"] == "w1"
+    with pytest.raises(fp.APIConnectionError, match="more than 5 redirects"):
+        _client(handler, workspace_id="w1").datasets.list().first_page()
+    assert [(r.method, str(r.url)) for r in seen] == [("GET", f"{BASE}/model-hub/develops/get-datasets/" + q) for q in ["?page=0"] + [""] * 5]
+    assert {(r.headers["x-api-key"], r.headers["x-secret-key"], r.headers["x-workspace-id"]) for r in seen} == {("k", "s", "w1")}
 
 
-def test_303_is_followed_as_a_get_without_the_body():
+def test_303_redirect_follows_as_get_without_the_post_body():
     seen: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen.append(request)
         request.read()
-        return httpx.Response(303, headers={"location": f"{BASE}/done/"}) if len(seen) == 1 else _dataset_response()
+        return httpx.Response(303, headers={"location": f"{BASE}/done/"})
 
-    _client(handler).datasets.create(new_dataset_name="x")
-    assert [(r.method, str(r.url)) for r in seen] == [("POST", f"{BASE}/model-hub/develops/create-empty-dataset/"), ("GET", f"{BASE}/done/")]
-    assert seen[1].content == b""
+    with pytest.raises(fp.APIConnectionError, match="more than 5 redirects"):
+        _client(handler).datasets.create(new_dataset_name="x")
+    assert [(r.method, str(r.url)) for r in seen] == [("POST", f"{BASE}/model-hub/develops/create-empty-dataset/")] + [("GET", f"{BASE}/done/")] * 5
+    assert (json.loads(seen[0].content), [r.content for r in seen[1:]]) == ({"new_dataset_name": "x"}, [b""] * 5)
+    assert {(r.headers["x-api-key"], r.headers["x-secret-key"]) for r in seen} == {("k", "s")}
 
 
 def test_redirect_off_the_origin_is_refused_so_the_keys_never_travel():
@@ -137,16 +137,16 @@ def test_redirect_off_the_origin_is_refused_so_the_keys_never_travel():
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen.append(request.url.host)
-        return httpx.Response(302, headers={"location": "https://evil.example/collect"})
+        return httpx.Response(302, headers={"location": "https://other.example/collect"})
 
-    with pytest.raises(fp.APIConnectionError, match="not followed"):
+    with pytest.raises(KeyedRedirectRefusedError):
         _client(handler).datasets.list().first_page()
     assert seen == ["backend.test"]
 
 
-def test_a_callers_client_that_follows_redirects_itself_is_still_held_to_the_origin():
-    """[P1, review 2] The redirect policy is per request, not per client: an injected
-    `httpx.Client(follow_redirects=True)` must not forward the keys to another host either."""
+def test_a_callers_client_that_follows_redirects_itself_does_not_follow_one():
+    """The redirect policy is per request, not per client: an injected `httpx.Client(follow_redirects=True)` does not
+    send the keys to another host either."""
     seen: list[str] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -157,7 +157,7 @@ def test_a_callers_client_that_follows_redirects_itself_is_still_held_to_the_ori
 
     http = httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=True)
     client = fp.Client(api_key="synthetic-key", secret_key="s", base_url="https://origin.test", http_client=http)
-    with pytest.raises(fp.APIConnectionError, match="not followed"):
+    with pytest.raises(KeyedRedirectRefusedError):
         client.request("GET", "/probe/")
     assert seen == ["origin.test synthetic-key"]  # other.test never saw a request, let alone the key
 
@@ -168,17 +168,23 @@ def test_a_callers_client_that_follows_redirects_itself_is_still_held_to_the_ori
         seen.clear()
         http = httpx.AsyncClient(transport=httpx.MockTransport(handler_async), follow_redirects=True)
         async with fp.AsyncClient(api_key="synthetic-key", secret_key="s", base_url="https://origin.test", http_client=http) as client:
-            with pytest.raises(fp.APIConnectionError, match="not followed"):
+            with pytest.raises(KeyedRedirectRefusedError):
                 await client.request("POST", "/probe/", body={"x": 1})
 
     asyncio.run(scenario())
     assert seen == ["origin.test synthetic-key"]
 
 
-def test_redirect_loop_stops_after_five_hops():
-    client = _client(lambda r: httpx.Response(302, headers={"location": f"{BASE}/again/"}))
+def test_a_redirect_loop_stops_at_the_hop_limit():
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return seen.append(request) or httpx.Response(302, headers={"location": f"{BASE}/again/"})
+
     with pytest.raises(fp.APIConnectionError, match="more than 5 redirects"):
-        client.datasets.list().first_page()
+        _client(handler).datasets.list().first_page()
+    assert [(r.method, str(r.url)) for r in seen] == [("GET", f"{BASE}/model-hub/develops/get-datasets/?page=0")] + [("GET", f"{BASE}/again/")] * 5
+    assert {(r.headers["x-api-key"], r.headers["x-secret-key"]) for r in seen} == {("k", "s")}
 
 
 def test_explicit_none_is_sent_as_null_and_an_omitted_argument_is_left_out():
@@ -386,3 +392,9 @@ def test_async_client_request_and_options():
             assert await client.request("GET", "/x/", options=fp.RequestOptions(headers={"X-Trace": "b"})) == {"ids": ["b"]}
 
     asyncio.run(scenario())  # plain pytest, no asyncio plugin needed
+
+
+@pytest.fixture(autouse=True)
+def _allow_plain_http_to_test_hosts(monkeypatch):
+    """The tests in this module send to ``http://`` hosts that are not loopback, which needs the opt-in."""
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")

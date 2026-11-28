@@ -1,0 +1,3882 @@
+{
+ "area": "stream_extra",
+ "cases": {
+  "stream.extra.cache_hit_json_to_stream.break_on_done[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "result": {
+      "ok": null
+     },
+     "types": [
+      "content",
+      "usage",
+      "done"
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Cached hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-cache",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 2,
+        "completion_tokens_details": null,
+        "prompt_tokens": 4,
+        "prompt_tokens_details": null,
+        "total_tokens": 6
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.cache_hit_json_to_stream.break_on_done[sync]": {
+   "raised": {
+    "__exception__": "ResponseNotRead",
+    "args": [
+     "Attempted to access streaming response content, without having called `read()`."
+    ],
+    "attrs": {},
+    "mro": [
+     "ResponseNotRead",
+     "StreamError",
+     "RuntimeError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "error": "TypeError",
+     "message": "ResponseNotRead.__init__() takes 1 positional argument but 2 were given",
+     "ok": false
+    },
+    "repr": "ResponseNotRead('Attempted to access streaming response content, without having called `read()`.')",
+    "str": "Attempted to access streaming response content, without having called `read()`."
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ]
+  },
+  "stream.extra.cache_hit_json_to_stream.events[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": null,
+     "items": [
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": "Cached hello",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "usage",
+        "usage": {
+         "__model__": "Usage",
+         "data": {
+          "completion_tokens": 2,
+          "completion_tokens_details": null,
+          "prompt_tokens": 4,
+          "prompt_tokens_details": null,
+          "total_tokens": 6
+         }
+        }
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "done",
+        "usage": null
+       }
+      }
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Cached hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-cache",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 2,
+        "completion_tokens_details": null,
+        "prompt_tokens": 4,
+        "prompt_tokens_details": null,
+        "total_tokens": 6
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.cache_hit_json_to_stream.events[sync]": {
+   "raised": {
+    "__exception__": "ResponseNotRead",
+    "args": [
+     "Attempted to access streaming response content, without having called `read()`."
+    ],
+    "attrs": {},
+    "mro": [
+     "ResponseNotRead",
+     "StreamError",
+     "RuntimeError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "error": "TypeError",
+     "message": "ResponseNotRead.__init__() takes 1 positional argument but 2 were given",
+     "ok": false
+    },
+    "repr": "ResponseNotRead('Attempted to access streaming response content, without having called `read()`.')",
+    "str": "Attempted to access streaming response content, without having called `read()`."
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ]
+  },
+  "stream.extra.cache_hit_json_to_stream.final[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": "hit",
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": false,
+        "latency_ms": 0,
+        "model_used": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "request_id": "req-cache-1",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Cached hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-cache",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 2,
+        "completion_tokens_details": null,
+        "prompt_tokens": 4,
+        "prompt_tokens_details": null,
+        "total_tokens": 6
+       }
+      }
+     }
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Cached hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-cache",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 2,
+        "completion_tokens_details": null,
+        "prompt_tokens": 4,
+        "prompt_tokens_details": null,
+        "total_tokens": 6
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.cache_hit_json_to_stream.final[sync]": {
+   "raised": {
+    "__exception__": "ResponseNotRead",
+    "args": [
+     "Attempted to access streaming response content, without having called `read()`."
+    ],
+    "attrs": {},
+    "mro": [
+     "ResponseNotRead",
+     "StreamError",
+     "RuntimeError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "error": "TypeError",
+     "message": "ResponseNotRead.__init__() takes 1 positional argument but 2 were given",
+     "ok": false
+    },
+    "repr": "ResponseNotRead('Attempted to access streaming response content, without having called `read()`.')",
+    "str": "Attempted to access streaming response content, without having called `read()`."
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ]
+  },
+  "stream.extra.cache_hit_json_to_stream.iter[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": "hit",
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "req-cache-1",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "error": null,
+    "items": [
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [
+        {
+         "delta": {
+          "content": "Cached hello",
+          "role": "assistant",
+          "tool_calls": null
+         },
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-cache",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 2,
+        "completion_tokens_details": null,
+        "prompt_tokens": 4,
+        "prompt_tokens_details": null,
+        "total_tokens": 6
+       }
+      }
+     }
+    ]
+   }
+  },
+  "stream.extra.cache_hit_json_to_stream.iter[sync]": {
+   "raised": {
+    "__exception__": "ResponseNotRead",
+    "args": [
+     "Attempted to access streaming response content, without having called `read()`."
+    ],
+    "attrs": {},
+    "mro": [
+     "ResponseNotRead",
+     "StreamError",
+     "RuntimeError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "error": "TypeError",
+     "message": "ResponseNotRead.__init__() takes 1 positional argument but 2 were given",
+     "ok": false
+    },
+    "repr": "ResponseNotRead('Attempted to access streaming response content, without having called `read()`.')",
+    "str": "Attempted to access streaming response content, without having called `read()`."
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ]
+  },
+  "stream.extra.cache_hit_json_to_stream.text[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": {
+      "__exception__": "TypeError",
+      "args": [
+       "'method' object is not iterable"
+      ],
+      "attrs": {},
+      "mro": [
+       "TypeError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "'method' object is not iterable"
+       ],
+       "ok": true,
+       "str": "'method' object is not iterable",
+       "type": "TypeError"
+      },
+      "repr": "TypeError(\"'method' object is not iterable\")",
+      "str": "'method' object is not iterable"
+     },
+     "items": []
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [],
+       "created": 0,
+       "id": "",
+       "model": "",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.cache_hit_json_to_stream.text[sync]": {
+   "raised": {
+    "__exception__": "ResponseNotRead",
+    "args": [
+     "Attempted to access streaming response content, without having called `read()`."
+    ],
+    "attrs": {},
+    "mro": [
+     "ResponseNotRead",
+     "StreamError",
+     "RuntimeError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "error": "TypeError",
+     "message": "ResponseNotRead.__init__() takes 1 positional argument but 2 were given",
+     "ok": false
+    },
+    "repr": "ResponseNotRead('Attempted to access streaming response content, without having called `read()`.')",
+    "str": "Attempted to access streaming response content, without having called `read()`."
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ]
+  },
+  "stream.extra.guardrail_header_open.break_on_done[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "result": {
+      "ok": null
+     },
+     "types": [
+      "content",
+      "done"
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Safe text",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.guardrail_header_open.break_on_done[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "result": {
+      "ok": null
+     },
+     "types": [
+      "content",
+      "done"
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Safe text",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.guardrail_header_open.events[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": null,
+     "items": [
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": "Safe text",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "done",
+        "usage": null
+       }
+      }
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Safe text",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.guardrail_header_open.events[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": null,
+     "items": [
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": "Safe text",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "done",
+        "usage": null
+       }
+      }
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Safe text",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.guardrail_header_open.final[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": null,
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": true,
+        "latency_ms": 0,
+        "model_used": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "request_id": "req-guard-1",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Safe text",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Safe text",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.guardrail_header_open.final[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": null,
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": true,
+        "latency_ms": 0,
+        "model_used": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "request_id": "req-guard-1",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Safe text",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Safe text",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.guardrail_header_open.iter[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": true,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "req-guard-1",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "error": null,
+    "items": [
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [
+        {
+         "delta": {
+          "content": "Safe text",
+          "role": "assistant",
+          "tool_calls": null
+         },
+         "finish_reason": null,
+         "index": 0,
+         "logprobs": null
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": null
+      }
+     },
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [
+        {
+         "delta": {
+          "content": null,
+          "role": null,
+          "tool_calls": null
+         },
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    ]
+   }
+  },
+  "stream.extra.guardrail_header_open.iter[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": true,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "req-guard-1",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "error": null,
+    "items": [
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [
+        {
+         "delta": {
+          "content": "Safe text",
+          "role": "assistant",
+          "tool_calls": null
+         },
+         "finish_reason": null,
+         "index": 0,
+         "logprobs": null
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": null
+      }
+     },
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [
+        {
+         "delta": {
+          "content": null,
+          "role": null,
+          "tool_calls": null
+         },
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    ]
+   }
+  },
+  "stream.extra.guardrail_header_open.text[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": {
+      "__exception__": "TypeError",
+      "args": [
+       "'method' object is not iterable"
+      ],
+      "attrs": {},
+      "mro": [
+       "TypeError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "'method' object is not iterable"
+       ],
+       "ok": true,
+       "str": "'method' object is not iterable",
+       "type": "TypeError"
+      },
+      "repr": "TypeError(\"'method' object is not iterable\")",
+      "str": "'method' object is not iterable"
+     },
+     "items": []
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [],
+       "created": 0,
+       "id": "",
+       "model": "",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.guardrail_header_open.text[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": null,
+     "items": [
+      "Safe text"
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Safe text",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-guard",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.break_on_done[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "result": {
+      "raised": {
+       "__exception__": "StreamError",
+       "args": [
+        "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+       ],
+       "attrs": {
+        "message": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+       },
+       "mro": [
+        "StreamError",
+        "AgentCCError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+        ],
+        "ok": true,
+        "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}",
+        "type": "StreamError"
+       },
+       "repr": "StreamError(\"Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}\")",
+       "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      }
+     },
+     "types": [
+      "content",
+      "usage"
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 1,
+        "completion_tokens_details": null,
+        "prompt_tokens": 3,
+        "prompt_tokens_details": null,
+        "total_tokens": 4
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.break_on_done[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "result": {
+      "raised": {
+       "__exception__": "StreamError",
+       "args": [
+        "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+       ],
+       "attrs": {
+        "message": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+       },
+       "mro": [
+        "StreamError",
+        "AgentCCError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+        ],
+        "ok": true,
+        "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}",
+        "type": "StreamError"
+       },
+       "repr": "StreamError(\"Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}\")",
+       "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      }
+     },
+     "types": [
+      "content",
+      "usage"
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 1,
+        "completion_tokens_details": null,
+        "prompt_tokens": 3,
+        "prompt_tokens_details": null,
+        "total_tokens": 4
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.events[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "args": [
+       "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      ],
+      "attrs": {
+       "message": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      },
+      "mro": [
+       "StreamError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+       ],
+       "ok": true,
+       "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}",
+       "type": "StreamError"
+      },
+      "repr": "StreamError(\"Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}\")",
+      "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+     },
+     "items": [
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": "Hello",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "usage",
+        "usage": {
+         "__model__": "Usage",
+         "data": {
+          "completion_tokens": 1,
+          "completion_tokens_details": null,
+          "prompt_tokens": 3,
+          "prompt_tokens_details": null,
+          "total_tokens": 4
+         }
+        }
+       }
+      }
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 1,
+        "completion_tokens_details": null,
+        "prompt_tokens": 3,
+        "prompt_tokens_details": null,
+        "total_tokens": 4
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.events[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "args": [
+       "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      ],
+      "attrs": {
+       "message": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      },
+      "mro": [
+       "StreamError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+       ],
+       "ok": true,
+       "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}",
+       "type": "StreamError"
+      },
+      "repr": "StreamError(\"Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}\")",
+      "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+     },
+     "items": [
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": "Hello",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "usage",
+        "usage": {
+         "__model__": "Usage",
+         "data": {
+          "completion_tokens": 1,
+          "completion_tokens_details": null,
+          "prompt_tokens": 3,
+          "prompt_tokens_details": null,
+          "total_tokens": 4
+         }
+        }
+       }
+      }
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 1,
+        "completion_tokens_details": null,
+        "prompt_tokens": 3,
+        "prompt_tokens_details": null,
+        "total_tokens": 4
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.final[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "raised": {
+      "__exception__": "StreamError",
+      "args": [
+       "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      ],
+      "attrs": {
+       "message": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      },
+      "mro": [
+       "StreamError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+       ],
+       "ok": true,
+       "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}",
+       "type": "StreamError"
+      },
+      "repr": "StreamError(\"Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}\")",
+      "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+     }
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 1,
+        "completion_tokens_details": null,
+        "prompt_tokens": 3,
+        "prompt_tokens_details": null,
+        "total_tokens": 4
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.final[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "raised": {
+      "__exception__": "StreamError",
+      "args": [
+       "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      ],
+      "attrs": {
+       "message": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      },
+      "mro": [
+       "StreamError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+       ],
+       "ok": true,
+       "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}",
+       "type": "StreamError"
+      },
+      "repr": "StreamError(\"Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}\")",
+      "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+     }
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 1,
+        "completion_tokens_details": null,
+        "prompt_tokens": 3,
+        "prompt_tokens_details": null,
+        "total_tokens": 4
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.iter[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "error": {
+     "__exception__": "StreamError",
+     "args": [
+      "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+     ],
+     "attrs": {
+      "message": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+     },
+     "mro": [
+      "StreamError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "args": [
+       "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      ],
+      "ok": true,
+      "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}",
+      "type": "StreamError"
+     },
+     "repr": "StreamError(\"Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}\")",
+     "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+    },
+    "items": [
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [
+        {
+         "delta": {
+          "content": "Hello",
+          "role": "assistant",
+          "tool_calls": null
+         },
+         "finish_reason": null,
+         "index": 0,
+         "logprobs": null
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": null
+      }
+     },
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [
+        {
+         "delta": {
+          "content": null,
+          "role": null,
+          "tool_calls": null
+         },
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": null
+      }
+     },
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 1,
+        "completion_tokens_details": null,
+        "prompt_tokens": 3,
+        "prompt_tokens_details": null,
+        "total_tokens": 4
+       }
+      }
+     }
+    ]
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.iter[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "error": {
+     "__exception__": "StreamError",
+     "args": [
+      "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+     ],
+     "attrs": {
+      "message": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+     },
+     "mro": [
+      "StreamError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "args": [
+       "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      ],
+      "ok": true,
+      "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}",
+      "type": "StreamError"
+     },
+     "repr": "StreamError(\"Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}\")",
+     "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+    },
+    "items": [
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [
+        {
+         "delta": {
+          "content": "Hello",
+          "role": "assistant",
+          "tool_calls": null
+         },
+         "finish_reason": null,
+         "index": 0,
+         "logprobs": null
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": null
+      }
+     },
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [
+        {
+         "delta": {
+          "content": null,
+          "role": null,
+          "tool_calls": null
+         },
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": null
+      }
+     },
+     {
+      "__model__": "ChatCompletionChunk",
+      "data": {
+       "choices": [],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion.chunk",
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 1,
+        "completion_tokens_details": null,
+        "prompt_tokens": 3,
+        "prompt_tokens_details": null,
+        "total_tokens": 4
+       }
+      }
+     }
+    ]
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.text[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": {
+      "__exception__": "TypeError",
+      "args": [
+       "'method' object is not iterable"
+      ],
+      "attrs": {},
+      "mro": [
+       "TypeError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "'method' object is not iterable"
+       ],
+       "ok": true,
+       "str": "'method' object is not iterable",
+       "type": "TypeError"
+      },
+      "repr": "TypeError(\"'method' object is not iterable\")",
+      "str": "'method' object is not iterable"
+     },
+     "items": []
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [],
+       "created": 0,
+       "id": "",
+       "model": "",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.late_error_after_finish_reason.text[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "args": [
+       "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      ],
+      "attrs": {
+       "message": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+      },
+      "mro": [
+       "StreamError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+       ],
+       "ok": true,
+       "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}",
+       "type": "StreamError"
+      },
+      "repr": "StreamError(\"Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}\")",
+      "str": "Stream error: {'message': 'Content blocked by streaming guardrail', 'type': 'guardrail_error', 'param': None, 'code': 'stream_blocked'}"
+     },
+     "items": [
+      "Hello"
+     ]
+    },
+    "snapshot": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-late",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 1,
+        "completion_tokens_details": null,
+        "prompt_tokens": 3,
+        "prompt_tokens_details": null,
+        "total_tokens": 4
+       }
+      }
+     }
+    }
+   }
+  },
+  "stream.extra.responses_event_error.iter[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "input": "hi",
+      "model": "gpt-4o-mini",
+      "store": true,
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/responses",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "req-resp-1",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "error": {
+     "__exception__": "StreamError",
+     "args": [
+      "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+     ],
+     "attrs": {
+      "message": "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+     },
+     "cause": "ValidationError",
+     "mro": [
+      "StreamError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "args": [
+       "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+      ],
+      "ok": true,
+      "str": "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing",
+      "type": "StreamError"
+     },
+     "repr": "StreamError(\"Stream interrupted: 5 validation errors for ChatCompletionChunk\\nid\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\\nobject\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\\ncreated\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\\nmodel\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\\nchoices\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\")",
+     "str": "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+    },
+    "items": []
+   }
+  },
+  "stream.extra.responses_event_error.iter[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "input": "hi",
+      "model": "gpt-4o-mini",
+      "store": true,
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/responses",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "req-resp-1",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "error": {
+     "__exception__": "StreamError",
+     "args": [
+      "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+     ],
+     "attrs": {
+      "message": "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+     },
+     "cause": "ValidationError",
+     "mro": [
+      "StreamError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "args": [
+       "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+      ],
+      "ok": true,
+      "str": "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing",
+      "type": "StreamError"
+     },
+     "repr": "StreamError(\"Stream interrupted: 5 validation errors for ChatCompletionChunk\\nid\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\\nobject\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\\ncreated\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\\nmodel\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\\nchoices\\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\")",
+     "str": "Stream interrupted: 5 validation errors for ChatCompletionChunk\nid\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nobject\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncreated\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nmodel\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nchoices\n  Field required [type=missing, input_value={'type': 'response.create...rogress', 'output': []}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+    },
+    "items": []
+   }
+  }
+ },
+ "format": 1
+}

@@ -19,7 +19,7 @@ def _make_sse_response(
     """Build a mock httpx.Response that yields SSE byte chunks."""
     hdrs = {
         "content-type": content_type,
-        "x-agentcc-request-id": "req-1",
+        "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "x-agentcc-trace-id": "trace-1",
         "x-agentcc-provider": "openai",
         "x-agentcc-latency-ms": "100",
@@ -81,7 +81,7 @@ def test_stream_yields_chunks() -> None:
 def test_stream_agentcc_metadata() -> None:
     resp = _make_sse_response([_make_chunk("Hi", "stop")])
     stream = Stream(resp)
-    assert stream.agentcc.request_id == "req-1"
+    assert stream.agentcc.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"
     assert stream.agentcc.provider == "openai"
     assert stream.agentcc.latency_ms == 100
 

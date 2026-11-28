@@ -1,0 +1,253 @@
+from http import HTTPStatus
+from typing import Any
+
+import httpx
+
+from ...client import AuthenticatedClient, Client
+from ...models.contract_extension_management_api_error_response import (
+    ContractExtensionManagementAPIErrorResponse,
+)
+from ...models.contract_extension_model_hub_error_response import (
+    ContractExtensionModelHubErrorResponse,
+)
+from ...models.run_comparison_request import RunComparisonRequest
+from ...models.run_comparison_response import RunComparisonResponse
+from ...types import Response
+
+
+def _get_kwargs(
+    *,
+    body: RunComparisonRequest,
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
+
+    _kwargs: dict[str, Any] = {
+        "method": "post",
+        "url": "/model-hub/experiment-runs/compare/",
+    }
+
+    _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
+    return _kwargs
+
+
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> (
+    ContractExtensionManagementAPIErrorResponse
+    | ContractExtensionModelHubErrorResponse
+    | RunComparisonResponse
+):
+    if response.status_code == 200:
+        response_200 = RunComparisonResponse.from_dict(response.json())
+
+        return response_200
+
+    if response.status_code == 400:
+        response_400 = ContractExtensionModelHubErrorResponse.from_dict(response.json())
+
+        return response_400
+
+    if response.status_code == 403:
+        response_403 = ContractExtensionModelHubErrorResponse.from_dict(response.json())
+
+        return response_403
+
+    if response.status_code == 404:
+        response_404 = ContractExtensionModelHubErrorResponse.from_dict(response.json())
+
+        return response_404
+
+    if response.status_code == 409:
+        response_409 = ContractExtensionModelHubErrorResponse.from_dict(response.json())
+
+        return response_409
+
+    if response.status_code == 500:
+        response_500 = ContractExtensionModelHubErrorResponse.from_dict(response.json())
+
+        return response_500
+
+    response_default = ContractExtensionManagementAPIErrorResponse.from_dict(
+        response.json()
+    )
+
+    return response_default
+
+
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[
+    ContractExtensionManagementAPIErrorResponse
+    | ContractExtensionModelHubErrorResponse
+    | RunComparisonResponse
+]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    *,
+    client: AuthenticatedClient | Client,
+    body: RunComparisonRequest,
+) -> Response[
+    ContractExtensionManagementAPIErrorResponse
+    | ContractExtensionModelHubErrorResponse
+    | RunComparisonResponse
+]:
+    """Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and
+    selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is
+    rejected, never truncated. Tenant and workspace scope come from authentication. Optional
+    include_trial_stability returns per-example counts, observed assessed-score population standard
+    deviations and paired candidate-minus-baseline deltas; deviations are null below two assessed trials
+    and imply no statistical significance. An optional release_gate derives a case-level verdict
+    requiring valid evidence for the complete plan on both sides; a failed gate still returns 200.
+    Optional diff_case returns one bounded canonical output comparison for an exact pinned case/trial;
+    it does not read traces or make writes. This endpoint does not execute tasks or attest caller-
+    supplied evidence.
+
+    Args:
+        body (RunComparisonRequest):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[ContractExtensionManagementAPIErrorResponse | ContractExtensionModelHubErrorResponse | RunComparisonResponse]
+    """
+
+    kwargs = _get_kwargs(
+        body=body,
+    )
+
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
+
+    return _build_response(client=client, response=response)
+
+
+def sync(
+    *,
+    client: AuthenticatedClient | Client,
+    body: RunComparisonRequest,
+) -> (
+    ContractExtensionManagementAPIErrorResponse
+    | ContractExtensionModelHubErrorResponse
+    | RunComparisonResponse
+    | None
+):
+    """Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and
+    selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is
+    rejected, never truncated. Tenant and workspace scope come from authentication. Optional
+    include_trial_stability returns per-example counts, observed assessed-score population standard
+    deviations and paired candidate-minus-baseline deltas; deviations are null below two assessed trials
+    and imply no statistical significance. An optional release_gate derives a case-level verdict
+    requiring valid evidence for the complete plan on both sides; a failed gate still returns 200.
+    Optional diff_case returns one bounded canonical output comparison for an exact pinned case/trial;
+    it does not read traces or make writes. This endpoint does not execute tasks or attest caller-
+    supplied evidence.
+
+    Args:
+        body (RunComparisonRequest):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        ContractExtensionManagementAPIErrorResponse | ContractExtensionModelHubErrorResponse | RunComparisonResponse
+    """
+
+    return sync_detailed(
+        client=client,
+        body=body,
+    ).parsed
+
+
+async def asyncio_detailed(
+    *,
+    client: AuthenticatedClient | Client,
+    body: RunComparisonRequest,
+) -> Response[
+    ContractExtensionManagementAPIErrorResponse
+    | ContractExtensionModelHubErrorResponse
+    | RunComparisonResponse
+]:
+    """Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and
+    selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is
+    rejected, never truncated. Tenant and workspace scope come from authentication. Optional
+    include_trial_stability returns per-example counts, observed assessed-score population standard
+    deviations and paired candidate-minus-baseline deltas; deviations are null below two assessed trials
+    and imply no statistical significance. An optional release_gate derives a case-level verdict
+    requiring valid evidence for the complete plan on both sides; a failed gate still returns 200.
+    Optional diff_case returns one bounded canonical output comparison for an exact pinned case/trial;
+    it does not read traces or make writes. This endpoint does not execute tasks or attest caller-
+    supplied evidence.
+
+    Args:
+        body (RunComparisonRequest):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[ContractExtensionManagementAPIErrorResponse | ContractExtensionModelHubErrorResponse | RunComparisonResponse]
+    """
+
+    kwargs = _get_kwargs(
+        body=body,
+    )
+
+    response = await client.get_async_httpx_client().request(**kwargs)
+
+    return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    *,
+    client: AuthenticatedClient | Client,
+    body: RunComparisonRequest,
+) -> (
+    ContractExtensionManagementAPIErrorResponse
+    | ContractExtensionModelHubErrorResponse
+    | RunComparisonResponse
+    | None
+):
+    """Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and
+    selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is
+    rejected, never truncated. Tenant and workspace scope come from authentication. Optional
+    include_trial_stability returns per-example counts, observed assessed-score population standard
+    deviations and paired candidate-minus-baseline deltas; deviations are null below two assessed trials
+    and imply no statistical significance. An optional release_gate derives a case-level verdict
+    requiring valid evidence for the complete plan on both sides; a failed gate still returns 200.
+    Optional diff_case returns one bounded canonical output comparison for an exact pinned case/trial;
+    it does not read traces or make writes. This endpoint does not execute tasks or attest caller-
+    supplied evidence.
+
+    Args:
+        body (RunComparisonRequest):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        ContractExtensionManagementAPIErrorResponse | ContractExtensionModelHubErrorResponse | RunComparisonResponse
+    """
+
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+        )
+    ).parsed

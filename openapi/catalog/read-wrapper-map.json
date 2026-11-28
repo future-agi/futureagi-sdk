@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "operations": {
+    "model-hub_api_models_list_list": {
+      "methods": [
+        {
+          "py": "client.models.list",
+          "py_async": "client.models.list",
+          "ts": "client.models.list",
+          "arguments": ["page", "limit", "name", "search", "model_type", "exclude_providers"]
+        }
+      ]
+    },
+    "accounts_key_get_secret_keys": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "reason": "The pinned endpoint lists organization-wide keys and supplies creator names, not an authenticated owner identity. Personal-only enumeration requires a certified owner-scoped backend contract."
+    },
+    "accounts_keys_list": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "reason": "Organization credential bootstrap is excluded; no SDK key namespace may call it."
+    },
+    "usage_v2_usage-overview_list": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "proposed": "billing.usage_overview",
+      "removed_aliases": ["usage.overview"],
+      "reason": "Billing reads, including the former usage.overview alias, are absent until the certified management contract and cloud backend are qualified."
+    },
+    "usage_v2_usage-time-series_list": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "proposed": "billing.usage_time_series",
+      "reason": "Cloud backend qualification and certified management contract are not available."
+    },
+    "usage_v2_usage-workspace-breakdown_list": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "proposed": "billing.workspace_breakdown",
+      "reason": "Cloud backend qualification and certified management contract are not available."
+    },
+    "usage_v2_billing-overview_list": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "proposed": "billing.overview",
+      "reason": "Cloud backend qualification and certified management contract are not available."
+    },
+    "usage_v2_invoices_list": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "proposed": "billing.invoices.list",
+      "reason": "Cloud backend qualification and certified management contract are not available."
+    },
+    "usage_v2_invoices_read": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "proposed": "billing.invoices.get",
+      "reason": "Cloud backend qualification and certified management contract are not available."
+    },
+    "usage_v2_budgets_list": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "proposed": "billing.budgets.list",
+      "reason": "Cloud backend qualification and certified management contract are not available."
+    },
+    "usage_v2_plans-and-addons_list": {
+      "py": "NOT-OFFERED",
+      "py_async": "NOT-OFFERED",
+      "ts": "NOT-OFFERED",
+      "proposed": "billing.plans",
+      "reason": "Cloud backend qualification and certified management contract are not available."
+    }
+  }
+}

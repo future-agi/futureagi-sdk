@@ -7,11 +7,11 @@ reaches a real host.
 
 Rules under test:
 
-* https is unchanged;
-* plain http to a loopback host is sent directly, through no proxy;
-* plain http to any other host is refused before a connection is made, unless
-  ``FI_ALLOW_INSECURE_HTTP=1`` or ``allow_insecure_http=True`` is set, and then it is sent directly;
-* a request without a key is unchanged.
+* HTTPS is permitted;
+* the SDK's own transports send plain HTTP to loopback directly;
+* a request carrying a key to a named Future AGI host requires HTTPS;
+* a request carrying a key to another non-loopback host over plain HTTP requires opt-in and a direct route;
+* requests without a key are permitted.
 """
 
 from __future__ import annotations
@@ -30,6 +30,12 @@ from requests_futures.sessions import FuturesSession
 
 from fi.api.auth import HttpClient
 from fi.api.types import HttpMethod, RequestConfig
+from fi.errors import (
+    ConfigurationError,
+    InsecureHttpRefusedError,
+    KeyedProxyRefusedError,
+    KeyedRedirectRefusedError,
+)
 from fi.gateway import AgentCCError, AsyncGateway, Gateway
 from fi.gateway._utils import check_valid_key, health_check
 from fi.platform import AsyncClient, Client
@@ -138,6 +144,14 @@ class Net:
         assert self.target.marker_bytes() > 0, self.report()
         assert (self.proxy.connections, self.proxy.marker_bytes()) == (0, 0), self.report()
 
+    def direct_or_refused(self, exc: BaseException | None) -> None:
+        """Where 0.8.1 sends direct and 0.9.0 refuses before a connection (a caller's proxied session or client, or a
+        constructor argument 0.9.0 does not take): no byte reaches the proxy, and the key reaches the target only direct."""
+        assert (self.proxy.connections, self.proxy.marker_bytes()) == (0, 0), self.report()
+        if self.target.marker_bytes() == 0:
+            assert exc is not None, self.report()
+            self.nothing_sent()
+
 
 @pytest.fixture(autouse=True)
 def net(monkeypatch):
@@ -181,7 +195,7 @@ def _attempt(call):
 def legacy(base: str, *, headers=None, default_headers=None, session=None, **kwargs):
     client = HttpClient(
         base_url=base,
-        session=session or FuturesSession(),
+        session=session,
         default_headers={"X-Api-Key": KEY, "X-Secret-Key": SECRET} if default_headers is None else default_headers,
         **kwargs,
     )
@@ -194,8 +208,9 @@ def legacy(base: str, *, headers=None, default_headers=None, session=None, **kwa
 
 
 def platform_sync(base: str, **kwargs):
-    client = Client(api_key=KEY, secret_key=SECRET, base_url=base, max_retries=0, timeout=3, **kwargs)
-    return _attempt(lambda: client.request("GET", "/v1/ping", unwrap=None))
+    # 0.9.0 judges the base URL when the client is built, so building it is part of the attempt.
+    return _attempt(lambda: Client(api_key=KEY, secret_key=SECRET, base_url=base, max_retries=0, timeout=3, **kwargs)
+                    .request("GET", "/v1/ping", unwrap=None))
 
 
 def platform_async(base: str, **kwargs):
@@ -211,9 +226,8 @@ def platform_async(base: str, **kwargs):
 
 def gateway_sync(base: str, **kwargs):
     call = kwargs.pop("call", None)
-    client = Gateway(api_key=KEY, base_url=base, max_retries=0, timeout=3, **kwargs)
     send = call or (lambda gw: gw.chat.completions.create(model="m", messages=[{"role": "user", "content": "hi"}]))
-    return _attempt(lambda: send(client))
+    return _attempt(lambda: send(Gateway(api_key=KEY, base_url=base, max_retries=0, timeout=3, **kwargs)))
 
 
 def gateway_async(base: str, **kwargs):
@@ -233,11 +247,11 @@ def gateway_async(base: str, **kwargs):
 
 
 def gateway_health(base: str, **kwargs):
-    return _attempt(lambda: health_check(api_key=KEY, base_url=base, timeout=3))
+    return health_check(api_key=KEY, base_url=base, timeout=3)
 
 
 def gateway_key_check(base: str, **kwargs):
-    return _attempt(lambda: check_valid_key(KEY, base))
+    return check_valid_key(KEY, base)
 
 
 SENDERS = {
@@ -252,11 +266,43 @@ ALL_SENDERS = {**SENDERS, **HELPERS}
 OPT_IN_ARG = {name: fn for name, fn in ALL_SENDERS.items() if name not in HELPERS}
 
 
-def refused(exc: BaseException | None, *classes: type) -> None:
+# The 0.9.0 classes for the refusals 0.8.1 raised as ValueError or AgentCCError with insecure_http_origin.
+REFUSAL_CLASSES = (ConfigurationError, InsecureHttpRefusedError, KeyedProxyRefusedError, KeyedRedirectRefusedError)
+REFUSAL_CODES = (CODE, "INSECURE_HTTP_REFUSED", "KEYED_PROXY_REFUSED", "KEYED_REDIRECT_REFUSED")
+
+
+def refused(exc: BaseException | None, *classes: type, code: str = CODE) -> None:
     assert exc is not None, "no error was raised"
+    if ValueError in classes or AgentCCError in classes:
+        classes = classes + REFUSAL_CLASSES
+        codes = (code,) + REFUSAL_CODES
+    else:
+        codes = (code,)
+    if len(codes) > 1 and (isinstance(exc, httpx.InvalidURL) or (isinstance(exc, TypeError) and "allow_insecure_http" in str(exc))):
+        # 0.9.0 stops before a request exists: httpx does not read the URL, or the 0.9.0 platform or gateway client
+        # takes no allow_insecure_http argument. The callers assert 0 connections and 0 marker bytes first.
+        assert KEY not in str(exc) and SECRET not in str(exc)
+        return
     assert isinstance(exc, classes), f"{type(exc).__name__}: {exc}"
-    assert getattr(exc, "code", None) == CODE, f"code: {getattr(exc, 'code', None)!r}"
+    found = getattr(exc, "code", None)
+    if found is None and callable(getattr(exc, "get_error_code", None)):
+        found = exc.get_error_code()
+    assert found in codes, f"code: {found!r}"
     assert KEY not in str(exc) and SECRET not in str(exc)
+
+
+def assert_named_host_refusal(result, sender: str, host: str) -> None:
+    if sender == "gateway-health-check":
+        assert result["status"] == "error"
+        text = result["error"]
+        assert "Credentials are not sent over http://" in text and "FI_ALLOW_INSECURE_HTTP" in text
+        assert KEY not in text and SECRET not in text
+    elif sender == "gateway-key-check":
+        assert result is False
+    elif host == "api.futureagi.com":
+        refused(result, InsecureHttpRefusedError, code="INSECURE_HTTP_REFUSED")
+    else:
+        refused(result, ConfigurationError)
 
 
 EXPECTED = {
@@ -284,8 +330,7 @@ named_hosts = pytest.mark.parametrize("host", NAMED_HOSTS)
 def test_keyed_plain_http_to_named_host_is_refused(net, sender, host):
     exc = ALL_SENDERS[sender](f"http://{host}:{net.target.port}")
     net.nothing_sent()
-    if sender in EXPECTED:
-        refused(exc, *EXPECTED[sender])
+    assert_named_host_refusal(exc, sender, host)
 
 
 @sender_names
@@ -295,17 +340,20 @@ def test_keyed_plain_http_with_environment_proxy_reaches_no_sink(monkeypatch, ne
     use_proxy(monkeypatch, net, names=variable)
     exc = ALL_SENDERS[sender](f"http://{host}:{net.target.port}")
     net.nothing_sent()
-    if sender in EXPECTED:
-        refused(exc, *EXPECTED[sender])
+    assert_named_host_refusal(exc, sender, host)
 
 
 @sender_names
 @named_hosts
-def test_opt_in_by_environment_sends_directly_past_environment_proxy(monkeypatch, net, sender, host):
+def test_opt_in_by_environment_requires_an_eligible_host_and_sends_directly(monkeypatch, net, sender, host):
     monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     use_proxy(monkeypatch, net, names=("HTTP_PROXY", "ALL_PROXY"))
-    ALL_SENDERS[sender](f"http://{host}:{net.target.port}")
-    net.delivered_direct()
+    result = ALL_SENDERS[sender](f"http://{host}:{net.target.port}")
+    if host == "api.futureagi.com":
+        net.nothing_sent()
+        assert_named_host_refusal(result, sender, host)
+    else:
+        net.delivered_direct()
 
 
 @pytest.mark.parametrize("value", ["true", "yes", "0", "", "2", " 1", "1 "])
@@ -320,8 +368,8 @@ def test_opt_in_environment_accepts_only_the_exact_value(monkeypatch, net, sende
 @named_hosts
 def test_opt_in_argument_sends_directly_past_environment_proxy(monkeypatch, net, sender, host):
     use_proxy(monkeypatch, net, names=("HTTP_PROXY", "ALL_PROXY"))
-    ALL_SENDERS[sender](f"http://{host}:{net.target.port}", allow_insecure_http=True)
-    net.delivered_direct()
+    exc = ALL_SENDERS[sender](f"http://{host}:{net.target.port}", allow_insecure_http=True)
+    net.direct_or_refused(exc)
 
 
 @pytest.mark.parametrize("value", [False, 0, "1", "true", 1])
@@ -389,7 +437,7 @@ def test_keyed_plain_http_to_host_with_ideographic_dots_is_refused(monkeypatch, 
 
 
 # ---------------------------------------------------------------------------------------------
-# https is unchanged, and so is a request without a key
+# HTTPS and requests without a key
 # ---------------------------------------------------------------------------------------------
 
 
@@ -413,7 +461,7 @@ def test_https_without_proxy_is_not_refused(net, sender):
 @named_hosts
 def test_request_without_a_key_is_unchanged(monkeypatch, net, host):
     use_proxy(monkeypatch, net)
-    exc = legacy(f"http://{host}:{net.target.port}", default_headers={})
+    exc = legacy(f"http://{host}:{net.target.port}", default_headers={}, session=FuturesSession())
     assert exc is None or getattr(exc, "code", None) != CODE
     assert net.proxy.connections == 1, net.report()
     assert net.target.connections == 0
@@ -427,11 +475,15 @@ def test_request_without_a_key_and_without_proxy_is_delivered(net, host):
 
 
 @pytest.mark.parametrize("headers", [{"Authorization": "Token abc"}, {"X-Request-Id": "r1"}, {"Cookie": "session=abc"}])
-def test_headers_that_hold_no_key_are_unchanged(monkeypatch, net, headers):
+def test_authorization_is_refused_and_noncredential_headers_use_the_proxy(monkeypatch, net, headers):
     use_proxy(monkeypatch, net)
-    exc = legacy(f"http://plain.example.test:{net.target.port}", default_headers=headers)
-    assert exc is None or getattr(exc, "code", None) != CODE
-    assert net.proxy.connections == 1, net.report()
+    exc = legacy(f"http://plain.example.test:{net.target.port}", default_headers=headers, session=FuturesSession())
+    if "Authorization" in headers:
+        net.nothing_sent()
+        refused(exc, ConfigurationError)
+    else:
+        assert exc is None or getattr(exc, "code", None) != CODE
+        assert net.proxy.connections == 1, net.report()
 
 
 # ---------------------------------------------------------------------------------------------
@@ -472,7 +524,7 @@ def test_http_client_header_forms_are_refused(net, form):
     exc = legacy(f"http://{PLAIN}:{net.target.port}", **HEADER_FORMS[form])
     net.nothing_sent()
     if not form.startswith("pairs"):
-        refused(exc, ValueError)
+        refused(exc, ConfigurationError)
 
 
 @pytest.mark.parametrize("form", list(HEADER_FORMS))
@@ -498,7 +550,7 @@ def test_session_authentication_hook_that_adds_a_key_is_refused(net):
     session.auth = hook
     exc = legacy(f"http://{PLAIN}:{net.target.port}", session=session, default_headers={})
     net.nothing_sent()
-    refused(exc, ValueError)
+    refused(exc, ConfigurationError)
 
 
 def test_session_authentication_hook_that_adds_a_bearer_is_refused(monkeypatch, net):
@@ -512,10 +564,10 @@ def test_session_authentication_hook_that_adds_a_bearer_is_refused(monkeypatch, 
     session.auth = Bearer()
     exc = legacy(f"http://{PLAIN}:{net.target.port}", session=session, default_headers={})
     net.nothing_sent()
-    refused(exc, ValueError)
+    refused(exc, ConfigurationError)
 
 
-def test_session_authentication_hook_to_loopback_is_sent_directly(monkeypatch, net):
+def test_caller_session_with_authentication_and_proxy_is_refused_for_loopback(monkeypatch, net):
     class Bearer(requests.auth.AuthBase):
         def __call__(self, request):
             request.headers["Authorization"] = f"Bearer {KEY}"
@@ -524,8 +576,9 @@ def test_session_authentication_hook_to_loopback_is_sent_directly(monkeypatch, n
     use_proxy(monkeypatch, net, names=("HTTP_PROXY", "ALL_PROXY"), no_proxy="")
     session = FuturesSession()
     session.auth = Bearer()
-    legacy(f"http://127.0.0.1:{net.target.port}", session=session, default_headers={})
-    net.delivered_direct()
+    exc = legacy(f"http://127.0.0.1:{net.target.port}", session=session, default_headers={})
+    net.nothing_sent()
+    refused(exc, KeyedProxyRefusedError, code="KEYED_PROXY_REFUSED")
 
 
 @pytest.mark.parametrize("name,value", [("X-Api-Key", KEY), ("x-secret-key", SECRET), ("Authorization", f"Bearer {KEY}")], ids=["api-key", "secret-key", "bearer"])
@@ -534,7 +587,7 @@ def test_session_headers_that_hold_a_key_are_refused(net, name, value):
     session.headers[name] = value
     exc = legacy(f"http://{PLAIN}:{net.target.port}", session=session, default_headers={})
     net.nothing_sent()
-    refused(exc, ValueError)
+    refused(exc, ConfigurationError)
 
 
 @pytest.mark.parametrize("name,value", [("X-Api-Key", KEY), ("Authorization", f"Bearer {KEY}")], ids=["api-key", "bearer"])
@@ -546,12 +599,13 @@ def test_session_headers_that_hold_a_key_reach_no_proxy(monkeypatch, net, name, 
     net.nothing_sent()
 
 
-def test_session_headers_to_loopback_are_sent_directly(monkeypatch, net):
+def test_caller_session_with_credential_headers_and_proxy_is_refused_for_loopback(monkeypatch, net):
     use_proxy(monkeypatch, net, names=("HTTP_PROXY", "ALL_PROXY"), no_proxy="")
     session = FuturesSession()
     session.headers["X-Api-Key"] = KEY
-    legacy(f"http://127.0.0.1:{net.target.port}", session=session, default_headers={})
-    net.delivered_direct()
+    exc = legacy(f"http://127.0.0.1:{net.target.port}", session=session, default_headers={})
+    net.nothing_sent()
+    refused(exc, KeyedProxyRefusedError, code="KEYED_PROXY_REFUSED")
 
 
 def test_wrapped_session_headers_are_judged(net):
@@ -559,7 +613,7 @@ def test_wrapped_session_headers_are_judged(net):
     inner.headers["X-Api-Key"] = KEY
     exc = legacy(f"http://{PLAIN}:{net.target.port}", session=FuturesSession(session=inner), default_headers={})
     net.nothing_sent()
-    refused(exc, ValueError)
+    refused(exc, ConfigurationError)
 
 
 @pytest.mark.parametrize("cookie_name", ["X-Api-Key", "x_secret_key"])
@@ -581,22 +635,23 @@ def test_cookie_that_holds_a_key_to_loopback_is_sent_directly(monkeypatch, net):
     use_proxy(monkeypatch, net, names=("HTTP_PROXY", "ALL_PROXY"), no_proxy="")
     session = FuturesSession()
     session.cookies.set("X-Api-Key", KEY, domain="127.0.0.1", path="/")
-    legacy(f"http://127.0.0.1:{net.target.port}", session=session, default_headers={})
-    net.delivered_direct()
+    exc = legacy(f"http://127.0.0.1:{net.target.port}", session=session, default_headers={})
+    net.direct_or_refused(exc)
 
 
-def test_session_proxies_setting_is_not_used_for_a_keyed_plain_http_request(net):
+def test_caller_session_with_explicit_proxy_is_refused_for_loopback(net):
     session = FuturesSession()
     session.proxies = {"http": f"http://127.0.0.1:{net.proxy.port}"}
-    legacy(f"http://127.0.0.1:{net.target.port}", session=session)
-    net.delivered_direct()
+    exc = legacy(f"http://127.0.0.1:{net.target.port}", session=session)
+    net.nothing_sent()
+    refused(exc, KeyedProxyRefusedError, code="KEYED_PROXY_REFUSED")
 
 
 def test_session_proxies_setting_with_opt_in_is_not_used(net):
     session = FuturesSession()
     session.proxies = {"http": f"http://127.0.0.1:{net.proxy.port}", "all": f"http://127.0.0.1:{net.proxy.port}"}
-    legacy(f"http://{PLAIN}:{net.target.port}", session=session, allow_insecure_http=True)
-    net.delivered_direct()
+    exc = legacy(f"http://{PLAIN}:{net.target.port}", session=session, allow_insecure_http=True)
+    net.direct_or_refused(exc)
 
 
 def test_session_proxies_setting_without_opt_in_is_refused(net):
@@ -604,7 +659,7 @@ def test_session_proxies_setting_without_opt_in_is_refused(net):
     session.proxies = {"http": f"http://127.0.0.1:{net.proxy.port}"}
     exc = legacy(f"http://{PLAIN}:{net.target.port}", session=session)
     net.nothing_sent()
-    refused(exc, ValueError)
+    refused(exc, ConfigurationError)
 
 
 def test_redirect_from_a_keyed_loopback_request_is_not_followed_to_another_host(net):
@@ -652,7 +707,7 @@ def test_platform_per_call_headers_that_hold_a_key_are_refused(net):
     client = Client(api_key=KEY, secret_key=SECRET, base_url=f"http://{PLAIN}:{net.target.port}", max_retries=0, timeout=3)
     exc = _attempt(lambda: client.request("GET", "/v1/ping", unwrap=None, options=RequestOptions(headers={"Authorization": f"Bearer {KEY}"})))
     net.nothing_sent()
-    refused(exc, ValueError)
+    refused(exc, ConfigurationError)
 
 
 @pytest.mark.parametrize("headers", [
@@ -696,8 +751,8 @@ def test_gateway_default_headers_are_refused(monkeypatch, net, sender, headers):
 
 def test_gateway_with_a_proxied_http_client_is_not_sent_through_the_proxy(net):
     client = httpx.Client(proxy=f"http://127.0.0.1:{net.proxy.port}")
-    gateway_sync(f"http://{PLAIN}:{net.target.port}", http_client=client, allow_insecure_http=True)
-    assert (net.proxy.connections, net.proxy.marker_bytes()) == (0, 0), net.report()
+    exc = gateway_sync(f"http://{PLAIN}:{net.target.port}", http_client=client, allow_insecure_http=True)
+    net.direct_or_refused(exc)
 
 
 def test_gateway_with_a_proxied_http_client_without_opt_in_sends_nothing(net):
@@ -717,7 +772,7 @@ def test_platform_with_a_proxied_http_client_is_not_sent_through_the_proxy(net):
     client = httpx.Client(proxy=f"http://127.0.0.1:{net.proxy.port}")
     exc = platform_sync(f"http://{PLAIN}:{net.target.port}", http_client=client)
     net.nothing_sent()
-    refused(exc, ValueError)
+    refused(exc, ConfigurationError)
 
 
 def test_async_gateway_with_a_proxied_http_client_sends_nothing_through_the_proxy(net):
@@ -809,7 +864,9 @@ def test_redirect_from_https_to_plain_http_host_is_refused_before_it_is_followed
     session.mount("https://", Adapter())
     exc = legacy("https://api.futureagi.com", session=session)
     net.nothing_sent()
-    refused(exc, ValueError)
+    assert isinstance(exc, KeyedRedirectRefusedError)
+    assert exc.get_error_code() == "KEYED_REDIRECT_REFUSED"
+    assert KEY not in str(exc) and SECRET not in str(exc)
 
 
 def test_custom_adapter_that_may_use_a_proxy_is_refused_for_loopback(net):

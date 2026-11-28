@@ -1,7 +1,7 @@
 """`Client` / `AsyncClient`: one config, every resource hangs off it.
 
 Extending the client
-    - Add methods to a resource in `fi/platform/resources/<name>.py` (hand-written, never regenerated).
+    - Add methods to a resource in `fi/platform/resources/<name>.py` (hand-written, not regenerated).
     - Swap or add a resource class: `class MyClient(Client): _resources = {**Client._resources, "datasets": MyDatasets}`.
     - Call an endpoint the catalog lacks: `client.request("GET", "/some/path/", query={...})`.
     - Per call: `client.datasets.get(id, options=RequestOptions(timeout=5, headers={...}))`.
@@ -14,29 +14,71 @@ from typing import Any, Dict, Mapping
 
 import httpx
 
-from fi.utils.constants import API_KEY_ENVVAR_NAME, SECRET_KEY_ENVVAR_NAME, get_base_url
+from fi._core.http_security import _written_host, future_agi_connect_host
+from fi._credentials import MissingAuthError
+from fi._credentials import resolve as resolve_credentials
+from fi.errors import ConfigurationError, InsecureHttpRefusedError
+from fi.utils.constants import get_base_url
 
 from ._transport import AsyncTransport, Config, FileInput, RequestOptions, SyncTransport
 from .resources import AsyncResources, Resources
 
 
-def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers, allow_insecure_http=None) -> Config:
-    api_key = api_key or os.environ.get(API_KEY_ENVVAR_NAME)
-    secret_key = secret_key or os.environ.get(SECRET_KEY_ENVVAR_NAME)
-    if not api_key or not secret_key:
-        raise ValueError(f"pass api_key= and secret_key=, or set {API_KEY_ENVVAR_NAME} and {SECRET_KEY_ENVVAR_NAME}")
+def _key_pair(api_key: str | None, secret_key: str | None, base_url: str) -> tuple[str, str]:
+    """The key pair for `base_url`, resolved as one unit by `fi._credentials`.
+
+    Both keys come from the arguments, or (when neither argument is given) both from
+    `FI_API_KEY` / `FI_SECRET_KEY`, then the saved login bound to `base_url`. A pair with a
+    missing or empty key raises `fi.errors.MissingAuthError` before any request.
+    """
+    creds = resolve_credentials(api_key, secret_key, base_url)
+    if not creds.complete:
+        raise MissingAuthError(
+            creds.api_key or None,
+            creds.secret_key or None,
+            base_url=creds.base_url,
+            login_skipped=creds.login_skipped,
+        )
+    return str(creds.api_key), str(creds.secret_key)
+
+
+def _check_written_base_url(base_url: str) -> None:
+    """Refuse a plain ``http://`` base URL with a backslash anywhere in it, or a host written with an ideographic,
+    fullwidth or halfwidth full stop, before any credential is read: ``InsecureHttpRefusedError`` for a Future AGI
+    host, else ``ConfigurationError`` (code ``insecure_http_origin``), with or without ``FI_ALLOW_INSECURE_HTTP=1``."""
+    if not base_url.strip().lower().startswith("http://"):
+        return
+    written_host = _written_host(base_url)
+    if "\\" not in base_url and not any(dot in written_host for dot in "。．｡"):
+        return
+    if host := future_agi_connect_host(base_url):
+        raise InsecureHttpRefusedError(host)
+    raise ConfigurationError(
+        "A plain http:// platform base URL must write its host with ASCII dots and hold no backslash "
+        "(insecure_http_origin)",
+        code="insecure_http_origin",
+    )
+
+
+def _config(
+    api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers,
+    allow_insecure_http: bool | None,
+) -> Config:
+    base_url = (base_url or get_base_url()).rstrip("/")
+    _check_written_base_url(base_url)
+    api_key, secret_key = _key_pair(api_key, secret_key, base_url)
     if max_retries < 0:
         raise ValueError("max_retries must be >= 0")
     return Config(
         api_key=api_key,
         secret_key=secret_key,
-        base_url=(base_url or get_base_url()).rstrip("/"),
+        base_url=base_url,
         timeout=timeout,
         max_retries=max_retries,
         workspace_id=workspace_id or os.environ.get("FI_WORKSPACE_ID"),
         strict_responses=strict_responses,
         default_headers=dict(default_headers) if default_headers else None,
-        allow_insecure_http=allow_insecure_http,
+        allow_insecure_http=None if allow_insecure_http is None else allow_insecure_http is True,
     )
 
 
@@ -48,15 +90,14 @@ class Client(Resources):
         for ds in client.datasets.list():
             print(ds.name)
 
-    ``allow_insecure_http``: ``True`` lets the client send its key to a plain ``http://`` URL whose host is not
-    loopback (``localhost``, ``127.0.0.0/8`` and ``::1`` need no opt-in). ``None`` (the default) turns the opt-in on
-    when ``FI_ALLOW_INSECURE_HTTP`` is ``1``; any other argument value (such as ``False``) turns it off. Without the
-    opt-in, such a request raises ``ValueError`` with ``.code`` ``"insecure_http_origin"`` before a connection is made.
-    The opt-in does not unlock a host written with userinfo, non-ASCII characters, ``%``, a trailing dot, or an IPv4
-    address in a short, hex or octal form. A keyed plain ``http://`` request goes through no proxy; with an
-    ``http_client`` passed in, it is refused unless the transport that client selects for the URL goes through no
-    proxy, and a client whose transport is ``httpx.MockTransport``, ``WSGITransport`` or ``ASGITransport`` is not
-    checked.
+    The key pair comes from one place: `api_key=` and `secret_key=` together, or, when neither
+    is given, `FI_API_KEY` and `FI_SECRET_KEY` together. One key given without the other (or as
+    an empty string), or no pair at all, raises `fi.errors.MissingAuthError` before any request. A plain
+    `http://` base URL with a backslash, or with a host written with a non-ASCII full stop, is refused first,
+    before the key pair is read.
+
+    `allow_insecure_http=True` opts in to direct plain HTTP for eligible non-loopback hosts outside the
+    Future AGI zone. `False` disables the opt-in, and `None` uses `FI_ALLOW_INSECURE_HTTP`.
     """
 
     def __init__(
@@ -74,7 +115,11 @@ class Client(Resources):
         allow_insecure_http: bool | None = None,
     ) -> None:
         self._transport = SyncTransport(
-            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers, allow_insecure_http), http_client
+            _config(
+                api_key, secret_key, base_url, timeout, max_retries, workspace_id,
+                strict_responses, default_headers, allow_insecure_http,
+            ),
+            http_client,
         )
         self._init_resources(self._transport)
 
@@ -111,18 +156,7 @@ class Client(Resources):
 
 
 class AsyncClient(AsyncResources):
-    """Same API as `Client`, with `await` / `async for`.
-
-    ``allow_insecure_http``: ``True`` lets the client send its key to a plain ``http://`` URL whose host is not
-    loopback (``localhost``, ``127.0.0.0/8`` and ``::1`` need no opt-in). ``None`` (the default) turns the opt-in on
-    when ``FI_ALLOW_INSECURE_HTTP`` is ``1``; any other argument value (such as ``False``) turns it off. Without the
-    opt-in, such a request raises ``ValueError`` with ``.code`` ``"insecure_http_origin"`` before a connection is made.
-    The opt-in does not unlock a host written with userinfo, non-ASCII characters, ``%``, a trailing dot, or an IPv4
-    address in a short, hex or octal form. A keyed plain ``http://`` request goes through no proxy; with an
-    ``http_client`` passed in, it is refused unless the transport that client selects for the URL goes through no
-    proxy, and a client whose transport is ``httpx.MockTransport``, ``WSGITransport`` or ``ASGITransport`` is not
-    checked.
-    """
+    """Same API as `Client`, with `await` / `async for`."""
 
     def __init__(
         self,
@@ -139,7 +173,11 @@ class AsyncClient(AsyncResources):
         allow_insecure_http: bool | None = None,
     ) -> None:
         self._transport = AsyncTransport(
-            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers, allow_insecure_http), http_client
+            _config(
+                api_key, secret_key, base_url, timeout, max_retries, workspace_id,
+                strict_responses, default_headers, allow_insecure_http,
+            ),
+            http_client,
         )
         self._init_resources(self._transport)
 

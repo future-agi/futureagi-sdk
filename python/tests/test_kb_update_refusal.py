@@ -2,18 +2,18 @@
 
 Each case calls one ``fi.kb.KnowledgeBase`` method against a loopback listener that a name such as
 ``api.futureagi.com`` resolves to, and reads what reached the target and proxy listeners. Without the
-opt-in the request is refused before a connection is made, and the refusal reaches the caller as it is
-(``.code == "insecure_http_origin"``), whatever the method had or had not prepared before the request.
+opt-in the request is refused before a connection is made. Methods may wrap the refusal in a lookup error.
 """
 
 from __future__ import annotations
 
 import pytest
 
+from fi.errors import ConfigurationError, InsecureHttpRefusedError
 from fi.kb.client import KnowledgeBase
 from fi.kb.types import KnowledgeBaseConfig
 from fi.utils.errors import SDKException
-from tests.test_plain_http_key_guards import CODE, KEY, SECRET, Net, Sink, net, refused, use_proxy  # noqa: F401
+from tests.test_plain_http_key_guards import KEY, SECRET, net, use_proxy  # noqa: F401
 
 KB_ID = "00000000-0000-4000-8000-000000000001"
 HOSTS = pytest.mark.parametrize("host", ["api.futureagi.com", "plain.example.test"], ids=["api-host", "plain-host"])
@@ -34,6 +34,24 @@ def _attempt(call):
     except Exception as exc:  # the listener's reply may fail to parse; the error is what is read
         return exc
     return None
+
+
+def _assert_refusal(exc, host, *, wrapper=None, discarded=False):
+    assert exc is not None
+    assert KEY not in str(exc) and SECRET not in str(exc)
+    if wrapper is not None:
+        assert type(exc) is SDKException
+        assert str(exc) == wrapper
+        if discarded:
+            return
+        exc = exc.__context__
+    cls, code = (
+        (InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED")
+        if host == "api.futureagi.com" else (ConfigurationError, "insecure_http_origin")
+    )
+    assert type(exc) is cls, repr(exc)
+    assert exc.code == exc.get_error_code() == code
+    assert KEY not in str(exc) and SECRET not in str(exc)
 
 
 @pytest.fixture
@@ -70,7 +88,7 @@ def test_update_kb_that_looks_up_the_name_is_refused_with_the_plain_http_code(mo
         kb.kb = KnowledgeBaseConfig(id=KB_ID, name=cached)
     exc = _attempt(lambda: kb.update_kb(kb_name="docs", new_name="renamed", file_paths=[notes] if with_files else None))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _assert_refusal(exc, host, wrapper="Knowledge Base named 'docs' not found when attempting to update.")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -103,11 +121,16 @@ def test_other_kb_methods_are_refused_with_the_plain_http_code(monkeypatch, net,
     use_proxy(monkeypatch, net, names=proxy)
     exc = _attempt(lambda: CALLS[call](f"http://{host}:{net.target.port}", notes))
     net.nothing_sent()
-    refused(exc, ValueError)
+    wrappers = {
+        "delete-kb-by-name": "None of the provided Knowledge Base names could be resolved to existing IDs.",
+        "delete-kb-by-names": "None of the provided Knowledge Base names could be resolved to existing IDs.",
+        "delete-files-by-kb-name": "Knowledge Base named 'docs' not found when attempting to delete files.",
+    }
+    _assert_refusal(exc, host, wrapper=wrappers.get(call), discarded=call in {"delete-kb-by-name", "delete-kb-by-names"})
 
 
 # ---------------------------------------------------------------------------------------------
-# controls: loopback and the opt-in send the lookup directly, through no proxy
+# controls: loopback and the environment opt-in send the lookup directly
 # ---------------------------------------------------------------------------------------------
 
 
@@ -116,14 +139,14 @@ def test_other_kb_methods_are_refused_with_the_plain_http_code(monkeypatch, net,
     [("127.0.0.1", None), ("localhost", None), ("plain.example.test", True)],
     ids=["loopback-address", "loopback-name", "opt-in-argument"],
 )
-def test_update_kb_lookup_to_loopback_or_with_opt_in_is_sent_directly(monkeypatch, net, host, opt_in):
+def test_update_kb_lookup_to_loopback_or_with_opt_in_argument(monkeypatch, net, host, opt_in):
     use_proxy(monkeypatch, net)
     kwargs = {} if opt_in is None else {"allow_insecure_http": opt_in}
     exc = _attempt(lambda: _kb(f"http://{host}:{net.target.port}", **kwargs).update_kb(kb_name="docs", new_name="renamed"))
     net.delivered_direct()
     # the listener's empty reply names no Knowledge Base
     assert isinstance(exc, SDKException), f"{type(exc).__name__}: {exc}"
-    assert getattr(exc, "code", None) != CODE
+    assert getattr(exc, "code", None) not in {"insecure_http_origin", "INSECURE_HTTP_REFUSED"}
 
 
 def test_update_kb_lookup_with_opt_in_environment_is_sent_directly(monkeypatch, net):
@@ -132,4 +155,4 @@ def test_update_kb_lookup_with_opt_in_environment_is_sent_directly(monkeypatch, 
     exc = _attempt(lambda: _kb(f"http://plain.example.test:{net.target.port}").update_kb(kb_name="docs", new_name="renamed"))
     net.delivered_direct()
     assert isinstance(exc, SDKException), f"{type(exc).__name__}: {exc}"
-    assert getattr(exc, "code", None) != CODE
+    assert getattr(exc, "code", None) not in {"insecure_http_origin", "INSECURE_HTTP_REFUSED"}

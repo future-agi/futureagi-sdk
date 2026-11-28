@@ -6,7 +6,7 @@ from __future__ import annotations
 def _full_headers() -> dict[str, str]:
     """Return a complete set of AgentCC response headers."""
     return {
-        "x-agentcc-request-id": "req-abc123",
+        "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "x-agentcc-trace-id": "trace-xyz789",
         "x-agentcc-provider": "openai",
         "x-agentcc-latency-ms": "142",
@@ -27,7 +27,7 @@ def test_from_headers_full() -> None:
     from fi.gateway.types.agentcc_metadata import AgentCCMetadata
 
     meta = AgentCCMetadata.from_headers(_full_headers())
-    assert meta.request_id == "req-abc123"
+    assert meta.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"
     assert meta.trace_id == "trace-xyz789"
     assert meta.provider == "openai"
     assert meta.latency_ms == 142
@@ -49,7 +49,7 @@ def test_from_headers_minimal() -> None:
     from fi.gateway.types.agentcc_metadata import AgentCCMetadata
 
     meta = AgentCCMetadata.from_headers({})
-    assert meta.request_id == "unknown"
+    assert meta.request_id is None
     assert meta.trace_id == "unknown"
     assert meta.provider == "unknown"
     assert meta.latency_ms == 0

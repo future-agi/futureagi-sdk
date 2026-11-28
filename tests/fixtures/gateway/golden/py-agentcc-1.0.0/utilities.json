@@ -1,0 +1,3410 @@
+{
+ "area": "utilities",
+ "cases": {
+  "utility.abatch_completion[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "again",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 0,
+       "model_used": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "request_id": "unknown",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "completion_tokens_details": null,
+       "prompt_tokens": 5,
+       "prompt_tokens_details": null,
+       "total_tokens": 8
+      }
+     }
+    },
+    {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 0,
+       "model_used": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "request_id": "unknown",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "completion_tokens_details": null,
+       "prompt_tokens": 5,
+       "prompt_tokens_details": null,
+       "total_tokens": 8
+      }
+     }
+    }
+   ]
+  },
+  "utility.abatch_completion_models[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "claude-3-5-haiku"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "utility.abatch_completion_models_all[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "claude-3-5-haiku"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 0,
+       "model_used": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "request_id": "unknown",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "completion_tokens_details": null,
+       "prompt_tokens": 5,
+       "prompt_tokens_details": null,
+       "total_tokens": 8
+      }
+     }
+    },
+    {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 0,
+       "model_used": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "request_id": "unknown",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "completion_tokens_details": null,
+       "prompt_tokens": 5,
+       "prompt_tokens_details": null,
+       "total_tokens": 8
+      }
+     }
+    }
+   ]
+  },
+  "utility.batch_completion.errors[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "again",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 0,
+       "model_used": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "request_id": "unknown",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "completion_tokens_details": null,
+       "prompt_tokens": 5,
+       "prompt_tokens_details": null,
+       "total_tokens": 8
+      }
+     }
+    },
+    {
+     "__exception__": "BadRequestError",
+     "args": [
+      "bad"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "bad"
+       }
+      },
+      "code": null,
+      "message": "bad",
+      "param": null,
+      "request_id": null,
+      "status_code": 400,
+      "type": null
+     },
+     "mro": [
+      "BadRequestError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "BadRequestError(status_code=400, message='bad')",
+     "response_status": 400,
+     "str": "Error code: 400 - bad"
+    }
+   ]
+  },
+  "utility.batch_completion[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "again",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 0,
+       "model_used": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "request_id": "unknown",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "completion_tokens_details": null,
+       "prompt_tokens": 5,
+       "prompt_tokens_details": null,
+       "total_tokens": 8
+      }
+     }
+    },
+    {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 0,
+       "model_used": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "request_id": "unknown",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "completion_tokens_details": null,
+       "prompt_tokens": 5,
+       "prompt_tokens_details": null,
+       "total_tokens": 8
+      }
+     }
+    }
+   ]
+  },
+  "utility.batch_completion_models[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "claude-3-5-haiku"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "utility.batch_completion_models_all[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "claude-3-5-haiku"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 0,
+       "model_used": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "request_id": "unknown",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "completion_tokens_details": null,
+       "prompt_tokens": 5,
+       "prompt_tokens_details": null,
+       "total_tokens": 8
+      }
+     }
+    },
+    {
+     "__exception__": "BadRequestError",
+     "args": [
+      "bad"
+     ],
+     "attrs": {
+      "body": {
+       "error": {
+        "message": "bad"
+       }
+      },
+      "code": null,
+      "message": "bad",
+      "param": null,
+      "request_id": null,
+      "status_code": 400,
+      "type": null
+     },
+     "mro": [
+      "BadRequestError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "BadRequestError(status_code=400, message='bad')",
+     "response_status": 400,
+     "str": "Error code: 400 - bad"
+    }
+   ]
+  },
+  "utility.budget_manager[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "Budget exceeded: current spend $1.3000 + estimated $0.0000 > max $1.0000"
+    ],
+    "attrs": {
+     "message": "Budget exceeded: current spend $1.3000 + estimated $0.0000 > max $1.0000"
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "Budget exceeded: current spend $1.3000 + estimated $0.0000 > max $1.0000"
+     ],
+     "ok": true,
+     "str": "Budget exceeded: current spend $1.3000 + estimated $0.0000 > max $1.0000",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('Budget exceeded: current spend $1.3000 + estimated $0.0000 > max $1.0000')",
+    "str": "Budget exceeded: current spend $1.3000 + estimated $0.0000 > max $1.0000"
+   },
+   "requests": []
+  },
+  "utility.chunk_accumulator[sync]": {
+   "requests": [],
+   "result": {
+    "builder_empty": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [],
+       "created": 0,
+       "id": "",
+       "model": "",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": null
+      }
+     }
+    },
+    "content": {
+     "accumulator": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-stream",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 2,
+        "completion_tokens_details": null,
+        "prompt_tokens": 4,
+        "prompt_tokens_details": null,
+        "total_tokens": 6
+       }
+      }
+     },
+     "builder": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-stream",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 2,
+        "completion_tokens_details": null,
+        "prompt_tokens": 4,
+        "prompt_tokens_details": null,
+        "total_tokens": 6
+       }
+      }
+     }
+    },
+    "tool_calls": {
+     "accumulator": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "tool_calls",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": null,
+          "name": null,
+          "role": "assistant",
+          "tool_calls": [
+           {
+            "function": {
+             "arguments": "{\"city\":\"Paris\"}",
+             "name": "get_weather"
+            },
+            "id": "call_1",
+            "type": "function"
+           }
+          ]
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-tool",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 7,
+        "completion_tokens_details": null,
+        "prompt_tokens": 12,
+        "prompt_tokens_details": null,
+        "total_tokens": 19
+       }
+      }
+     },
+     "builder": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": null,
+       "choices": [
+        {
+         "finish_reason": "tool_calls",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": null,
+          "name": null,
+          "role": "assistant",
+          "tool_calls": [
+           {
+            "function": {
+             "arguments": "{\"city\":\"Paris\"}",
+             "name": "get_weather"
+            },
+            "id": "call_1",
+            "type": "function"
+           }
+          ]
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-tool",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 7,
+        "completion_tokens_details": null,
+        "prompt_tokens": 12,
+        "prompt_tokens_details": null,
+        "total_tokens": 19
+       }
+      }
+     }
+    }
+   }
+  },
+  "utility.cost_from_response[sync]": {
+   "requests": [],
+   "result": {
+    "from_completion": 0.00022500000000000002,
+    "from_dict": null
+   }
+  },
+  "utility.json_logging_callback[sync]": {
+   "logs": [
+    [
+     "agentcc",
+     "DEBUG",
+     "Callback JSONLoggingCallbackHandler.on_request_end raised an exception"
+    ]
+   ],
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": null
+  },
+  "utility.patch_openai[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "result": {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 0,
+       "model_used": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "request_id": "unknown",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "completion_tokens_details": null,
+       "prompt_tokens": 5,
+       "prompt_tokens_details": null,
+       "total_tokens": 8
+      }
+     }
+    },
+    "type": "AgentCC"
+   }
+  },
+  "utility.per_model[sync]": {
+   "requests": [],
+   "result": {
+    "": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": null,
+     "functions": false,
+     "info": null,
+     "json_mode": false,
+     "max_output_tokens": null,
+     "max_tokens": null,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "claude-3-5-haiku-20241022": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.0048000000000000004,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 8e-07,
+       "max_output_tokens": 8192,
+       "max_tokens": 200000,
+       "output_cost_per_token": 4e-06,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": false
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 8192,
+     "max_tokens": 200000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": false
+    },
+    "claude-3-5-sonnet-20241022": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.018000000000000002,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 3e-06,
+       "max_output_tokens": 8192,
+       "max_tokens": 200000,
+       "output_cost_per_token": 1.5e-05,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": true
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 8192,
+     "max_tokens": 200000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": true
+    },
+    "claude-3-haiku-20240307": {
+     "content_fallback": null,
+     "context_fallback": "claude-3-5-haiku-20241022",
+     "cost_1k_1k": 0.0015,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 2.5e-07,
+       "max_output_tokens": 4096,
+       "max_tokens": 200000,
+       "output_cost_per_token": 1.25e-06,
+       "supports_function_calling": true,
+       "supports_json_mode": false,
+       "supports_vision": true
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": 4096,
+     "max_tokens": 200000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": true
+    },
+    "claude-3-opus-20240229": {
+     "content_fallback": null,
+     "context_fallback": "claude-sonnet-4-20250514",
+     "cost_1k_1k": 0.09,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1.5e-05,
+       "max_output_tokens": 4096,
+       "max_tokens": 200000,
+       "output_cost_per_token": 7.5e-05,
+       "supports_function_calling": true,
+       "supports_json_mode": false,
+       "supports_vision": true
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": 4096,
+     "max_tokens": 200000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": true
+    },
+    "claude-sonnet-4-20250514": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.018000000000000002,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 3e-06,
+       "max_output_tokens": 64000,
+       "max_tokens": 200000,
+       "output_cost_per_token": 1.5e-05,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": true
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 64000,
+     "max_tokens": 200000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": true
+    },
+    "gemini-1.5-flash": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.00037499999999999995,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 7.5e-08,
+       "max_output_tokens": 8192,
+       "max_tokens": 1048576,
+       "output_cost_per_token": 3e-07,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": true
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 8192,
+     "max_tokens": 1048576,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": true
+    },
+    "gemini-1.5-pro": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.00625,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1.25e-06,
+       "max_output_tokens": 8192,
+       "max_tokens": 2097152,
+       "output_cost_per_token": 5e-06,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": true
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 8192,
+     "max_tokens": 2097152,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": true
+    },
+    "gemini-2.0-flash": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.0005,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1e-07,
+       "max_output_tokens": 8192,
+       "max_tokens": 1048576,
+       "output_cost_per_token": 4e-07,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": true
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 8192,
+     "max_tokens": 1048576,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": true
+    },
+    "gpt-3.5-turbo": {
+     "content_fallback": null,
+     "context_fallback": "gpt-4o-mini",
+     "cost_1k_1k": 0.002,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 5e-07,
+       "max_output_tokens": 4096,
+       "max_tokens": 16385,
+       "output_cost_per_token": 1.5e-06,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": false
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 4096,
+     "max_tokens": 16385,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": false
+    },
+    "gpt-4": {
+     "content_fallback": null,
+     "context_fallback": "gpt-4-turbo",
+     "cost_1k_1k": 0.09000000000000001,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 3e-05,
+       "max_output_tokens": 8192,
+       "max_tokens": 8192,
+       "output_cost_per_token": 6e-05,
+       "supports_function_calling": true,
+       "supports_json_mode": false,
+       "supports_vision": false
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": 8192,
+     "max_tokens": 8192,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "gpt-4-turbo": {
+     "content_fallback": null,
+     "context_fallback": "gpt-4o",
+     "cost_1k_1k": 0.04,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1e-05,
+       "max_output_tokens": 4096,
+       "max_tokens": 128000,
+       "output_cost_per_token": 3e-05,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": true
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 4096,
+     "max_tokens": 128000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": true
+    },
+    "gpt-4o": {
+     "content_fallback": "gpt-4-turbo",
+     "context_fallback": null,
+     "cost_1k_1k": 0.0125,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 2.5e-06,
+       "max_output_tokens": 16384,
+       "max_tokens": 128000,
+       "output_cost_per_token": 1e-05,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": true
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 16384,
+     "max_tokens": 128000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": true
+    },
+    "gpt-4o-2024-08-06": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.0125,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 2.5e-06,
+       "max_output_tokens": 16384,
+       "max_tokens": 128000,
+       "output_cost_per_token": 1e-05,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": true
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 16384,
+     "max_tokens": 128000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": true
+    },
+    "gpt-4o-mini": {
+     "content_fallback": "gpt-3.5-turbo",
+     "context_fallback": null,
+     "cost_1k_1k": 0.0007499999999999999,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1.5e-07,
+       "max_output_tokens": 16384,
+       "max_tokens": 128000,
+       "output_cost_per_token": 6e-07,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": true
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 16384,
+     "max_tokens": 128000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": true
+    },
+    "llama-3.1-70b": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.00176,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 8.8e-07,
+       "max_output_tokens": 4096,
+       "max_tokens": 128000,
+       "output_cost_per_token": 8.8e-07,
+       "supports_function_calling": true,
+       "supports_json_mode": false,
+       "supports_vision": false
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": 4096,
+     "max_tokens": 128000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "llama-3.1-8b": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.00035999999999999997,
+     "functions": false,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1.8e-07,
+       "max_output_tokens": 4096,
+       "max_tokens": 128000,
+       "output_cost_per_token": 1.8e-07,
+       "supports_function_calling": false,
+       "supports_json_mode": false,
+       "supports_vision": false
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": 4096,
+     "max_tokens": 128000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "mistral-large-latest": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.008,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 2e-06,
+       "max_output_tokens": 4096,
+       "max_tokens": 128000,
+       "output_cost_per_token": 6e-06,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": false
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 4096,
+     "max_tokens": 128000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": false
+    },
+    "mistral-small-latest": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.0007999999999999999,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 2e-07,
+       "max_output_tokens": 4096,
+       "max_tokens": 128000,
+       "output_cost_per_token": 6e-07,
+       "supports_function_calling": true,
+       "supports_json_mode": true,
+       "supports_vision": false
+      }
+     },
+     "json_mode": true,
+     "max_output_tokens": 4096,
+     "max_tokens": 128000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": true,
+     "vision": false
+    },
+    "o1": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.07500000000000001,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1.5e-05,
+       "max_output_tokens": 100000,
+       "max_tokens": 200000,
+       "output_cost_per_token": 6e-05,
+       "supports_function_calling": true,
+       "supports_json_mode": false,
+       "supports_vision": true
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": 100000,
+     "max_tokens": 200000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": true
+    },
+    "o1-mini": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.015,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 3e-06,
+       "max_output_tokens": 65536,
+       "max_tokens": 128000,
+       "output_cost_per_token": 1.2e-05,
+       "supports_function_calling": true,
+       "supports_json_mode": false,
+       "supports_vision": false
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": 65536,
+     "max_tokens": 128000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "o3-mini": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.0055000000000000005,
+     "functions": true,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1.1e-06,
+       "max_output_tokens": 100000,
+       "max_tokens": 200000,
+       "output_cost_per_token": 4.4e-06,
+       "supports_function_calling": true,
+       "supports_json_mode": false,
+       "supports_vision": false
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": 100000,
+     "max_tokens": 200000,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "openai/gpt-4o": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": null,
+     "functions": false,
+     "info": null,
+     "json_mode": false,
+     "max_output_tokens": null,
+     "max_tokens": null,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "text-embedding-3-large": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 0.00013,
+     "functions": false,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1.3e-07,
+       "max_output_tokens": null,
+       "max_tokens": 8191,
+       "output_cost_per_token": 0.0,
+       "supports_function_calling": false,
+       "supports_json_mode": false,
+       "supports_vision": false
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": null,
+     "max_tokens": 8191,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "text-embedding-3-small": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 2e-05,
+     "functions": false,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 2e-08,
+       "max_output_tokens": null,
+       "max_tokens": 8191,
+       "output_cost_per_token": 0.0,
+       "supports_function_calling": false,
+       "supports_json_mode": false,
+       "supports_vision": false
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": null,
+     "max_tokens": 8191,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "text-embedding-ada-002": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": 9.999999999999999e-05,
+     "functions": false,
+     "info": {
+      "__dataclass__": "ModelInfo",
+      "fields": {
+       "input_cost_per_token": 1e-07,
+       "max_output_tokens": null,
+       "max_tokens": 8191,
+       "output_cost_per_token": 0.0,
+       "supports_function_calling": false,
+       "supports_json_mode": false,
+       "supports_vision": false
+      }
+     },
+     "json_mode": false,
+     "max_output_tokens": null,
+     "max_tokens": 8191,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    },
+    "unknown-model": {
+     "content_fallback": null,
+     "context_fallback": null,
+     "cost_1k_1k": null,
+     "functions": false,
+     "info": null,
+     "json_mode": false,
+     "max_output_tokens": null,
+     "max_tokens": null,
+     "prompt_caching": [
+      false,
+      "No caching indicators found"
+     ],
+     "response_schema": false,
+     "vision": false
+    }
+   }
+  },
+  "utility.register_model[sync]": {
+   "requests": [],
+   "result": {
+    "info": {
+     "__dataclass__": "ModelInfo",
+     "fields": {
+      "input_cost_per_token": 2.5e-06,
+      "max_output_tokens": 16384,
+      "max_tokens": 128000,
+      "output_cost_per_token": 1e-05,
+      "supports_function_calling": true,
+      "supports_json_mode": true,
+      "supports_vision": true
+     }
+    },
+    "valid": true
+   }
+  },
+  "utility.return_raw_request[sync]": {
+   "requests": [],
+   "result": {
+    "body": {
+     "messages": [
+      {
+       "content": "Say hello",
+       "role": "user"
+      }
+     ],
+     "model": "gpt-4o",
+     "session_id": "s",
+     "temperature": 0.1
+    },
+    "headers": {
+     "Authorization": "Bearer [REDACTED]",
+     "Content-Type": "application/json",
+     "User-Agent": "agentcc-python/0.1.0"
+    },
+    "method": "POST",
+    "url": "https://gateway.futureagi.com/v1/chat/completions"
+   }
+  },
+  "utility.structured_output[sync]": {
+   "requests": [],
+   "result": {
+    "function_to_dict": {
+     "function": {
+      "description": "Get the weather.\n\nArgs:\n    city: City name.\n    unit: c or f.",
+      "name": "get_weather",
+      "parameters": {
+       "properties": {
+        "city": {
+         "type": "string"
+        },
+        "days": {
+         "type": "integer"
+        },
+        "unit": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "city"
+       ],
+       "type": "object"
+      }
+     },
+     "type": "function"
+    },
+    "to_response_format": {
+     "json_schema": {
+      "name": "Person",
+      "schema": {
+       "properties": {
+        "age": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Age"
+        },
+        "name": {
+         "title": "Name",
+         "type": "string"
+        }
+       },
+       "required": [
+        "name"
+       ],
+       "title": "Person",
+       "type": "object"
+      },
+      "strict": true
+     },
+     "type": "json_schema"
+    },
+    "validate_missing": false,
+    "validate_not_json": false,
+    "validate_ok": true
+   }
+  },
+  "utility.tables[sync]": {
+   "requests": [],
+   "result": {
+    "content_policy_fallbacks": {
+     "gpt-4o": "gpt-4-turbo",
+     "gpt-4o-mini": "gpt-3.5-turbo"
+    },
+    "context_window_fallbacks": {
+     "claude-3-haiku-20240307": "claude-3-5-haiku-20241022",
+     "claude-3-opus-20240229": "claude-sonnet-4-20250514",
+     "gpt-3.5-turbo": "gpt-4o-mini",
+     "gpt-4": "gpt-4-turbo",
+     "gpt-4-turbo": "gpt-4o"
+    },
+    "model_alias_map": {},
+    "model_info_keys": [
+     "claude-3-5-haiku-20241022",
+     "claude-3-5-sonnet-20241022",
+     "claude-3-haiku-20240307",
+     "claude-3-opus-20240229",
+     "claude-sonnet-4-20250514",
+     "gemini-1.5-flash",
+     "gemini-1.5-pro",
+     "gemini-2.0-flash",
+     "gpt-3.5-turbo",
+     "gpt-4",
+     "gpt-4-turbo",
+     "gpt-4o",
+     "gpt-4o-mini",
+     "llama-3.1-70b",
+     "llama-3.1-8b",
+     "mistral-large-latest",
+     "mistral-small-latest",
+     "o1",
+     "o1-mini",
+     "o3-mini",
+     "text-embedding-3-large",
+     "text-embedding-3-small",
+     "text-embedding-ada-002"
+    ],
+    "valid_models": [
+     "gpt-4o",
+     "gpt-4o-mini",
+     "gpt-4-turbo",
+     "gpt-4",
+     "gpt-3.5-turbo",
+     "o1",
+     "o1-mini",
+     "o3-mini",
+     "text-embedding-3-small",
+     "text-embedding-3-large",
+     "text-embedding-ada-002",
+     "claude-sonnet-4-20250514",
+     "claude-3-5-sonnet-20241022",
+     "claude-3-5-haiku-20241022",
+     "claude-3-opus-20240229",
+     "claude-3-haiku-20240307",
+     "gemini-2.0-flash",
+     "gemini-1.5-pro",
+     "gemini-1.5-flash",
+     "llama-3.1-70b",
+     "llama-3.1-8b",
+     "mistral-large-latest",
+     "mistral-small-latest"
+    ]
+   }
+  },
+  "utility.tokens[sync]": {
+   "requests": [],
+   "result": {
+    "claude-3-5-haiku-20241022|": {
+     "count_text": {
+      "ok": 1
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "claude-3-5-haiku-20241022|The quick brown fox ": {
+     "count_text": {
+      "ok": 33
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "claude-3-5-haiku-20241022|hello world": {
+     "count_text": {
+      "ok": 2
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "claude-3-5-haiku-20241022|messages": {
+     "ok": 9
+    },
+    "claude-3-5-haiku-20241022|naive cafe 1234 !?": {
+     "count_text": {
+      "ok": 4
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "gpt-4o|": {
+     "count_text": {
+      "ok": 1
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "gpt-4o|The quick brown fox ": {
+     "count_text": {
+      "ok": 33
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "gpt-4o|hello world": {
+     "count_text": {
+      "ok": 2
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "gpt-4o|messages": {
+     "ok": 9
+    },
+    "gpt-4o|naive cafe 1234 !?": {
+     "count_text": {
+      "ok": 4
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "invalid_window": {
+     "ok": {
+      "__dataclass__": "BudgetManager",
+      "fields": {
+       "_current_spend": 0.0,
+       "_lock": {
+        "__object__": "lock",
+        "repr": "<unlocked _thread.lock object at 0x?>"
+       },
+       "_user_budgets": {},
+       "_user_spend": {},
+       "_window_start": 1761177600.0,
+       "max_budget": 1.0,
+       "window": "daily"
+      }
+     }
+    },
+    "unknown-model|": {
+     "count_text": {
+      "ok": 1
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "unknown-model|The quick brown fox ": {
+     "count_text": {
+      "ok": 33
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "unknown-model|hello world": {
+     "count_text": {
+      "ok": 2
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    },
+    "unknown-model|messages": {
+     "ok": 9
+    },
+    "unknown-model|naive cafe 1234 !?": {
+     "count_text": {
+      "ok": 4
+     },
+     "decode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for decode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for decode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for decode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for decode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for decode(). Install it with: pip install tiktoken"
+      }
+     },
+     "encode": {
+      "raised": {
+       "__exception__": "ImportError",
+       "args": [
+        "tiktoken is required for encode(). Install it with: pip install tiktoken"
+       ],
+       "attrs": {},
+       "mro": [
+        "ImportError",
+        "Exception",
+        "BaseException",
+        "object"
+       ],
+       "pickle": {
+        "args": [
+         "tiktoken is required for encode(). Install it with: pip install tiktoken"
+        ],
+        "ok": true,
+        "str": "tiktoken is required for encode(). Install it with: pip install tiktoken",
+        "type": "ImportError"
+       },
+       "repr": "ImportError('tiktoken is required for encode(). Install it with: pip install tiktoken')",
+       "str": "tiktoken is required for encode(). Install it with: pip install tiktoken"
+      }
+     }
+    }
+   }
+  },
+  "utility.trim_messages[sync]": {
+   "requests": [],
+   "result": {
+    "default": [
+     {
+      "content": "rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules ",
+      "role": "system"
+     },
+     {
+      "content": "turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 turn 0 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 turn 1 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 turn 2 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 turn 3 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 turn 4 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 turn 5 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 turn 6 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 turn 7 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 turn 8 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 turn 9 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 turn 10 ",
+      "role": "user"
+     },
+     {
+      "content": "turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 turn 11 ",
+      "role": "user"
+     }
+    ],
+    "max_tokens_50": [
+     {
+      "content": "rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules ",
+      "role": "system"
+     }
+    ],
+    "ratio_0.1_small_model": [
+     {
+      "content": "rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules ",
+      "role": "system"
+     }
+    ],
+    "unknown_model": [
+     {
+      "content": "rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules rules ",
+      "role": "system"
+     }
+    ]
+   }
+  },
+  "utility.validate_environment.empty[sync]": {
+   "requests": [],
+   "result": {
+    "keys_missing": [
+     "AGENTCC_API_KEY",
+     "AGENTCC_BASE_URL"
+    ],
+    "keys_set": [],
+    "ready": false
+   }
+  },
+  "utility.validate_environment[sync]": {
+   "requests": [],
+   "result": {
+    "keys_missing": [
+     "AGENTCC_BASE_URL"
+    ],
+    "keys_set": [
+     "AGENTCC_API_KEY"
+    ],
+    "ready": false
+   }
+  }
+ },
+ "format": 1
+}

@@ -1,0 +1,166 @@
+"""Dataset registration and metric naming against the contract stand-in; no network, no model.
+
+- The refusal to version a dataset reports only the observed state. When the SDK creates an empty dataset
+  and its first ``versions.create`` POST fails, the SDK does not retry the POST and the dataset has no version.
+  Creating the first version without opt-in requires a conditional server operation. Without one, a repeat run
+  without opt-in is refused and ``add_version=True`` stores the rows. If rows are added in the app, the refusal
+  reports the table rows without claiming who made the dataset.
+- ``name=`` / ``--dataset-name`` / ``--add-version`` are refused on a server dataset (exit 2). With
+  ``--no-upload`` the CLI refuses them; the Python call with ``upload=False`` warns.
+- Two templates whose names fold to one slug get two metric names.
+"""
+
+import json
+import re
+
+import pytest
+
+from fi import experiments
+from fi.experiments._server_dataset import DatasetNotOwnedError
+from fi.experiments.errors import UsageError
+from fi.experiments.evaluators.hosted import Template, metric_name
+from tests.experiments.unit.cli_helpers import cli
+from tests.experiments.unit.contract_server import ContractServer, client_for, err
+
+ROWS = [{"id": "T0", "question": "where is order 1?", "expected": "shipped"},
+        {"id": "T1", "question": "where is order 2?", "expected": "lost"}]
+VERSION_POSTS = r"/model-hub/datasets/.*/versions/"
+
+
+def task(row):
+    return "shipped"
+
+
+def _run(server, dataset, **kw):
+    return experiments.run(dataset, task, [], client=client_for(server), trace=False, progress=False, **kw)
+
+
+class FirstVersionFails(ContractServer):
+    """Return a 503 on the first ``versions.create`` POST after dataset creation; the SDK does not retry."""
+
+    def __init__(self):
+        super().__init__()
+        self.fail_versions = [503]
+
+    def _versions(self, did, method, body, q):
+        if method == "POST" and self.fail_versions:
+            return err(self.fail_versions.pop(0), "temporarily unavailable")
+        return super()._versions(did, method, body, q)
+
+
+# ---- Versioning an existing dataset ----------------------------------------------------------------
+
+
+def test_S1_the_retry_after_a_failed_first_version_is_refused_for_what_was_seen_and_stored_with_the_opt_in():
+    """Native rows survive a failed version POST; a retry must not append or silently claim ownership."""
+    server = FirstVersionFails()
+    ds = experiments.dataset(ROWS, name="support-cases")
+    with pytest.raises(Exception) as first:
+        _run(server, ds)
+    assert not isinstance(first.value, DatasetNotOwnedError)
+    [made] = server.datasets.values()
+    assert made["name"] == "support-cases" and made["versions"] == []  # made by run 1; no version landed
+    posts = server.count("POST", VERSION_POSTS)
+    with pytest.raises(DatasetNotOwnedError) as again:
+        _run(server, ds)  # the same call again, no opt-in
+    message = str(again.value)
+    assert "'support-cases' already exists on the server and has table rows" in message
+    assert len(made["rows"]) == len(ROWS) and "nothing was changed" in message
+    assert "add_version=True" in message and "--add-version" in message
+    assert "was not created by fi.experiments" not in message
+    assert server.count("POST", VERSION_POSTS) == posts and made["versions"] == []
+    result = _run(server, experiments.dataset(ROWS, name="support-cases", add_version=True))
+    assert result.status == "completed" and len(made["versions"]) == 1
+
+
+def test_S1_an_sdk_dataset_with_rows_added_in_the_app_is_refused_for_what_was_seen(tmp_path):
+    server = ContractServer()
+    first = _run(server, experiments.dataset(ROWS, name="support-cases"))
+    server.datasets[first.dataset_id]["rows"].append({"row_id": "app-row"})  # a row added in the app
+    with pytest.raises(DatasetNotOwnedError) as info:
+        _run(server, experiments.dataset([dict(ROWS[0], expected="delivered"), ROWS[1]], name="support-cases"))
+    message = str(info.value)
+    assert "has table rows; local uploads do not synchronize an existing table" in message
+    assert "was not created by fi.experiments" not in message
+
+
+# ---- Dataset creation options for server datasets and local runs -----------------------------------
+
+
+@pytest.mark.parametrize("spec", [dict(name="support-copy"), dict(add_version=True)])
+def test_S2_name_or_add_version_on_a_server_dataset_is_refused_before_any_request(spec):
+    server = ContractServer()
+    server.add_dataset("Support tickets", [{"question": "q", "expected": "x"}])
+    with pytest.raises(UsageError) as info:
+        _run(server, experiments.dataset("Support tickets", **spec))
+    assert "'Support tickets' is a server dataset" in str(info.value) and "--dataset-name" in str(info.value)
+    assert server.requests == []
+
+
+def test_S2_log_results_refuses_them_too():
+    server = ContractServer()
+    server.add_dataset("Support tickets", [{"id": "T0", "question": "q", "expected": "x"}])
+    with pytest.raises(UsageError, match="is a server dataset"):
+        experiments.log_results(experiments.dataset("Support tickets", name="elsewhere"), [{"id": "T0", "output": "x"}],
+                                client=client_for(server), progress=False)
+    assert server.requests == []
+
+
+@pytest.fixture
+def cli_server(monkeypatch):
+    server = ContractServer()
+    import fi.experiments._log_results as lr
+
+    real = lr.log_results
+    monkeypatch.setattr(lr, "log_results", lambda *a, **k: real(*a, client=client_for(server), **k))
+    return server
+
+
+@pytest.mark.parametrize("flags", [["--dataset-name", "elsewhere"], ["--add-version"]])
+def test_S2_cli_upload_with_a_server_dataset_exits_2(tmp_path, monkeypatch, cli_server, flags):
+    monkeypatch.chdir(tmp_path)
+    did = cli_server.add_dataset("Support tickets", [{"id": "T0", "question": "where is order 1?", "expected": "x"}])
+    (tmp_path / "results.jsonl").write_text(json.dumps({"id": "T0", "output": "shipped"}) + "\n")
+    code, out, err_ = cli("upload", "results.jsonl", "--dataset", "Support tickets", *flags, "--json", "--no-env-file")
+    said = out + err_  # --json puts the error object on stdout
+    assert code == 2 and "--dataset-name" in said and "is a server dataset" in said, (code, out[-300:], err_[-300:])
+    assert [d["name"] for d in cli_server.datasets.values()] == ["Support tickets"]
+    assert cli_server.datasets[did]["versions"] == [] and cli_server.requests == []
+
+
+@pytest.mark.parametrize("flags", [["--dataset-name", "support-sdk"], ["--add-version"]])
+def test_S2_cli_run_no_upload_refuses_dataset_name_and_add_version(tmp_path, monkeypatch, flags):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "rows.jsonl").write_text("\n".join(json.dumps(r) for r in ROWS) + "\n")
+    code, out, err_ = cli("run", "--from-column", "expected", "--dataset", "rows.jsonl", "--no-upload", *flags,
+                          "--no-trace", "--no-env-file")
+    assert code == 2 and "--no-upload nothing is stored" in err_, (code, err_[-300:])
+
+
+def test_S2_upload_false_with_a_name_warns():
+    with pytest.warns(UserWarning, match="uploads nothing"):
+        result = experiments.run(experiments.dataset(ROWS, name="support-cases"), task, [], upload=False,
+                                 trace=False, progress=False)
+    assert result.status == "no_upload"
+
+
+# ---- Metric names for templates that share a slug --------------------------------------------------
+
+SERVER_EVAL_NAME = re.compile(r"^(?![-_])(?!.*(_-|-_))[a-z0-9_-]{1,50}(?<![-_])$")  # validate_eval_name
+
+
+def test_S4_two_templates_that_fold_to_one_slug_get_two_metric_names():
+    a = metric_name(Template("Is JSON", {}), {"text": "output"}, None)
+    b = metric_name(Template("is-json", {}), {"text": "output"}, None)
+    assert a != b and a.startswith("sdk-is-json-") and b.startswith("sdk-is-json-")
+    assert a == metric_name(Template("Is JSON", {}), {"text": "output"}, None)  # the metric name is deterministic
+    assert SERVER_EVAL_NAME.match(a) and SERVER_EVAL_NAME.match(b)
+
+
+def test_a_taken_name_says_how_to_choose_another():
+    server = ContractServer()
+    server.add_dataset("support", [{"question": "q"}], listed=False)  # a source get-datasets-names does not list
+    with pytest.raises(UsageError) as info:
+        _run(server, experiments.dataset(ROWS, name="support"))
+    assert "name=" in str(info.value) and "--dataset-name NAME" in str(info.value)
+    assert "Rename the file" not in str(info.value)

@@ -1,0 +1,26 @@
+{
+  "source_head": "d502de895f0add84ed2eaacd4bb6b24287935a25",
+  "source": [
+    "tfc/capabilities/service.py:317-324,384-409",
+    "tfc/capabilities/errors.py:16-37",
+    "accounts/authentication.py:1124-1146",
+    "tfc/utils/api_errors.py:195-245",
+    "tracer/views/feed/_permissions.py:11-24"
+  ],
+  "body": {
+    "status": false,
+    "type": "entitlement_error",
+    "code": "LICENSE_MISSING",
+    "detail": "'error_feed' is not available. Upgrade your plan.",
+    "message": "'error_feed' is not available. Upgrade your plan.",
+    "error": {
+      "code": "LICENSE_MISSING",
+      "message": "'error_feed' is not available. Upgrade your plan.",
+      "detail": {"feature": "error_feed"}
+    },
+    "result": "'error_feed' is not available. Upgrade your plan.",
+    "attr": "feature",
+    "details": {"feature": ["error_feed"]},
+    "upgrade_required": true
+  }
+}

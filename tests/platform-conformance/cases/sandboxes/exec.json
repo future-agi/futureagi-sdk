@@ -1,0 +1,424 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "sandboxes",
+  "about": "Commands: exec over SSE-over-POST, exit codes, cancel.",
+  "cases": [
+    {
+      "id": "sandboxes.exec.ok",
+      "title": "Run a command and stream its output to the exit event",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "commands.run"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/exec"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "command": "echo conformance-ok"
+        },
+        "stream": {
+          "kind": "sse-post",
+          "maxMs": 60000,
+          "until": [
+            "exit"
+          ]
+        }
+      },
+      "args": {
+        "sandbox": "${res.sandbox}",
+        "cmd": "echo conformance-ok"
+      },
+      "expect": {
+        "status": 200,
+        "events": {
+          "include": [
+            "started",
+            "stdout",
+            "exit"
+          ],
+          "last": "exit",
+          "exitCode": 0
+        }
+      }
+    },
+    {
+      "id": "sandboxes.exec.nonzero",
+      "title": "A non-zero exit is reported in the exit event (the SDK raises CommandExitError)",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "commands.run"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/exec"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "command": "exit 3"
+        },
+        "stream": {
+          "kind": "sse-post",
+          "maxMs": 60000,
+          "until": [
+            "exit"
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "events": {
+          "include": [
+            "exit"
+          ],
+          "exitCode": 3
+        }
+      }
+    },
+    {
+      "id": "sandboxes.exec.env-and-cwd",
+      "title": "Per-command env and a workspace-relative cwd reach the command",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "commands.run"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/exec"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "command": "test \"$CONF_VAR\" = conf-value && test \"$(basename \"$PWD\")\" = conf-cwd-${run.short}",
+          "cwd": "conf-cwd-${run.short}",
+          "env": {
+            "CONF_VAR": "conf-value"
+          }
+        },
+        "stream": {
+          "kind": "sse-post",
+          "maxMs": 60000,
+          "until": [
+            "exit"
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "events": {
+          "include": [
+            "exit"
+          ],
+          "exitCode": 0
+        }
+      },
+      "setup": [
+        {
+          "op": {
+            "method": "PUT",
+            "path": "/workspace/sandboxes/{sandbox}/folders/{filePath}"
+          },
+          "params": {
+            "sandbox": "${res.sandbox}",
+            "filePath": "conf-cwd-${run.short}"
+          },
+          "expectStatus": [
+            200,
+            201
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sandboxes.exec.missing-command",
+      "title": "An exec body without a command is a typed 400",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "commands.run"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/exec"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "cwd": "/tmp"
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.exec.cross-tenant",
+      "title": "Org B cannot run a command in org A's sandbox, every time",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "commands.run"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/exec"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "command": "echo hijack"
+        },
+        "stream": {
+          "kind": "sse-post",
+          "maxMs": 10000,
+          "until": [
+            "exit"
+          ]
+        }
+      },
+      "repeat": 20,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.exec.forged-scope",
+      "title": "Org B's key with org A's scope selectors cannot run a command in org A's sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "commands.run"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/exec"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A",
+        "scopeOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "command": "echo hijack"
+        },
+        "stream": {
+          "kind": "sse-post",
+          "maxMs": 10000,
+          "until": [
+            "exit"
+          ]
+        }
+      },
+      "repeat": 3,
+      "expect": {
+        "status": [
+          401,
+          403,
+          404
+        ]
+      },
+      "expectByMode": {
+        "ee-key": {
+          "status": 403,
+          "code": "workspace_scope_denied",
+          "errorClass": "PermissionDeniedError"
+        }
+      }
+    },
+    {
+      "id": "sandboxes.exec.cancel-unknown",
+      "title": "Cancelling an exec id that does not exist answers 404",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "commands.cancel"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/exec/{id}/cancel"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": [
+          "${res.sandbox}",
+          "exec-conformance-missing"
+        ],
+        "body": {}
+      },
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.exec.absolute-cwd",
+      "title": "An absolute cwd is refused with a typed 400 (cwd is relative to the workspace)",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "commands.run"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/exec"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "command": "pwd",
+          "cwd": "/tmp"
+        }
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    }
+  ]
+}

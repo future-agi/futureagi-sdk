@@ -43,7 +43,7 @@ def test_fi_env_vars_win_over_agentcc_ones(monkeypatch: pytest.MonkeyPatch) -> N
     assert (gw._api_key, gw._base_url) == ("sk-agentcc-fi", "http://fi-gw")
 
 
-def test_agentcc_env_vars_still_work(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_agentcc_env_vars_work(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AGENTCC_API_KEY", "sk-agentcc-old")
     monkeypatch.setenv("AGENTCC_BASE_URL", "http://old-gw/v1")
     gw = Gateway()

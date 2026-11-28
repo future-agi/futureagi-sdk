@@ -3,13 +3,13 @@
 The cache of ``Dataset.get_dataset_config`` keeps the dataset config of a lookup. A call served from it gets a
 ``Dataset`` built from its own arguments and environment: its own keys, base URL, plain http opt-in and session.
 These cases read what reached loopback listeners, through the lookup shim of ``test_plain_http_key_guards``
-(``api.futureagi.com`` resolves to the loopback interface), with an environment proxy pointed at the proxy
+(``plain.example.test`` resolves to the loopback interface), with an environment proxy pointed at the proxy
 listener, to check that:
 
 * a call that relies on ``FI_ALLOW_INSECURE_HTTP=1`` (argument absent or ``None``) and is served from an entry
-  made by a call with ``allow_insecure_http=True`` gets a client whose later keyed request is refused before a
+  made under the environment opt-in gets a client whose later keyed request is refused before a
   connection is made once the variable is unset, as a client built directly with the same arguments is;
-* the session given to one call (its headers and proxies) does not reach the client of a later call;
+* an explicitly proxied session refuses before connecting, and a direct session is not reused by a later call;
 * a repeated call is still served from the cache without a new lookup, and a deleted dataset is looked up again.
 """
 
@@ -23,8 +23,9 @@ from requests_futures.sessions import FuturesSession
 
 from fi.datasets.dataset import Dataset, LRUCache
 from fi.datasets.types import DatasetConfig
-from tests.test_dataset_config_cache import NAME, DatasetSink
-from tests.test_plain_http_key_guards import CODE, net, use_proxy  # noqa: F401
+from fi.errors import ConfigurationError, KeyedProxyRefusedError
+from tests.test_dataset_config_cache import NAME, DatasetSink, _assert_refusal, opted_in  # noqa: F401
+from tests.test_plain_http_key_guards import net, use_proxy  # noqa: F401
 
 KEY_A = "fikey-tenant-a-" + secrets.token_hex(8)
 SECRET_A = "fisec-tenant-a-" + secrets.token_hex(8)
@@ -52,7 +53,7 @@ def _attempt(call):
 
 
 def _base(listener) -> str:
-    return f"http://api.futureagi.com:{listener.port}"
+    return f"http://plain.example.test:{listener.port}"
 
 
 def _counts(listener, proxy) -> tuple:
@@ -84,12 +85,11 @@ env_opt = pytest.mark.parametrize("opt", [{}, {"allow_insecure_http": None}], id
 
 
 @env_opt
-def test_client_served_from_an_opted_in_entry_follows_its_own_environment_opt_in(net, sink, monkeypatch, opt):
+def test_client_served_from_an_opted_in_entry_follows_its_own_environment_opt_in(net, sink, monkeypatch, opt, opted_in):
     base = _base(sink)
-    first, error = _attempt(lambda: _get_config(base, allow_insecure_http=True))
+    first, error = _attempt(lambda: _get_config(base))
     assert error is None and first.dataset_config.id == sink.default_id, (error, _report(sink, net.proxy))
 
-    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     second, error = _attempt(lambda: _get_config(base, **opt))
     assert error is None and second.dataset_config.id == sink.default_id, (error, _report(sink, net.proxy))
     assert sink.names_requests == 1, _report(sink, net.proxy)
@@ -104,7 +104,7 @@ def test_client_served_from_an_opted_in_entry_follows_its_own_environment_opt_in
         f"later delete: target {delta[0]}/{delta[1]}, proxy {delta[2]}/{delta[3]} (connections/marker bytes); "
         f"{_report(sink, net.proxy)}"
     )
-    assert getattr(error, "code", None) == CODE, repr(error)
+    _assert_refusal(error, ConfigurationError, "insecure_http_origin")
 
 
 @env_opt
@@ -120,7 +120,7 @@ def test_control_client_built_directly_with_the_same_arguments_is_refused(net, s
     assert counts == (0, 0, 0, 0), (
         f"target {counts[0]}/{counts[1]}, proxy {counts[2]}/{counts[3]} (connections/marker bytes)"
     )
-    assert getattr(error, "code", None) == CODE, repr(error)
+    _assert_refusal(error, ConfigurationError, "insecure_http_origin")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -128,18 +128,27 @@ def test_control_client_built_directly_with_the_same_arguments_is_refused(net, s
 # ---------------------------------------------------------------------------------------------
 
 
-def test_session_of_one_call_does_not_reach_the_client_of_a_later_call(net, sink):
+@pytest.mark.parametrize("proxied", [True, False], ids=["explicit-proxy", "direct-session"])
+def test_session_of_one_call_does_not_reach_the_client_of_a_later_call(net, sink, monkeypatch, opted_in, proxied):
     base = _base(sink)
     probe = "probe-" + secrets.token_hex(8)
-    session = FuturesSession()
-    session.headers[PROBE_HEADER] = probe
-    session.proxies = {"http": f"http://127.0.0.1:{net.proxy.port}", "https": f"http://127.0.0.1:{net.proxy.port}"}
-    first, error = _attempt(lambda: _get_config(base, allow_insecure_http=True, session=session))
+    monkeypatch.setenv("NO_PROXY", "plain.example.test")
+    with FuturesSession() as session:
+        session.headers[PROBE_HEADER] = probe
+        if proxied:
+            session.proxies = {"http": f"http://127.0.0.1:{net.proxy.port}", "https": f"http://127.0.0.1:{net.proxy.port}"}
+        first, error = _attempt(lambda: _get_config(base, session=session))
+    if proxied:
+        assert _counts(sink, net.proxy) == (0, 0, 0, 0), _report(sink, net.proxy)
+        assert (net.proxy.connections, net.proxy.raw.count(probe.encode())) == (0, 0), _report(sink, net.proxy)
+        _assert_refusal(error, KeyedProxyRefusedError, "KEYED_PROXY_REFUSED", wrapped=True)
+        net.nothing_sent()
+        return
     assert error is None and first.dataset_config.id == sink.default_id, (error, _report(sink, net.proxy))
     probe_before = sink.raw.count(probe.encode())
     assert probe_before > 0, _report(sink, net.proxy)
 
-    second, error = _attempt(lambda: _get_config(base, allow_insecure_http=True))
+    second, error = _attempt(lambda: _get_config(base))
     assert error is None and second.dataset_config.id == sink.default_id, (error, _report(sink, net.proxy))
     _, error = _attempt(second.delete)
 
@@ -158,12 +167,12 @@ def test_session_of_one_call_does_not_reach_the_client_of_a_later_call(net, sink
 # ---------------------------------------------------------------------------------------------
 
 
-def test_repeated_call_is_served_from_the_cache_with_a_client_of_its_own(net, sink):
+def test_repeated_call_is_served_from_the_cache_with_a_client_of_its_own(net, sink, opted_in):
     base = _base(sink)
-    first, error = _attempt(lambda: _get_config(base, allow_insecure_http=True))
+    first, error = _attempt(lambda: _get_config(base))
     assert error is None, repr(error)
 
-    second, error = _attempt(lambda: _get_config(base, allow_insecure_http=True))
+    second, error = _attempt(lambda: _get_config(base))
 
     assert error is None, repr(error)
     assert sink.names_requests == 1, _report(sink, net.proxy)
@@ -172,14 +181,14 @@ def test_repeated_call_is_served_from_the_cache_with_a_client_of_its_own(net, si
     assert (net.proxy.connections, net.proxy.marker_bytes()) == (0, 0), _report(sink, net.proxy)
 
 
-def test_dataset_deleted_through_a_served_client_is_looked_up_again(net, sink):
+def test_dataset_deleted_through_a_served_client_is_looked_up_again(net, sink, opted_in):
     base = _base(sink)
-    first, error = _attempt(lambda: _get_config(base, allow_insecure_http=True))
+    first, error = _attempt(lambda: _get_config(base))
     assert error is None, repr(error)
     _, error = _attempt(first.delete)
     assert error is None, repr(error)
 
-    again, error = _attempt(lambda: _get_config(base, allow_insecure_http=True))
+    again, error = _attempt(lambda: _get_config(base))
 
     assert error is None and again.dataset_config.id == sink.default_id, repr(error)
     assert (sink.names_requests, sink.other_requests) == (2, 1), _report(sink, net.proxy)

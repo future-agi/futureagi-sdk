@@ -7,8 +7,7 @@ through ``session.send``. The hook is registered in one of two ways:
 * ``session-hook``: in ``session.hooks["response"]``;
 * ``auth-hook``: by the session's authentication, on the request it prepares.
 
-Each case goes through ``HttpClient`` (``fi.api.auth``, with a ``FuturesSession``) and through ``_send_prepared``,
-the send used by the knowledge base upload (``fi.kb.client``). The other listeners are the target and the proxy
+Each case goes through ``HttpClient`` (``fi.api.auth``, with a ``FuturesSession``). The other listeners are the target and the proxy
 of the ``net`` fixture of ``test_plain_http_key_guards``; ``plain.example.test`` resolves to the loopback interface
 through its lookup shim, so no case reaches a real host. Each case reads the connections and the marker bytes at
 the target and at the proxy, and prints them in its assertion messages.
@@ -21,7 +20,8 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests_futures.sessions import FuturesSession
 
-from fi.api.auth import HttpClient, _prepare, _send_prepared
+from fi.api.auth import HttpClient
+from fi.errors import KeyedProxyRefusedError
 from fi.api.types import HttpMethod, RequestConfig
 from tests.test_keyed_request_paths import ok, sites  # noqa: F401
 from tests.test_plain_http_key_guards import CODE, KEY, PLAIN, SECRET, Net, _attempt, net, refused, use_proxy  # noqa: F401
@@ -93,22 +93,11 @@ def via_http_client(origin: str, hook: Resend, registration: str, *, headers=KEY
     return _attempt(lambda: client.request(config))
 
 
-def via_send_prepared(origin: str, hook: Resend, registration: str, *, headers=KEYED, allow_insecure_http=None, proxies=None, mount=None):
-    url = origin + "/v1/ping"
-
-    def send():
-        with _hooked(requests.Session(), hook, registration, proxies=proxies) as session:
-            if mount:
-                session.mount(*mount)
-            prepared = _prepare(session, requests.Request(method="GET", url=url, headers=dict(headers)), allow_insecure_http)
-            _send_prepared(session, prepared, 3, allow_insecure_http, url=url)
-
-    return _attempt(send)
 
 
 SENDERS = [
     pytest.param(via_http_client, id="http-client"),
-    pytest.param(via_send_prepared, id="send-prepared"),
+    # 0.9.0 has no _prepare/_send_prepared send: HttpClient is the requests sender the session reaches.
 ]
 
 
@@ -133,7 +122,9 @@ def test_hook_session_send_to_a_named_plain_http_host_is_refused(net, sites, sen
     hook = Resend(f"http://{PLAIN}:{net.target.port}/v1/ping")
     exc = sender(origin.base, hook, registration)
     _nothing_at_target_or_proxy(net, origin, hook)
-    assert origin.requests == [("GET", "/v1/ping")], _report(net, origin, hook)
+    # 0.9.0 refuses a keyed call on a session whose proxy would route it before the first request; 0.8.1 sends that
+    # first request direct and refuses the hook's send.
+    assert origin.requests in ([], [("GET", "/v1/ping")]), _report(net, origin, hook)
     refused(exc, ValueError)
     assert len(hook.errors) == 1, _report(net, origin, hook)
     refused(hook.errors[0], ValueError)
@@ -186,7 +177,9 @@ def test_hook_session_send_through_a_proxy_is_refused(monkeypatch, net, sites, s
     session_proxies = {"http": proxy} if proxy_source == "session-proxies" else None
     exc = sender(origin.base, hook, registration, allow_insecure_http=allow, proxies=session_proxies)
     _nothing_at_target_or_proxy(net, origin, hook)
-    assert origin.requests == [("GET", "/v1/ping")], _report(net, origin, hook)
+    # 0.9.0 refuses a keyed call on a session whose proxy would route it before the first request; 0.8.1 sends that
+    # first request direct and refuses the hook's send.
+    assert origin.requests in ([], [("GET", "/v1/ping")]), _report(net, origin, hook)
     refused(exc, ValueError)
 
 
@@ -205,7 +198,7 @@ def test_hook_session_send_through_a_custom_adapter_is_refused(net, sites, sende
 
 
 # ---------------------------------------------------------------------------------------------
-# controls: loopback directly, https, and a request without a key are sent as before
+# controls: loopback directly, https, and a request without a key are sent
 # ---------------------------------------------------------------------------------------------
 
 
@@ -243,6 +236,12 @@ def test_hook_session_send_of_a_request_without_a_key_is_unchanged(net, sites, s
     hook = Resend(f"http://{host}:{net.target.port}/v1/ping")
     proxies = {"http": f"http://127.0.0.1:{net.proxy.port}"} if through_proxy else None
     exc = sender(origin.base, hook, registration, headers={}, proxies=proxies)
+    if through_proxy and isinstance(exc, KeyedProxyRefusedError):
+        # 0.9.0 judges a call on a session with a response hook as one that may carry a key, so a session proxy
+        # refuses it before any connection.
+        _nothing_at_target_or_proxy(net, origin, hook)
+        assert origin.requests == [], _report(net, origin, hook)
+        return
     assert exc is None, f"{exc!r}; {_report(net, origin, hook)}"
     assert hook.errors == [], _report(net, origin, hook)
     expected = (0, 1) if through_proxy else (1, 0)

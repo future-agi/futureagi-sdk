@@ -21,7 +21,7 @@ def _make_sse_response(chunks: list[dict[str, object]]) -> MagicMock:
     resp = MagicMock()
     resp.headers = {
         "content-type": "text/event-stream",
-        "x-agentcc-request-id": "req-1",
+        "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
         "x-agentcc-trace-id": "trace-1",
         "x-agentcc-provider": "openai",
         "x-agentcc-latency-ms": "50",
@@ -87,7 +87,7 @@ def test_get_final_completion() -> None:
     assert comp.choices[0].message.content == "Hello world"
     assert comp.choices[0].finish_reason == "stop"
     assert comp.agentcc is not None
-    assert comp.agentcc.request_id == "req-1"
+    assert comp.agentcc.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 
 
 def test_get_final_text() -> None:
@@ -121,7 +121,7 @@ def test_agentcc_available_immediately() -> None:
     stream = Stream(resp)
     with StreamManager(stream) as mgr:
         assert mgr.agentcc.provider == "openai"
-        assert mgr.agentcc.request_id == "req-1"
+        assert mgr.agentcc.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 
 
 def test_stream_events() -> None:

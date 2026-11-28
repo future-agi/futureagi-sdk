@@ -6,6 +6,9 @@ from pydantic import BaseModel, Field, field_validator
 
 # Base class for all messages
 class MessageBase(BaseModel):
+    # Preserve provider fields such as tool_call_id when parsing saved messages.
+    model_config = {"extra": "allow"}
+
     role: str
     content: Union[str, List[Dict[str, Any]]]
 

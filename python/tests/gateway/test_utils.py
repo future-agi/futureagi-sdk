@@ -44,7 +44,9 @@ def test_redact_headers_authorization() -> None:
 
     headers = {"Authorization": "Bearer sk-abc123xyz789", "Content-Type": "application/json"}
     result = redact_headers(headers)
-    assert result["Authorization"] == "Bearer sk-...z789"
+    assert result["Authorization"] == "[REDACTED]"
+    assert "sk-" not in repr(result) and "z789" not in repr(result)
+    assert headers["Authorization"] == "Bearer sk-abc123xyz789"
     assert result["Content-Type"] == "application/json"
 
 
@@ -53,7 +55,9 @@ def test_redact_headers_short_auth() -> None:
 
     headers = {"Authorization": "short"}
     result = redact_headers(headers)
-    assert result["Authorization"] == "***"
+    assert result["Authorization"] == "[REDACTED]"
+    assert "short" not in repr(result)
+    assert headers["Authorization"] == "short"
 
 
 def test_redact_headers_case_insensitive() -> None:
@@ -61,7 +65,9 @@ def test_redact_headers_case_insensitive() -> None:
 
     headers = {"authorization": "Bearer sk-abc123xyz789"}
     result = redact_headers(headers)
-    assert "..." in result["authorization"]
+    assert result["authorization"] == "[REDACTED]"
+    assert "sk-" not in repr(result) and "z789" not in repr(result)
+    assert headers["authorization"] == "Bearer sk-abc123xyz789"
 
 
 def test_redact_headers_no_auth() -> None:

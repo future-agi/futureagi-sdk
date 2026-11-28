@@ -37,7 +37,7 @@ def handler(request: httpx.Request) -> httpx.Response:
     return httpx.Response(200, json={"status": True, "result": {"value": 1}})
 
 
-client = Client(api_key="x", secret_key="y", base_url="http://backend.test", http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+client = Client(api_key="x", secret_key="y", base_url="https://backend.test", http_client=httpx.Client(transport=httpx.MockTransport(handler)))
 assert fi.Client is Client
 
 # JSON-value inputs take a string, a boolean or a number as much as an object.
@@ -64,7 +64,7 @@ client.dashboards.update("d1", name=NOT_GIVEN, description=None)
 assert SEEN[-1]["body"] == {"description": None}
 
 # Strict mode holds a response to the contract's required fields; the default is tolerant.
-strict = Client(api_key="x", secret_key="y", base_url="http://backend.test", strict_responses=True, http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+strict = Client(api_key="x", secret_key="y", base_url="https://backend.test", strict_responses=True, http_client=httpx.Client(transport=httpx.MockTransport(handler)))
 try:
     strict.datasets.create(new_dataset_name="x")
     raise AssertionError("strict mode accepted a dataset-create result without dataset_id")

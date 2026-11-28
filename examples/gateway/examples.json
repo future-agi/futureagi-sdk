@@ -1,0 +1,14 @@
+{
+  "availability": "source-preview-only",
+  "backendQualification": "not-evaluated",
+  "examples": [
+    {
+      "framework": "langchain",
+      "python": ["python/langchain_chat.py:ask", "python/langchain_chat.py:ask_sync"]
+    },
+    {
+      "framework": "llamaindex-openai-like",
+      "python": ["python/llamaindex_chat.py:ask", "python/llamaindex_chat.py:ask_sync"]
+    }
+  ]
+}

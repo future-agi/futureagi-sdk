@@ -1,8 +1,10 @@
-import hashlib as _hashlib
+import copy
 import time
 import threading
 from typing import Dict, Optional
 
+from fi._core.http_security import insecure_http_allowed
+from fi._keyed_errors import KeyedRedirectRefusedError
 from fi.api.auth import APIKeyAuth, ResponseHandler
 from fi.api.types import HttpMethod, RequestConfig
 from fi.prompt.types import ModelConfig, PromptTemplate
@@ -12,7 +14,18 @@ from fi.utils.logging import logger
 from fi.utils.routes import Routes
 from fi.prompt.cache import prompt_cache
 from fi.prompt.label_management import LabelManagementMixin
-from fi.utils import _http_guard as _guard
+
+
+def _model_config_to_wire(config: ModelConfig) -> Dict:
+    """Send every model setting that has a value, using the backend's model key.
+
+    Settings left as None are omitted rather than sent as null, so a saved
+    prompt does not store null where the backend later expects a value such as
+    a list of tools. The filter does not remove nested values, including None.
+    """
+    payload = {key: value for key, value in config.model_dump().items() if value is not None}
+    payload["model"] = payload.pop("model_name")
+    return payload
 
 
 class SimpleJsonResponseHandler(ResponseHandler[Dict, Dict]):
@@ -130,10 +143,13 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
             name_param = qs.get("name", [None])[0]
             raise TemplateNotFound(name_param or "unknown")
         if response.status_code == 400:
-            detail = None
             try:
                 detail = response.json()
-                error_code = detail.get("error_code") if isinstance(detail, dict) else None
+                error_code = (
+                    detail.get("code") or detail.get("error_code")
+                    if isinstance(detail, dict)
+                    else None
+                )
             except Exception:
                 error_code = None
 
@@ -146,19 +162,9 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
 
             raise SDKException(
                 detail.get("message", "Bad request – please verify request body.")
-                if isinstance(detail, dict) else "Bad request – please verify request body."
             )
         else:
             response.raise_for_status()
-
-
-def _template_cache_scope(client: APIKeyAuth) -> str:
-    """The part of a template cache key that ties it to one client: its base URL, its effective plain http opt-in
-    and a digest of its keys (the raw keys are not kept in the cache)."""
-    headers = client._default_headers
-    keys = f"{headers.get('X-Api-Key') or ''}\0{headers.get('X-Secret-Key') or ''}"
-    opted_in = "1" if _guard.insecure_http_allowed(client._allow_insecure_http) else "0"
-    return f"{client._base_url}|{opted_in}|{_hashlib.sha256(keys.encode('utf-8')).hexdigest()}"
 
 
 class Prompt(APIKeyAuth, LabelManagementMixin):
@@ -268,6 +274,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         # Label requested during draft create; will be assigned on commit
         self._pending_label: Optional[str] = None
+        self._last_generation_id: Optional[str] = None
 
         if template and not template.id:
             try:
@@ -281,7 +288,12 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             self.template = template
 
     def generate(self, requirements: str) -> "Prompt":
-        """Generate a prompt and return self for chaining"""
+        """Submit a generation job and return self for chaining.
+
+        Queued responses do not update messages; ``last_generation_id``
+        identifies the submitted job. Legacy immediate prompt results
+        update the last message.
+        """
         if not self.template:
             raise ValueError("No template configured")
         response = self.request(
@@ -292,11 +304,15 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             ),
             response_handler=PromptResponseHandler,
         )
-        self.template.messages[-1].content = response["result"]["prompt"]
+        self._apply_generation_response(response)
         return self
 
     def improve(self, requirements: str) -> "Prompt":
-        """Improve prompt and return self for chaining"""
+        """Submit an improvement job and return self for chaining.
+
+        As with ``generate()``, queued responses expose ``last_generation_id``
+        without replacing the current messages.
+        """
         if not self.template:
             raise ValueError("No template configured")
 
@@ -315,8 +331,22 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             ),
             response_handler=PromptResponseHandler,
         )
-        self.template.messages[-1].content = improved_response["result"]["prompt"]
+        self._apply_generation_response(improved_response)
         return self
+
+    @property
+    def last_generation_id(self) -> Optional[str]:
+        """Job ID from the latest successful generate/improve response, if present."""
+        return self._last_generation_id
+
+    def _apply_generation_response(self, response) -> None:
+        result = response.get("result", response) if isinstance(response, dict) else None
+        self._last_generation_id = (
+            result.get("generation_id") if isinstance(result, dict) else None
+        )
+        # Retain support for older backends returning an immediate prompt.
+        if isinstance(result, dict) and "prompt" in result and self.template.messages:
+            self.template.messages[-1].content = result["prompt"]
 
     def create(self, *, label: Optional[str] = None) -> "Prompt":
         """Create a draft prompt template and return self for chaining.
@@ -341,14 +371,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             "prompt_config": [
                 {
                     "messages": messages,
-                    "configuration": {
-                        "model": self.template.model_configuration.model_name,
-                        "temperature": self.template.model_configuration.temperature,
-                        "max_tokens": self.template.model_configuration.max_tokens,
-                        "top_p": self.template.model_configuration.top_p,
-                        "frequency_penalty": self.template.model_configuration.frequency_penalty,
-                        "presence_penalty": self.template.model_configuration.presence_penalty,
-                    },
+                    "configuration": _model_config_to_wire(self.template.model_configuration),
                     "placeholders": list(placeholders.keys()),
                 }
             ],
@@ -393,14 +416,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         messages, placeholders = self._prepare_messages_and_placeholders()
 
-        model_config = {
-            "model": self.template.model_configuration.model_name,
-            "temperature": self.template.model_configuration.temperature,
-            "max_tokens": self.template.model_configuration.max_tokens,
-            "top_p": self.template.model_configuration.top_p,
-            "frequency_penalty": self.template.model_configuration.frequency_penalty,
-            "presence_penalty": self.template.model_configuration.presence_penalty,
-        }
+        model_config = _model_config_to_wire(self.template.model_configuration)
 
         draft_entry = {
             "prompt_config": [
@@ -436,21 +452,34 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
     def delete(self) -> bool:
         """Delete the current template (requires `self.template.id`).
 
-        Returns True when deletion succeeds. If the template has no `id`, a
-        ValueError is raised.
+        Returns True on HTTP 2xx. HTTP errors do not update the template
+        or cache. If the template has no `id`, a ValueError is raised.
         """
         if not self.template or not self.template.id:
             raise ValueError("Template ID missing; cannot delete.")
 
-        self.request(
+        headers = self._platform_headers(self._base_url + "/", dict(self._default_headers))
+        scope = prompt_cache.scope_for(self, headers=headers)
+        response = self.request(
             config=RequestConfig(
                 method=HttpMethod.DELETE,
                 url=self._base_url
                 + "/"
                 + Routes.delete_template.value.format(template_id=self.template.id),
+                headers=headers,
             ),
             response_handler=None,
         )
+
+        response.raise_for_status()
+        if not 200 <= response.status_code < 300:
+            raise SDKException(f"Template deletion did not succeed (HTTP {response.status_code}).")
+
+        if self.template.name:
+            try:
+                prompt_cache.invalidate_scoped_template(self.template.name, scope=scope)
+            except Exception:
+                logger.warning("Prompt cache invalidation failed after delete()", exc_info=True)
 
         # Clear local reference so user knows it's gone.
         self.template = None
@@ -466,7 +495,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         *,
         allow_insecure_http: Optional[bool] = None,
     ) -> bool:
-        """Delete a template by its exact name.
+        """Delete a template by its exact name, preserving cache on HTTP failure.
         """
 
         client = APIKeyAuth(
@@ -477,24 +506,35 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         )
 
         try:
+            headers = client._platform_headers(client._base_url + "/", dict(client._default_headers))
+            scope = prompt_cache.scope_for(client, headers=headers)
             tmpl: PromptTemplate = client.request(
                 config=RequestConfig(
                     method=HttpMethod.GET,
                     url=client._base_url + "/" + Routes.prompt_label_get_by_name.value,
                     params={"name": name},
+                    headers=headers,
                 ),
                 response_handler=PromptResponseHandler,
             )
 
-            client.request(
+            response = client.request(
                 config=RequestConfig(
                     method=HttpMethod.DELETE,
                     url=client._base_url
                     + "/"
                     + Routes.delete_template.value.format(template_id=tmpl.id),
+                    headers=headers,
                 ),
                 response_handler=None,
             )
+            response.raise_for_status()
+            if not 200 <= response.status_code < 300:
+                raise SDKException(f"Template deletion did not succeed (HTTP {response.status_code}).")
+            try:
+                prompt_cache.invalidate_scoped_template(name, scope=scope)
+            except Exception:
+                logger.warning("Prompt cache invalidation failed after delete_template_by_name()", exc_info=True)
             return True
         finally:
             client.close()
@@ -505,7 +545,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         response = self.request(
             config=RequestConfig(
                 method=HttpMethod.GET,
-                url=self._base_url + "/" + Routes.prompt_label_get_by_name.value,
+                url=self._base_url + "/" + Routes.get_template_by_name.value,
                 params={"name": name},
             ),
             response_handler=PromptResponseHandler,
@@ -548,7 +588,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
     # ------------------------------------------------------------------
 
     def _current_version_is_draft(self) -> bool:
-        """Check backend state to know if the current version is still draft."""
+        """Check backend state to know if the current version is draft."""
         history = self._fetch_template_version_history()
         for entry in history:
             if entry.get("template_version") == self.template.version:
@@ -601,25 +641,30 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             fi_base_url=fi_base_url,
             allow_insecure_http=allow_insecure_http,
         )
-        # A cached template is only served to a call with the same keys, base URL and plain http opt-in.
-        cache_key = f"{prompt_cache.make_key(name, version=version, label=label)}|scope:{_template_cache_scope(client)}"
-
-        fresh = prompt_cache.get(cache_key)
-        if fresh is not None:
-            client.close()
-            return cls(
-                template=fresh,
-                fi_api_key=fi_api_key,
-                fi_secret_key=fi_secret_key,
-                fi_base_url=fi_base_url,
-                allow_insecure_http=allow_insecure_http,
-            )
-
-        stale = prompt_cache.get_stale(cache_key)
-        # Note: Async refresh logic is not applied here to simplify the fallback flow.
-        # If stale data is present, it will be used only if the live fetch fails.
-
+        stale = None
         try:
+            headers = client._platform_headers(client._base_url + "/", dict(client._default_headers))
+            cache_key = prompt_cache.make_scoped_key(
+                name, scope=prompt_cache.scope_for(client, headers=headers),
+                version=version, label=label,
+                allow_insecure_http=insecure_http_allowed(client._allow_insecure_http),
+            )
+            # Use the same resolved credentials/origin for the returned client.
+            fi_api_key, fi_secret_key, fi_base_url = (
+                client._fi_api_key, client._fi_secret_key, client._base_url
+            )
+            fresh = prompt_cache.get(cache_key)
+            if fresh is not None:
+                return cls(
+                    template=fresh,
+                    fi_api_key=fi_api_key,
+                    fi_secret_key=fi_secret_key,
+                    fi_base_url=fi_base_url,
+                    allow_insecure_http=allow_insecure_http,
+                )
+
+            # Stale fallback is available only within the resolved identity.
+            stale = prompt_cache.get_stale(cache_key)
             template = None
             # If a specific version or label is provided, use the direct endpoint. No fallback.
             if version or label:
@@ -636,6 +681,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                         + "/"
                         + Routes.prompt_label_get_by_name.value,
                         params=params,
+                        headers=headers,
                     ),
                     response_handler=PromptResponseHandler,
                 )
@@ -650,9 +696,13 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                             + "/"
                             + Routes.prompt_label_get_by_name.value,
                             params=params,
+                            headers=headers,
                         ),
                         response_handler=PromptResponseHandler,
                     )
+                except KeyedRedirectRefusedError:
+                    # A redirect answer is not a missing template: the keyed lookup is not sent again to another route.
+                    raise
                 except (TemplateNotFound, SDKException):
                     logger.info(
                         "Template with label 'production' not found for '%s'. Falling back to default.",
@@ -666,11 +716,12 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                             + "/"
                             + Routes.get_template_by_name.value,
                             params=fallback_params,
+                            headers=headers,
                         ),
                         response_handler=PromptResponseHandler,
                     )
 
-            prompt_cache.set(cache_key, template)
+            prompt_cache.set(cache_key, template, snapshot=True)
             return cls(
                 template=template,
                 fi_api_key=fi_api_key,
@@ -757,7 +808,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
     ) -> "Prompt":
         """Commit current draft (if any) then create a fresh draft version.
 
-        The helper guarantees we never leave an uncommitted draft behind.
+        The helper guarantees we do not leave an uncommitted draft behind.
         Returns self so the call can be chained (e.g. ``client.create_new_version().generate(...)``).
         """
         if not self.template:
@@ -767,11 +818,11 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         if template is not None:
             self._apply_template_updates(template)
 
-        # If the current version is still in draft (backend-checked), commit it first.
+        # If the current version is in draft (backend-checked), commit it first.
         if self._current_version_is_draft():
             self.commit_current_version(message=commit_message, set_default=set_default, label=label)
 
-        # Now create a fresh draft version
+        # Create a fresh draft version
         self._create_new_draft()
         return self
 
@@ -798,24 +849,17 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         """Push the current in-memory template state to the backend draft version."""
         if not self.template or not self.template.id:
             raise ValueError("Template must be created before it can be updated.")
-        # Ensure the current version is still a draft according to backend
+        # Ensure the current version is a draft according to backend
         if not self._current_version_is_draft():
             raise ValueError("Current version is already committed; create a new draft version first.")
 
-        # Prepare messages and configuration just like in _create_new_draft
+        # Prepare messages and configuration like in _create_new_draft
         messages, placeholders = self._prepare_messages_and_placeholders()
 
-        model_cfg = {
-            "model": self.template.model_configuration.model_name,
-            "temperature": self.template.model_configuration.temperature,
-            "max_tokens": self.template.model_configuration.max_tokens,
-            "top_p": self.template.model_configuration.top_p,
-            "frequency_penalty": self.template.model_configuration.frequency_penalty,
-            "presence_penalty": self.template.model_configuration.presence_penalty,
-        }
+        model_cfg = _model_config_to_wire(self.template.model_configuration)
 
         body = {
-            "is_run": "draft",  # purely save changes
+            "is_run": False,  # purely save changes
             "is_sdk": True,
             "version": self.template.version,
             "prompt_config": [
@@ -860,6 +904,29 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
             return re.sub(r"\{\{\s*(\w+)\s*\}\}", _repl, text)
 
+        def _render_content(value):
+            if isinstance(value, str):
+                return _substitute_vars(value)
+            if isinstance(value, list):
+                return [_render_content(part) for part in value]
+            if isinstance(value, dict):
+                return {key: _render_content(part) for key, part in value.items()}
+            return copy.deepcopy(value)
+
+        def _compile_message(message) -> dict:
+            if isinstance(message, dict):
+                result = copy.deepcopy(message)
+            elif hasattr(message, "model_dump"):
+                # variable_names is SDK bookkeeping, not a provider message field.
+                result = message.model_dump(exclude={"variable_names"})
+            else:
+                result = {"role": getattr(message, "role", None),
+                          "content": getattr(message, "content", None)}
+            if result.get("role") is None:
+                raise ValueError("Message object missing 'role' attribute")
+            result["content"] = _render_content(result.get("content"))
+            return result
+
         compiled: list[dict] = []
 
         for msg in self.template.messages:
@@ -870,27 +937,16 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                     # Insert each provided chat message
                     for ph_msg in kwargs[ph_name]:
                         if isinstance(ph_msg, dict) and "role" in ph_msg and "content" in ph_msg:
-                            compiled.append({
-                                "role": ph_msg["role"],
-                                "content": _substitute_vars(str(ph_msg["content"])),
-                            })
+                            compiled.append(_compile_message(ph_msg))
                         else:
                             raise ValueError(
                                 f"Each chat message for placeholder '{ph_name}' must include 'role' and 'content'."
                             )
                 else:
-                    # Placeholder unresolved – keep as-is
-                    compiled.append(msg)
+                    # Keep unresolved placeholders without sharing mutable data.
+                    compiled.append(copy.deepcopy(msg))
             else:
-                # Handle MessageBase or raw dict with role/content
-                role = getattr(msg, "role", msg.get("role") if isinstance(msg, dict) else None)
-                content = getattr(msg, "content", msg.get("content") if isinstance(msg, dict) else None)
-                if role is None:
-                    raise ValueError("Message object missing 'role' attribute")
-                compiled.append({
-                    "role": role,
-                    "content": _substitute_vars(str(content)),
-                })
+                compiled.append(_compile_message(msg))
 
         return compiled
 

@@ -1,0 +1,6 @@
+{
+  "excluded_path_prefixes": [
+    "/simulate/",
+    "/sdk/api/v1/simulation/"
+  ]
+}

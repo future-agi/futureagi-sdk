@@ -25,7 +25,7 @@ UUID_FOO = "11111111-1111-1111-1111-111111111111"
 UUID_FOOBAR = "22222222-2222-2222-2222-222222222222"
 
 
-def _mock_response(data, status_code=200, url="http://api.test/"):
+def _mock_response(data, status_code=200, url="https://api.test/"):
     resp = MagicMock(spec=Response)
     resp.status_code = status_code
     resp.ok = 200 <= status_code < 300
@@ -66,7 +66,7 @@ def test_post_not_resent_when_parsing_a_successful_response_fails():
     client = _client_with_session(result=_mock_response({"result": {}}, 200))
     config = RequestConfig(
         method=HttpMethod.POST,
-        url="http://api.test/create-empty-dataset/",
+        url="https://api.test/create-empty-dataset/",
         json={"new_dataset_name": "x"},
     )
 
@@ -77,11 +77,11 @@ def test_post_not_resent_when_parsing_a_successful_response_fails():
     assert client._session.request.call_count == 1
 
 
-def test_transport_failures_are_still_retried():
+def test_transport_failures_are_retried():
     client = _client_with_session(side_effect=ConnectionError("boom"))
     config = RequestConfig(
         method=HttpMethod.GET,
-        url="http://api.test/get-datasets/",
+        url="https://api.test/get-datasets/",
         retry_attempts=3,
         retry_delay=0,
     )
@@ -97,7 +97,7 @@ def test_transport_failures_are_still_retried():
 # --------------------------------------------------------------------------
 
 def _names_response(datasets, search_text):
-    url = f"http://api.test/model-hub/develops/get-datasets-names/?search_text={search_text}"
+    url = f"https://api.test/model-hub/develops/get-datasets-names/?search_text={search_text}"
     data = {"result": {"datasets": datasets}}
     return data, _mock_response(data, 200, url=url)
 

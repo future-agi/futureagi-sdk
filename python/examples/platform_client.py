@@ -4,6 +4,9 @@
     python examples/platform_client.py
 
 Most of it only reads. It creates one dataset and one dashboard and deletes both at the end.
+
+For a trusted platform on a private network that requires direct plain HTTP, use
+``Client(base_url="http://platform.example.test", allow_insecure_http=True)``.
 """
 
 from __future__ import annotations

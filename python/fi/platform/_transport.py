@@ -15,7 +15,14 @@ from urllib.parse import quote
 import httpx
 from pydantic import TypeAdapter, ValidationError
 
-from fi.utils import _http_guard as _guard
+# Share the lane's graded HTTP policy and its one-notice-per-origin budget.
+from fi._core.http_security import (
+    check_http_security,
+    httpx_client_proxied,
+    httpx_client_sdk_built,
+)
+from fi._core.proxy_routing import SdkDirectAsyncTransport, SdkDirectTransport
+from fi.errors import KeyedRedirectRefusedError
 
 from ._errors import (
     APIConnectionError,
@@ -33,7 +40,7 @@ RETRY_ANY_METHOD = {429}
 RETRY_IDEMPOTENT = {408, 500, 502, 503, 504}
 IDEMPOTENT_METHODS = {"GET", "HEAD", "OPTIONS", "PUT", "DELETE"}
 REDIRECT_STATUSES = {301, 302, 303, 307, 308}
-MAX_REDIRECTS = 5
+MAX_REDIRECTS = 5  # 0.8.1: a sixth redirect in a row raises APIConnectionError
 
 
 class NotGiven:
@@ -145,20 +152,33 @@ def _merge_headers(*layers: Mapping[str, str] | None) -> dict[str, str]:
     return {key: value for key, value in by_name.values()}
 
 
+def _refuse_redirect(response: httpx.Response) -> None:
+    """Raise ``KeyedRedirectRefusedError`` for a 3xx answer that is not followed (see :func:`_follow_redirect`): a 300,
+    a redirect status without a ``Location``, or any other 3xx with one."""
+    status = response.status_code
+    if status in REDIRECT_STATUSES or (300 <= status < 400 and response.headers.get("location")):
+        raise KeyedRedirectRefusedError(status_code=status)
+
+
 def _origin(url: str) -> str:
     u = httpx.URL(url)
     return f"{u.scheme}://{u.host}:{u.port or (443 if u.scheme == 'https' else 80)}".lower()
 
 
 def _follow_redirect(base_url: str, response: httpx.Response, method: str) -> tuple[str, str]:
-    """(url, method) to follow a redirect with. Only a target on the client's own origin is
-    followed: the credentials travel in custom headers (`X-Api-Key`, `X-Secret-Key`) that
-    neither httpx nor browsers strip on a cross-origin redirect, so one is refused instead."""
-    target = str(response.request.url.join(response.headers["location"]))
-    if _origin(target) != _origin(base_url):
-        raise APIConnectionError(
-            f"{response.status_code} redirect to {target} was not followed: it leaves {base_url} and the API keys would go with it"
-        )
+    """(url, method) to follow a 301, 302, 303, 307 or 308 with, as 0.8.1 follows it. Only a target on the client's own
+    origin (scheme, host and port of ``base_url``) is followed, and only from a request sent to that origin: the keys
+    travel in custom headers (``X-Api-Key``, ``X-Secret-Key``) that httpx does not strip on a redirect. A target on any
+    other origin (another scheme, such as https to http on the same host, another host or another port) raises
+    ``KeyedRedirectRefusedError`` and nothing is sent to it; so does a chain that leaves the origin, at its first hop
+    off it. The caller judges the target before it is sent, as any request."""
+    try:
+        target = str(response.request.url.join(response.headers["location"]))
+        same_origin = _origin(target) == _origin(base_url) == _origin(str(response.request.url))
+    except (httpx.InvalidURL, ValueError, TypeError, UnicodeError):
+        same_origin = False
+    if not same_origin:
+        raise KeyedRedirectRefusedError(status_code=response.status_code)
     if response.status_code == 303 or (response.status_code in (301, 302) and method == "POST"):
         method = "GET"  # the way browsers and httpx re-issue these
     return target, method
@@ -174,7 +194,7 @@ class Config:
     workspace_id: str | None = None
     strict_responses: bool = False
     default_headers: Optional[Mapping[str, str]] = None
-    allow_insecure_http: Optional[bool] = None
+    allow_insecure_http: bool | None = None
 
     def headers(self, options: RequestOptions | None = None) -> dict[str, str]:
         headers = {
@@ -260,7 +280,7 @@ def _adapter(model: Any) -> TypeAdapter:
 def _parse(op: Operation, model: Any, data: Any, strict: bool) -> Any:
     """Validate into the generated model (or `List[model]`); untyped responses pass through.
 
-    A response that does not match the contract never breaks a call by default: the
+    A response that does not match the contract does not break a call by default: the
     caller gets the raw JSON and a ResponseShapeWarning. Tests run strict to catch drift,
     which then also holds the response to the contract's required fields.
     """
@@ -277,8 +297,8 @@ def _parse(op: Operation, model: Any, data: Any, strict: bool) -> Any:
 
 
 def _check_page(op: Operation, data: Any, strict: bool) -> Any:
-    """A page without its items list means the contract's page shape is wrong; never
-    let that look like an empty result."""
+    """A page without its items list means the contract's page shape is wrong; it raises
+    instead of returning an empty result."""
     if isinstance(_get(data, op.pagination["items"]), list):
         return data
     message = f"{op.id}: page has no {op.pagination['items']!r} list"
@@ -286,20 +306,6 @@ def _check_page(op: Operation, data: Any, strict: bool) -> Any:
         raise ResponseValidationError(op.id, ValueError(message), data)
     warnings.warn(message, ResponseShapeWarning, stacklevel=4)
     return data
-
-
-def _check_send(config: Config, url: str, headers: Mapping[str, str], client: Any, owned: bool) -> None:
-    """Refuse a request that carries a key over plain http unless it is to loopback or opted in; a client the caller
-    supplied must not be able to route it through a proxy. A caller's client that answers in the process (such as
-    ``httpx.MockTransport``) makes no connection and is not judged.
-
-    Each request is judged twice: as written, before httpx rewrites the host (IDNA, IPv4 forms), and as the client
-    built it, with its URL merged onto the client's ``base_url`` and its headers holding the client's defaults. The
-    proxy is the one the client picks for that URL (its environment proxies, ``NO_PROXY`` and ``trust_env``)."""
-    if not owned and _guard.in_process_transport(client, url):
-        return
-    if _guard.requires_direct(url, _guard.carries_key(headers), config.allow_insecure_http, ValueError) and not owned:
-        _guard.refuse_proxied_client(client, url, ValueError)
 
 
 def _backoff(attempt: int, response: httpx.Response | None) -> float:
@@ -312,15 +318,67 @@ def _backoff(attempt: int, response: httpx.Response | None) -> float:
     return min(0.5 * 2**attempt, 8.0) * (0.75 + random.random() / 2)
 
 
+def _check_destination(client: Any, url: str, allow_insecure_http: bool | None) -> None:
+    # The URL is judged as written: httpx reads a host written with the ideographic or fullwidth full stop as a dot and
+    # sends to 127.0.0.1, so the parsed URL would pass for loopback a host the text names otherwise. A URL httpx cannot
+    # read keeps httpx's own error. It is judged again as the client sends it, merged onto the client's own base_url
+    # (a base URL of "/" or "//host" takes its scheme and host from there), with the proxy the client picks for it.
+    # A caller's client whose transport for the URL is exactly httpx's MockTransport, WSGITransport or ASGITransport
+    # answers in the process, makes no connection and is not judged (0.8.1); a subclass of one is judged.
+    parsed = httpx.URL(url)
+    if type(_transport_for(client, parsed)) in _IN_PROCESS:
+        return
+    _check_written_destination(client, url, allow_insecure_http)
+
+
+def _check_built_request(client: Any, url: str, request: httpx.Request, allow_insecure_http: bool | None) -> None:
+    # 0.8.1 judges the request as the client built it too: merged onto the client's base_url (a base URL of "/" or "//host"
+    # takes its scheme and host from there). Its origin is judged (the path was judged as written), with the proxy the
+    # client picks for it; a client that answers in the process makes no connection and is not judged.
+    built = request.url
+    if built.scheme != "http" or str(built) == url or type(_transport_for(client, built)) in _IN_PROCESS:
+        return
+    origin = str(built.copy_with(raw_path=b"/", fragment=None))
+    check_http_security(
+        origin, "keys", allow_insecure_http=allow_insecure_http,
+        caller_proxied=httpx_client_proxied(client, built), proxies_disabled=True,
+    )
+
+
+_IN_PROCESS = (httpx.MockTransport, httpx.WSGITransport, httpx.ASGITransport)
+
+
+def _transport_for(client: Any, url: httpx.URL) -> Any:
+    try:
+        return client._transport_for_url(url)
+    except Exception:  # noqa: BLE001 - a client that cannot answer is judged
+        return None
+
+
+def _check_written_destination(client: Any, url: str, allow_insecure_http: bool | None) -> None:
+    if url[:7].lower() != "http://":
+        check_http_security(url, "keys", allow_insecure_http=allow_insecure_http)
+        return
+    # A client the SDK built sends plain HTTP direct (its mount reads no proxy variable). A caller's client is asked
+    # which transport it uses for the URL: the proxies it picks for itself (its ``proxy=``, ``mounts=`` and, while
+    # ``trust_env`` is on, the environment it read) decide, and a client with ``trust_env=False`` reads no proxy
+    # variable, so the environment is not judged for it (0.8.1).
+    built = httpx_client_sdk_built(client, url)
+    check_http_security(
+        url, "keys", allow_insecure_http=allow_insecure_http,
+        caller_proxied=not built and httpx_client_proxied(client, url), proxies_disabled=True,
+    )
+
+
 class SyncTransport:
     def __init__(self, config: Config, http_client: httpx.Client | None = None) -> None:
         self.config = config
-        # A caller's client is used as given (absolute URLs, per-request timeout) and never
+        # A caller's client is used as given (absolute URLs, per-request timeout) and not
         # closed here; only a client we created is ours to configure and close.
         self._owns_http = http_client is None
-        # Redirects are followed here, not by httpx: only to the client's own origin (see _follow_redirect).
-        # Every request also says so itself, because a caller's client may have follow_redirects=True.
-        self._http = http_client or httpx.Client(follow_redirects=False, mounts=_guard.direct_mounts())
+        # Redirects are followed here, not by httpx, and only to the client's own origin (see _follow_redirect). Every
+        # request says follow_redirects=False itself, because a caller's client may have follow_redirects=True.
+        self._http = http_client or httpx.Client(follow_redirects=False, mounts={"http://": SdkDirectTransport()})
 
     def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
         """One HTTP call for `op`: auth, retries, envelope unwrap, typed errors. Returns decoded JSON."""
@@ -329,9 +387,9 @@ class SyncTransport:
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
         attempt = redirects = 0
         while True:
-            _check_send(self.config, url, headers, self._http, self._owns_http)
+            _check_destination(self._http, url, self.config.allow_insecure_http)
             request = self._http.build_request(method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
-            _check_send(self.config, str(request.url), request.headers, self._http, self._owns_http)
+            _check_built_request(self._http, url, request, self.config.allow_insecure_http)
             try:
                 response = self._http.send(request, follow_redirects=False)
             except httpx.TransportError as exc:
@@ -345,10 +403,11 @@ class SyncTransport:
                 if redirects > MAX_REDIRECTS:
                     raise APIConnectionError(f"{op.id}: more than {MAX_REDIRECTS} redirects")
                 url, method = _follow_redirect(self.config.base_url, response, method)
-                query = None  # the target URL carries whatever query it needs
+                query = None  # the target URL carries the query it needs
                 if method != op.method:
-                    payload = {}  # re-issued as a GET: no body
+                    payload = {}  # sent again as a GET: no body
                 continue
+            _refuse_redirect(response)
             if _can_retry(op, response.status_code, attempt, retries):
                 time.sleep(_backoff(attempt, response))
                 attempt += 1
@@ -383,7 +442,7 @@ class AsyncTransport:
     def __init__(self, config: Config, http_client: httpx.AsyncClient | None = None) -> None:
         self.config = config
         self._owns_http = http_client is None
-        self._http = http_client or httpx.AsyncClient(follow_redirects=False, mounts=_guard.direct_async_mounts())
+        self._http = http_client or httpx.AsyncClient(follow_redirects=False, mounts={"http://": SdkDirectAsyncTransport()})
 
     async def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
         url, method = self.config.base_url + _url(op, path), op.method
@@ -391,9 +450,9 @@ class AsyncTransport:
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
         attempt = redirects = 0
         while True:
-            _check_send(self.config, url, headers, self._http, self._owns_http)
+            _check_destination(self._http, url, self.config.allow_insecure_http)
             request = self._http.build_request(method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
-            _check_send(self.config, str(request.url), request.headers, self._http, self._owns_http)
+            _check_built_request(self._http, url, request, self.config.allow_insecure_http)
             try:
                 response = await self._http.send(request, follow_redirects=False)
             except httpx.TransportError as exc:
@@ -407,10 +466,11 @@ class AsyncTransport:
                 if redirects > MAX_REDIRECTS:
                     raise APIConnectionError(f"{op.id}: more than {MAX_REDIRECTS} redirects")
                 url, method = _follow_redirect(self.config.base_url, response, method)
-                query = None  # the target URL carries whatever query it needs
+                query = None  # the target URL carries the query it needs
                 if method != op.method:
-                    payload = {}
+                    payload = {}  # sent again as a GET: no body
                 continue
+            _refuse_redirect(response)
             if _can_retry(op, response.status_code, attempt, retries):
                 await asyncio.sleep(_backoff(attempt, response))
                 attempt += 1

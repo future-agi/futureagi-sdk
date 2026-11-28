@@ -4,14 +4,14 @@ A caller may supply an ``httpx`` client with its own ``base_url`` and give the p
 scheme (``/``, ``/api``, ``//host:port``). httpx then merges the two, so the request goes to the client's base URL,
 through whatever proxy the client takes from the environment (``HTTP_PROXY``, ``ALL_PROXY``, ``NO_PROXY``, read only
 when the client trusts the environment). The judgement has to be made on that final request: plain ``http://`` to a
-host that is not loopback is refused without the opt-in, and a keyed plain ``http://`` request is never sent through
-a proxy.
+host that is not loopback is refused without the opt-in, and any proxy route blocks a keyed plain ``http://``
+request.
 
-Every case sends one keyed request and reads what reached the loopback listeners (target and proxy): the connection
+Each case attempts one keyed request and reads what reached the loopback listeners (target and proxy): the connection
 count and the bytes that hold the marker key. ``api.futureagi.com`` resolves to the loopback interface through the
 lookup shim of ``tests/test_plain_http_key_guards.py``, so no case reaches a real host.
 """
-# ruff: noqa: F811  (the autouse `net` fixture is imported for pytest and taken as a parameter)
+# ruff: noqa: F811
 
 from __future__ import annotations
 
@@ -19,13 +19,19 @@ import asyncio
 
 import httpx
 import pytest
+from fi.errors import (
+    ConfigurationError,
+    InsecureHttpRefusedError,
+    KeyedProxyRefusedError,
+)
 from fi.platform import APIConnectionError, AsyncClient, Client
+
 from tests.test_plain_http_key_guards import (  # noqa: F401  (net is autouse)
     CODE,
     KEY,
     SECRET,
+    _attempt,
     net,
-    refused,
     use_proxy,
 )
 
@@ -42,22 +48,14 @@ SCHEMELESS = pytest.mark.parametrize(
 TRANSPORTS = pytest.mark.parametrize("transport", [pytest.param("sync", id="sync"), pytest.param("async", id="async")])
 
 
-def _attempt(call):
-    try:
-        call()
-    except Exception as exc:  # the listener's reply may not parse; what reached the listeners is what is read
-        return exc
-    return None
-
-
-def send(transport: str, base: str, http=None, **kwargs):
+def send(transport: str, base: str, http=None):
     """Send one keyed ``GET /v1/ping`` through ``Client`` or ``AsyncClient``. ``http(cls)`` builds the caller's
     httpx client from ``httpx.Client`` or ``httpx.AsyncClient``; ``None`` leaves the client to the SDK."""
     if transport == "sync":
         caller = http(httpx.Client) if http else None
 
         def run():
-            client = Client(api_key=KEY, secret_key=SECRET, base_url=base, max_retries=0, timeout=3, http_client=caller, **kwargs)
+            client = Client(api_key=KEY, secret_key=SECRET, base_url=base, max_retries=0, timeout=3, http_client=caller)
             try:
                 client.request("GET", "/v1/ping", unwrap=None)
             finally:
@@ -69,7 +67,7 @@ def send(transport: str, base: str, http=None, **kwargs):
 
     async def arun():
         caller = http(httpx.AsyncClient) if http else None
-        client = AsyncClient(api_key=KEY, secret_key=SECRET, base_url=base, max_retries=0, timeout=3, http_client=caller, **kwargs)
+        client = AsyncClient(api_key=KEY, secret_key=SECRET, base_url=base, max_retries=0, timeout=3, http_client=caller)
         try:
             await client.request("GET", "/v1/ping", unwrap=None)
         finally:
@@ -78,6 +76,12 @@ def send(transport: str, base: str, http=None, **kwargs):
                 await caller.aclose()
 
     return _attempt(lambda: asyncio.run(arun()))
+
+
+def _coded_refusal(exc, cls, code):
+    assert isinstance(exc, cls), repr(exc)
+    assert exc.code == code
+    assert KEY not in str(exc) and SECRET not in str(exc)
 
 
 def caller_client(base_url: str, **kwargs):
@@ -98,7 +102,7 @@ def plain_base(net) -> str:
 def test_schemeless_base_merged_with_callers_plain_http_base_is_refused(net, transport, base):
     exc = send(transport, base.format(port=net.target.port), caller_client(plain_base(net)))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _coded_refusal(exc, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED")
 
 
 @TRANSPORTS
@@ -108,7 +112,7 @@ def test_schemeless_base_with_environment_proxy_is_refused(monkeypatch, net, tra
     use_proxy(monkeypatch, net, names=variable)
     exc = send(transport, base.format(port=net.target.port), caller_client(plain_base(net)))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _coded_refusal(exc, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED")
 
 
 @TRANSPORTS
@@ -117,7 +121,7 @@ def test_schemeless_base_that_no_proxy_sends_directly_is_refused(monkeypatch, ne
     use_proxy(monkeypatch, net, names=("HTTP_PROXY",), no_proxy=HOST)
     exc = send(transport, base.format(port=net.target.port), caller_client(plain_base(net)))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _coded_refusal(exc, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED")
 
 
 @TRANSPORTS
@@ -126,7 +130,7 @@ def test_schemeless_base_with_client_that_ignores_the_environment_is_refused(mon
     use_proxy(monkeypatch, net, names=("HTTP_PROXY",))
     exc = send(transport, base.format(port=net.target.port), caller_client(plain_base(net), trust_env=False))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _coded_refusal(exc, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED")
 
 
 @TRANSPORTS
@@ -134,18 +138,20 @@ def test_schemeless_base_with_client_that_ignores_the_environment_is_refused(mon
 @pytest.mark.parametrize("variable", [pytest.param(("HTTP_PROXY",), id="HTTP_PROXY"), pytest.param(("ALL_PROXY",), id="ALL_PROXY")])
 def test_opt_in_with_schemeless_base_is_refused_when_the_environment_proxy_applies(monkeypatch, net, transport, base, variable):
     use_proxy(monkeypatch, net, names=variable)
-    exc = send(transport, base.format(port=net.target.port), caller_client(plain_base(net)), allow_insecure_http=True)
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
+    exc = send(transport, base.format(port=net.target.port), caller_client(plain_base(net)))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _coded_refusal(exc, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED")
 
 
 @TRANSPORTS
 @SCHEMELESS
-def test_opt_in_with_schemeless_base_is_refused_when_the_callers_client_has_a_proxy(net, transport, base):
+def test_opt_in_with_schemeless_base_is_refused_when_the_callers_client_has_a_proxy(monkeypatch, net, transport, base):
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     proxied = caller_client(plain_base(net), proxy=f"http://127.0.0.1:{net.proxy.port}")
-    exc = send(transport, base.format(port=net.target.port), proxied, allow_insecure_http=True)
+    exc = send(transport, base.format(port=net.target.port), proxied)
     net.nothing_sent()
-    refused(exc, ValueError)
+    _coded_refusal(exc, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED")
 
 
 @TRANSPORTS
@@ -156,7 +162,7 @@ def test_schemeless_base_merged_with_callers_loopback_base_is_not_sent_through_t
     written = base.replace(HOST, "127.0.0.1").format(port=net.target.port)
     exc = send(transport, written, caller_client(loopback))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _coded_refusal(exc, KeyedProxyRefusedError, "KEYED_PROXY_REFUSED")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -168,7 +174,13 @@ def test_schemeless_base_merged_with_callers_loopback_base_is_not_sent_through_t
 @SCHEMELESS
 def test_opt_in_with_schemeless_base_and_client_that_ignores_the_environment_is_sent_directly(monkeypatch, net, transport, base):
     use_proxy(monkeypatch, net, names=("HTTP_PROXY", "ALL_PROXY"))
-    send(transport, base.format(port=net.target.port), caller_client(plain_base(net), trust_env=False), allow_insecure_http=True)
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
+    exc = send(transport, base.format(port=net.target.port), caller_client(plain_base(net), trust_env=False))
+    if net.target.marker_bytes() == 0:
+        # 0.9.0 judges the merged URL and refuses plain http to a Future AGI host whatever the opt-in says.
+        net.nothing_sent()
+        assert isinstance(exc, InsecureHttpRefusedError), repr(exc)
+        return
     net.delivered_direct()
 
 
@@ -176,6 +188,7 @@ def test_opt_in_with_schemeless_base_and_client_that_ignores_the_environment_is_
 @SCHEMELESS
 def test_schemeless_base_merged_with_callers_https_base_is_not_refused(net, transport, base):
     exc = send(transport, base.format(port=net.target.port), caller_client(f"https://{HOST}:{net.target.port}"))
+    assert not isinstance(exc, ConfigurationError), repr(exc)
     assert getattr(exc, "code", None) != CODE
     assert net.target.marker_bytes() == 0, net.report()
 
@@ -185,6 +198,7 @@ def test_schemeless_base_merged_with_callers_https_base_is_not_refused(net, tran
 def test_schemeless_base_merged_with_callers_https_base_still_uses_the_environment_proxy(monkeypatch, net, transport, base):
     use_proxy(monkeypatch, net, names=("HTTPS_PROXY",))
     exc = send(transport, base.format(port=net.target.port), caller_client(f"https://{HOST}:{net.target.port}"))
+    assert not isinstance(exc, ConfigurationError), repr(exc)
     assert getattr(exc, "code", None) != CODE
     assert net.proxy.connections >= 1, net.report()
     assert net.proxy.marker_bytes() == 0, net.report()
@@ -194,7 +208,7 @@ def test_schemeless_base_merged_with_callers_https_base_still_uses_the_environme
 def test_absolute_plain_http_base_with_callers_client_is_refused(net, transport):
     exc = send(transport, plain_base(net), caller_client(plain_base(net)))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _coded_refusal(exc, InsecureHttpRefusedError, "INSECURE_HTTP_REFUSED")
 
 
 @TRANSPORTS
@@ -203,7 +217,7 @@ def test_absolute_loopback_base_with_callers_client_and_environment_proxy_is_ref
     loopback = f"http://127.0.0.1:{net.target.port}"
     exc = send(transport, loopback, caller_client(loopback))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _coded_refusal(exc, KeyedProxyRefusedError, "KEYED_PROXY_REFUSED")
 
 
 @TRANSPORTS
@@ -229,6 +243,10 @@ def test_schemeless_base_with_callers_in_process_transport_is_answered_in_proces
         return cls(base_url=plain_base(net), transport=mock)
 
     exc = send(transport, base.format(port=net.target.port), http)
+    net.nothing_sent()
+    if isinstance(exc, InsecureHttpRefusedError):
+        # 0.9.0 judges the merged URL (plain http to a Future AGI host) before the transport is asked.
+        assert seen == [], seen
+        return
     assert exc is None, repr(exc)
     assert len(seen) == 1 and seen[0].url.scheme == "http" and seen[0].headers["X-Api-Key"] == KEY
-    net.nothing_sent()

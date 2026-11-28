@@ -1,0 +1,14 @@
+{
+  "omegaGetWorkspaceConversations": "listWorkspaceConversations",
+  "omegaPostWorkspaceConversations": "createWorkspaceConversation",
+  "omegaGetWorkspaceConversationsById": "getWorkspaceConversation",
+  "omegaDeleteWorkspaceConversationsById": "deleteWorkspaceConversation",
+  "omegaGetWorkspaceConversationsByIdEvents": "streamWorkspaceConversationEvents",
+  "omegaGetWorkspaceConversationsByIdApprovals": "listWorkspaceConversationApprovals",
+  "omegaGetWorkspaceConversationsByIdProofPack": "getWorkspaceConversationProofPack",
+  "omegaGetWorkspaceConversationsByIdEvidence": "getWorkspaceConversationEvidence",
+  "omegaGetWorkspaceConversationsByIdControlStatus": "getWorkspaceConversationControlStatus",
+  "omegaPostWorkspaceConversationsByIdMessages": "sendWorkspaceConversationMessage",
+  "omegaPostWorkspaceConversationsByIdCancel": "cancelWorkspaceConversation",
+  "omegaGetWorkspaceApprovals": "listWorkspaceApprovals"
+}

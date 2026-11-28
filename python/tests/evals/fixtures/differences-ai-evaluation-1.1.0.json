@@ -1,0 +1,326 @@
+{
+ "note": "What changes for code and docs written against ai-evaluation 1.1.0 when they run on futureagi. Imports, call shapes, results, exported names and type hints not listed here match 1.1.0 (test_compat_examples.py, test_surface.py, test_shared_paths.py, test_type_hints.py). Each entry names the tests that hold it true; the documentation sweep reads this file, next to census-fi-evals.json, which counts the fi.evals imports and `fi` command lines in the docs, the site and the app's snippets.",
+ "differences": [
+  {
+   "id": "cli",
+   "area": "command line",
+   "ai_evaluation": "The `fi` console script: `fi init`, `fi run`, `fi list`, `fi validate`, `fi view`, `fi export` and `fi config`. `fi run` takes `--config/-c`, `--eval/-e`, `--data/-d`, `--output/-o`, `--parallel/-p`, `--timeout`, `--model/-m`, `--dry-run`, `--output-file`, `--quiet/-q`, `--no-save`, `--check/--no-check`, `--fail-fast`, `--strict`, `--mode`, `--local-llm` and `--offline`; `fi list` takes `templates|categories`, `--format/-f` and `--category/-c`.",
+   "futureagi": "No `fi` script and no `fi.cli` package. `futureagi-py evals list [--json]` lists the templates the keys can run. `futureagi-py evals run TEMPLATE [--input KEY=VALUE ...] [--inputs FILE] [--model NAME] [--timeout SECONDS] [--json]` runs one template on one set of inputs (a JSON object). There is no counterpart for init, validate, view, export or config, for config or data files, assertions, parallel runs, local or offline modes, saved run history, listing categories, or writing results to a file.",
+   "docs": "Replace `fi run --eval NAME` with `futureagi-py evals run NAME --input KEY=VALUE` (or `--inputs FILE` for one JSON object of inputs), `--output json` with `--json`, and `fi list` with `futureagi-py evals list`. Pages built on config files, data files, assertions or run history move to Python (`Evaluator().evaluate(...)`). The census counts one `fi run` line on the site.",
+   "tests": [
+    "tests/evals/test_provenance.py::test_the_package_ships_fi_evals_and_no_fi_console_script",
+    "tests/evals/test_provenance.py::test_the_legacy_cli_tree_is_not_shipped",
+    "tests/evals/test_differences.py::test_the_retired_fi_commands_have_no_evals_counterpart",
+    "tests/evals/test_differences.py::test_evals_run_takes_one_template_and_these_options",
+    "tests/evals/test_cli.py::test_run_json",
+    "tests/evals/test_cli.py::test_list_json"
+   ]
+  },
+  {
+   "id": "evals-extra",
+   "area": "installation",
+   "ai_evaluation": "`pip install ai-evaluation` installed every dependency, so every fi.evals module imported.",
+   "futureagi": "`pip install futureagi` covers the cloud client: `Evaluator`, `evaluate()`, the templates, `Protect`, `Execution`, `EvalTemplateManager` and `list_evaluations`, including on Python 3.10 without rouge-score. The metrics (`fi.evals.metrics`: the local metrics, the LLM judges and the code-security metrics), the local evaluator (`fi.evals.local`), the LLM providers (`fi.evals.llm`) and the OpenTelemetry helpers in `fi.evals.otel_utils` also need `pip install \"futureagi[evals]\"` (jinja2, litellm, nltk, openai, opentelemetry, pyyaml, rouge-score and filelock). The `[evals]` extra needs Python 3.11+; importing local metrics or LLM judges on Python 3.10 raises a value-free `ImportError` naming Python 3.11+ and `futureagi[evals]`. Rouge-score is no longer a base dependency: installing `[evals]` builds rouge-score from its source distribution. Constructing ROUGEScore without rouge-score raises `ModuleNotFoundError` naming `futureagi[evals]` and Python 3.11+. Other missing optional dependencies still raise `ModuleNotFoundError` naming the missing module; `fi.evals.otel_utils` raises `ImportError` asking for `fi-instrumentation-otel`, which the extra also satisfies. The optional distributed backends (Temporal, Celery, Ray, Kubernetes) name only their own dependency when it is missing; 1.1.0 also suggested an `fi-evals[...]` extra that no package provides.",
+   "docs": "Pages that use only the cloud client install `pip install futureagi`, including on Python 3.10. Pages that import anything from `fi.evals.metrics`, `fi.evals.local`, `fi.evals.llm` or `fi.evals.otel_utils` need Python 3.11+ and `pip install \"futureagi[evals]\"`. Explain that rouge-score comes with `[evals]`, not the base SDK, and that installing `[evals]` builds its source distribution. A troubleshooting note can map `No module named 'jinja2'` (or `litellm`) to that extra.",
+   "tests": [
+    "tests/evals/test_differences.py::test_local_metrics_need_the_evals_extra_and_the_cloud_client_does_not",
+    "tests/evals/test_optional_dependencies.py::test_python310_local_imports_name_python_and_extra_before_dependencies",
+    "tests/evals/test_optional_dependencies.py::test_cloud_names_import_without_attempting_rouge_or_litellm",
+    "tests/evals/test_optional_dependencies.py::test_every_shipped_non_evals_module_imports_without_evals_dependencies",
+    "tests/evals/test_optional_dependencies.py::test_rouge_without_dependency_names_extra_and_python",
+    "tests/evals/test_openai_call_paths.py::test_guardrails_constructs_installed_sync_and_async_clients_and_calls",
+    "tests/evals/test_openai_call_paths.py::test_litellm_provider_completes_through_installed_mock_response_api",
+    "tests/evals/test_openai_call_paths.py::test_litellm_provider_wraps_installed_openai_exception_types",
+    "tests/evals/test_openai_call_paths.py::test_instrumentor_wraps_calls_and_restores_installed_openai_targets",
+    "tests/evals/test_port_gates.py::test_install_guidance_names_only_futureagi_or_a_third_party_dependency"
+   ]
+  },
+  {
+   "id": "http-error-retries",
+   "area": "requests",
+   "ai_evaluation": "A request that got an HTTP error status was sent again: 3 attempts, 1 second apart.",
+   "futureagi": "It is sent once. Only transport failures (a connection error or a timeout) are retried, by the client's shared retry policy.",
+   "docs": "Do not promise automatic retries of 4xx or 5xx responses.",
+   "tests": [
+    "tests/evals/test_compat_examples.py::test_an_http_error_status_is_sent_once_not_three_times"
+   ],
+   "examples": [
+    "error_server_rejects_keys"
+   ]
+  },
+  {
+   "id": "missing-keys-message",
+   "area": "credentials",
+   "ai_evaluation": "Keys came from the arguments or from FI_API_KEY and FI_SECRET_KEY; `MissingAuthError` said to pass them or set those variables.",
+   "futureagi": "The same error class. Keys resolve from the arguments, then the environment, then the login saved by `futureagi-py login`, and the message names `futureagi-py login` as a third way to supply them.",
+   "docs": "Pages may add `futureagi-py login` as a way to supply keys; examples that pass keys or set the variables are unchanged.",
+   "tests": [
+    "tests/evals/test_compat_examples.py::test_missing_keys_raise_the_same_error_class",
+    "tests/evals/test_cli.py::test_missing_keys_exit_3_before_any_request"
+   ],
+   "examples": [
+    "error_missing_keys"
+   ]
+  },
+  {
+   "id": "per-instance-keys",
+   "area": "credentials",
+   "ai_evaluation": "The keys were class attributes of the client: after a second client was built with other keys, an earlier client's template-registry lookup sent the later keys.",
+   "futureagi": "Each client keeps its own keys, and the client class holds none of them: reading `_fi_api_key` or `_fi_secret_key` from `APIKeyAuth` or a subclass returns None with a DeprecationWarning instead of the keys of the last client built. Instances keep their own keys. A guardrails gateway built with `GuardrailsGateway.with_openai`, `with_azure` or `with_local_model` keeps the key, endpoint or server URL it is given on that gateway and does not write to the process environment: a later gateway built without them reads the environment, not the earlier gateway's values. `Guardrails` and `GuardrailsGateway` accept `backend_options` for the same per-instance settings. `fi.evals.otel.setup_tracing` keeps one active tracing configuration: it installs the module's own provider as the OpenTelemetry global provider once, which sends every span (also from tracers obtained earlier) to the active configuration's exporters and headers, and to none after `shutdown_tracing()`. A second `setup_tracing` while one is active, or one after other code set the global provider, raises `fi.evals.otel.tracer.TracingAlreadyConfigured` (a `fi.errors.ConfigurationError`, code tracing_already_configured) before building anything; in 1.1.0 the module then reported the second configuration while its spans went out through the first one's exporters and keys. `Protect(fi_api_key=..., fi_secret_key=..., fi_base_url=...)` and the turing guardrail backend built on it send the keys they are given to the base URL they are given. They take the two keys as one pair from one place: both from the arguments, or, when neither key argument is given, both from FI_API_KEY and FI_SECRET_KEY, then the saved login; one key from the arguments with the other left out or empty raises fi.errors.MissingAuthError (an fi.errors.AuthError) before any request, and so does a missing pair, where 1.1.0 raised InvalidAuthError. `Guardrails` passes an fi.errors.AuthError raised while it builds a backend (such as that MissingAuthError) to the caller as it is; another failure to build a backend raises RuntimeError. FI_BASE_URL fills in a base URL the caller left out, as for the other clients. In 1.1.0 Protect took FI_API_KEY and FI_SECRET_KEY over its key arguments when both were set, and took its base URL from FI_BASE_URL or https://api.futureagi.com in every case, setting fi_base_url aside.",
+   "docs": "No change to examples. Code that relied on one client's keys changing another's behaves differently, and code that read the keys from the class must read them from the client instance. Guardrails examples pass provider keys to `with_openai`/`with_azure` or in `backend_options`; code that read OPENAI_API_KEY, AZURE_CONTENT_SAFETY_* or VLLM_SERVER_URL back from the environment after building a gateway must keep its own copy. Call `shutdown_tracing()` before configuring tracing again, and configure it before any other code sets the OpenTelemetry global provider. Code that passed keys or a base URL to `Protect` while FI_API_KEY and FI_SECRET_KEY name another tenant reaches the tenant and URL it passed. Pass both keys to `Protect` or the turing backend, or neither, and catch fi.errors.MissingAuthError where code caught InvalidAuthError for missing keys.",
+   "tests": [
+    "tests/evals/test_delegate.py::test_two_evaluators_with_different_keys_each_send_their_own",
+    "tests/evals/test_delegate.py::test_two_platform_clients_do_not_share_keys",
+    "tests/core/test_apikeyauth_isolation.py::test_class_reads_are_value_free",
+    "tests/core/test_apikeyauth_isolation.py::test_two_clients_send_their_own_headers_in_sequence",
+    "tests/core/test_each_client_sends_its_own_keys_2.py::test_one_after_another_with_a_process_key_for_the_second",
+    "tests/core/test_each_client_sends_its_own_keys_2.py::test_concurrently_from_eight_threads",
+    "tests/evals/guardrails/test_gateway_provider_key_isolation.py::test_openai_key_is_not_seen_by_a_later_gateway_without_one",
+    "tests/evals/guardrails/test_gateway_provider_key_isolation.py::test_azure_gateways_built_from_eight_threads_keep_their_own_settings",
+    "tests/core/test_each_client_sends_its_own_keys_3.py::test_one_configuration_after_another_sends_each_ones_keys_to_its_own_sink",
+    "tests/core/test_each_client_sends_its_own_keys_3.py::test_spans_from_eight_threads_reach_only_the_active_configuration",
+    "tests/core/test_each_client_sends_its_own_keys_3.py::test_a_second_configuration_while_one_is_active_is_refused",
+    "tests/core/test_each_client_sends_its_own_keys_3.py::test_eight_configurations_at_once_leave_one_active_and_its_sink_alone_gets_spans",
+    "tests/evals/otel/test_setup_tracing_isolation.py::test_a_foreign_global_provider_is_refused_and_keeps_its_place",
+    "tests/evals/otel/test_setup_tracing_isolation.py::test_the_global_provider_is_installed_once_and_follows_the_active_configuration",
+    "tests/core/test_protect_sends_its_own_keys.py::test_two_instances_one_after_another_send_their_own_keys_to_their_own_sinks",
+    "tests/core/test_protect_sends_its_own_keys.py::test_two_instances_from_eight_threads_send_their_own_keys_to_their_own_sinks",
+    "tests/evals/test_protect_turing_key_pairs.py::test_one_key_from_the_caller_raises_missing_auth_before_any_connection",
+    "tests/evals/test_protect_turing_key_pairs.py::test_full_caller_pair_goes_to_the_caller_base_url_only",
+    "tests/evals/test_protect_turing_key_pairs.py::test_no_arguments_send_the_environment_pair_to_the_environment_base_url",
+    "tests/evals/test_langfuse_pair_scope.py::test_guardrails_passes_an_auth_error_from_a_backend_through_as_it_is",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body"
+   ],
+   "source_contract": {
+    "fi/evals/guardrails/base.py:Guardrails.__init__": {
+     "upstream_ast_sha256": "bcc2e5994fc3c9474c68d43e0634cab5d40dd865885509166b9efe02071b6651",
+     "ast_sha256": "46dc3afc4a6dc0d38a94673db2246fdc2163c60f9a56a6f082965543086037ed"
+    },
+    "fi/evals/guardrails/base.py:Guardrails._create_backend": {
+     "upstream_ast_sha256": "6b4c3fc2c645cd670870e46b6edc0c589ff8fad992c50ce4a8b63baeba4da1b8",
+     "ast_sha256": "b8403f9304a02c542ce6959a4904c8171507b6a0eb081157919625282aac65f4"
+    },
+    "fi/evals/guardrails/gateway.py:GuardrailsGateway.__init__": {
+     "upstream_ast_sha256": "08f90bf80dac44b8bf036758d2bfdc68afcb98aafb2bd204f91ef73aad713270",
+     "ast_sha256": "35db4299084244da22ba953547c9eb4b4653f72fe143ba8bcb8afb7e96d2ff63"
+    },
+    "fi/evals/guardrails/gateway.py:GuardrailsGateway.with_openai": {
+     "upstream_ast_sha256": "de3a1abb89a1454f767554e0647f2491f399fe3cbd8ed8783053c82b015015e2",
+     "ast_sha256": "8a465b2cdef7583f2bcf22cdc50da331fceb1ff78b138c0c1fcdd8478588c84c"
+    },
+    "fi/evals/guardrails/gateway.py:GuardrailsGateway.with_azure": {
+     "upstream_ast_sha256": "135248280fbf5106a0961ab378a80f6cc7358ef88191197a291fb11d2ab1db7f",
+     "ast_sha256": "1ba1bca3de4f018fef1c5a4e17f058c166c268968a790e82d9b8b915529ac482"
+    },
+    "fi/evals/guardrails/gateway.py:GuardrailsGateway.with_local_model": {
+     "upstream_ast_sha256": "6da8b73b9b4a90e4d6f83f92838890292e52b7b4846e20227b1e3f0557564cb2",
+     "ast_sha256": "922ae8722ce5b97aa278746744cddb05ef99023bee5801db2ea966e2bc47e554"
+    },
+    "fi/evals/otel/tracer.py:setup_tracing": {
+     "upstream_ast_sha256": "8bdf44d36bc3e876d4e70091ac6fa0eadd8032e9f45ee5ce820822150eac4794",
+     "ast_sha256": "51122dcbc603d9d59cc3c1c77e80a12ea7af15063fa38c4720025d28ce519ff7"
+    },
+    "fi/evals/otel/tracer.py:get_tracer": {
+     "upstream_ast_sha256": "eb19836a3b031c1266505c294dd5d3eff5a76a49960d937ecfb21825a699d68c",
+     "ast_sha256": "841806067ba4393fc458760e25fd443dd0d98ebfe012484685cfde1fbaa02f2a"
+    },
+    "fi/evals/otel/tracer.py:shutdown_tracing": {
+     "upstream_ast_sha256": "0a0043b9f88c2c21906693f718a80d34137adf4f79a1d4276cf1aaeb41bd535b",
+     "ast_sha256": "1fd6672729f1f7e2c16bc26061cf6fb5704662e9e7807f978912f203aba6341f"
+    },
+    "fi/evals/protect.py:Protect.__init__": {
+     "upstream_ast_sha256": "a5dc89c735a16be4805d18e775a4b36aeab19c9fce28a3c8a86ab0ede68d0de0",
+     "ast_sha256": "6c3d23106c01ecc1f0177a6cb80f03f57af94a250c0f47018bd898e7e8741b77"
+    }
+   }
+  },
+  {
+   "id": "success-status",
+   "area": "responses",
+   "ai_evaluation": "`fi.api.auth.ResponseHandler.parse` treated every status other than 200 as an error.",
+   "futureagi": "The shared `ResponseHandler.parse` treats every 2xx status as a success and calls `_parse_success` for it.",
+   "docs": "No change to examples. A custom `ResponseHandler` subclass now sees 201 to 299 as successes.",
+   "tests": [
+    "tests/evals/test_differences.py::test_any_2xx_status_is_a_success",
+    "tests/evals/test_differences.py::test_a_status_outside_2xx_is_an_error"
+   ]
+  },
+  {
+   "id": "patch-targets",
+   "area": "testing code that uses fi.evals",
+   "ai_evaluation": "Each class's methods were defined in the module that exports the class, so `mock.patch(\"fi.evals.<module>.<name>\")` changed what those methods saw.",
+   "futureagi": "Modules over 400 lines were split: some methods, classes and functions now live in private modules beside the public one. Every public name still imports from where it did, and moved classes keep their published `__module__`, but a moved method's `__module__` names its new module. A function reads the globals of the module that defines it, so patching the public module's attribute reaches a moved body only when that body imports the name each time it runs.",
+   "docs": "A test that patches a name a method uses patches it in the module that defines the code, `function.__globals__[\"__name__\"]` (for example `StreamingEvaluator.add_eval.__globals__[\"__name__\"]`), or patches the attribute on the class.",
+   "tests": [
+    "tests/evals/test_differences.py::test_moved_code_reads_the_globals_of_its_own_module"
+   ]
+  },
+  {
+   "id": "registry-session",
+   "area": "signatures",
+   "ai_evaluation": "`fi.evals.core.cloud_registry.load_registry`, `get_template_info`, `get_required_keys`, `map_inputs_to_backend` and `list_known_names` took no session.",
+   "futureagi": "Each also takes a keyword-only `session=None`, which `FutureAGIClient().evals` uses to share its HTTP configuration; with the default they behave as in 1.1.0.",
+   "docs": "No change; reference pages generated from signatures show the extra keyword.",
+   "tests": [
+    "tests/evals/test_differences.py::test_the_registry_functions_take_an_optional_session_keyword"
+   ]
+  },
+  {
+   "id": "ground-truth-setup",
+   "area": "current platform routes",
+   "ai_evaluation": "EvalTemplateManager used separate ground-truth config, variable-mapping, role-mapping and search routes. The shared Routes enum also advertised the legacy model logging route.",
+   "futureagi": "The current platform no longer serves these routes. Mapping setters use PUT /model-hub/ground-truth/{ground_truth_id}/setup/ with both mappings, max_examples and enabled. The existing positional parameters remain unchanged; the other mapping, max_examples and enabled are optional keyword-only parameters defaulting to None, with fi.errors.ConfigurationValueError (also ConfigurationError and ValueError) before HTTP when state is missing or invalid. Unknown role_mapping keys are rejected locally rather than silently dropped; accepted keys are output, explanation, expected_output, reasoning and reason. Setup has no GET, data/status omit settings, and the GT root supports only DELETE. Only the template-scoped list exposes setup state, so the SDK cannot read-merge by GT ID. Explicit enabled avoids the server default silently re-enabling disabled datasets. Config reads/writes and search, plus legacy fi.client.Client.log, raise fi.errors.PlatformNotConfiguredError with code unsupported_operation before HTTP. Retired route constants keep their original paths for source compatibility with ai-evaluation 1.1.0, but no fi.evals or fi.client code path references them. ground_truth_setup is added.",
+   "docs": "Call list_ground_truth(template_id) for current dataset state, then pass both mappings, max_examples (1-20) and enabled explicitly to either mapping setter. Preserve unchanged values. Two-argument setter calls now raise unless the other mapping, max_examples and enabled are also passed as keywords. This is an atomic replacement, not a patch or concurrency-safe read-merge. Setup makes this dataset the template's ACTIVE ground truth and deactivates the others for the same template, organization and workspace, even when enabled=False. Changing variable_mapping on a COMPLETED dataset resets embedding_status to PENDING; re-run trigger_ground_truth_embeddings(ground_truth_id). Config mode, similarity_threshold and injection_format have no setup counterpart; there is no replacement search or legacy model-log route. For tracing, emit traces through traceAI instrumentation and query stored traces via client.tracing on a FutureAGIClient; these are not drop-in model-log replacements. Method names and prior call shapes remain available, but removed operations fail locally.",
+   "tests": [
+    "tests/evals/test_ground_truth_routes.py::test_mapping_uses_atomic_setup_and_preserves_all_supplied_fields",
+    "tests/evals/test_ground_truth_routes.py::test_setup_requires_explicit_state_without_http",
+    "tests/evals/test_ground_truth_routes.py::test_setup_rejects_unknown_role_keys_before_http",
+    "tests/evals/test_ground_truth_routes.py::test_setup_preserves_declared_role_keys_and_legacy_aliases",
+    "tests/evals/test_ground_truth_routes.py::test_dead_routes_are_never_referenced",
+    "tests/evals/test_ground_truth_routes.py::test_removed_manager_methods_fail_locally",
+    "tests/evals/test_ground_truth_routes.py::test_legacy_client_log_fails_locally",
+    "tests/evals/test_ground_truth_routes.py::test_mapping_signature_keeps_positional_arguments_and_adds_only_optional_keywords",
+    "tests/evals/test_shared_paths.py::test_every_route_ai_evaluation_had_is_here_with_the_same_path",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body"
+   ],
+   "source_contract": {
+    "fi/evals/manager.py:EvalTemplateManager.get_ground_truth_config": {
+     "upstream_ast_sha256": "8eea297eb4a1d69090d598986ed02632cc62202d17cf378dc16dac20a9d7599d",
+     "ast_sha256": "156805506bae79d7990019b6f28fc63ef3b51e461b70140825f08b4d03a1389b"
+    },
+    "fi/evals/manager.py:EvalTemplateManager.set_ground_truth_config": {
+     "upstream_ast_sha256": "a2b6583e1a885acf4045344670aa83de81a89c266fa851ed4b10721157919afc",
+     "ast_sha256": "dac3481a25de1a2faea43b6981ba51fe43d5178d31d0e46b033a0e65a893ab15"
+    },
+    "fi/evals/manager.py:EvalTemplateManager.set_ground_truth_variable_mapping": {
+     "upstream_ast_sha256": "2bd35af0823eebda72f735e9acba3b7cf8ff30627b3cfd41dfe35052b5d754f1",
+     "ast_sha256": "8857e614fe72df74c5c4b1838498846fa64e285ad0b2b89af71a5d8303925668"
+    },
+    "fi/evals/manager.py:EvalTemplateManager.set_ground_truth_role_mapping": {
+     "upstream_ast_sha256": "7135a98485fc6b9dc7e699753de7ce66781c5376a8ffa254530d7a08958b821c",
+     "ast_sha256": "bc231d270c20c4019ca003947d25bac3742a2660d5c0494507913208f7fff4c8"
+    },
+    "fi/evals/manager.py:EvalTemplateManager.search_ground_truth": {
+     "upstream_ast_sha256": "d6c5b2e08e0ef524973073cac829835bbbcc4982d7d290006b469cb1cae9243d",
+     "ast_sha256": "33bba78cd9cf7162165b6814223d2442e5fa4b74c680cb0ec9bfae9685bb736c"
+    }
+   }
+  },
+  {
+   "id": "log-privacy",
+   "area": "logging",
+   "ai_evaluation": "Evaluator log lines could carry evaluated content: a timed-out or failed evaluation logged the whole input case and the exception text, a non-200 configuration response logged the response body, a missing fi-instrumentation-otel package logged a traceback, and span enrichment logged scores and exception text.",
+   "futureagi": "Those log lines carry only operational context: the evaluation or template name, the timeout, the status code and the exception class name. Missing-instrumentation messages are logged as errors without a traceback. Return values, raised exceptions, retries and timeouts are unchanged.",
+   "docs": "No change to examples. Code or log processing that read inputs, response bodies, scores or exception text out of these log messages no longer finds them there.",
+   "tests": [
+    "tests/evals/test_evaluator_log_privacy.py::test_request_failure_logs_no_inputs_or_exception_text",
+    "tests/evals/test_evaluator_log_privacy.py::test_mapping_failure_logs_only_exception_type",
+    "tests/evals/test_evaluator_log_privacy.py::test_configuration_warning_omits_response_body",
+    "tests/evals/test_evaluator_log_privacy.py::test_registry_failure_inside_evaluate_omits_exception_text",
+    "tests/evals/test_evaluator_log_privacy.py::test_real_auto_enrichment_never_logs_evaluation_output"
+   ]
+  },
+  {
+   "id": "refusal-reason",
+   "area": "evaluation errors",
+   "ai_evaluation": "When the eval endpoint refused an evaluation, Evaluator.evaluate() returned a result with no output whose reason was \"Evaluation failed with a 400 Bad Request. Please check your input data and evaluation configuration. Response: <the whole response body>\" for a 400, \"Invalid FI Client Authentication, please check your API key and secret key.\" for a 403 whatever the server said, or \"Error in evaluation: <status>, response: <the whole response body>\" for any other status. A request that timed out had the reason \"Evaluation timed out after <n>s\" when the wait for it timed out, or the transport's own exception text when the HTTP request timed out. evaluate(<template>, engine=\"turing\") returned each of these, and any other request Evaluator.evaluate() could not complete, as status \"completed\" with no score, no error and the text only in reason.",
+   "futureagi": "The reason leads with the server's own sentence (the message, detail or error of its error body, then the field errors it lists under details) and then the status, for example \"Validation failed: inputs: Unexpected keys provided: answer. Accepted keys are: output (HTTP 400)\". A 403 reads the same way, followed by \"Check your API key and secret key.\", for example \"Authentication credentials were not provided. (HTTP 403) Check your API key and secret key.\"; EvalResponseHandler still raises it as InvalidAuthError. A body without a sentence gives a short excerpt of itself, at most 200 characters, instead of the whole body (a 403 adds the same hint). A request that timed out, whether the wait for it or the HTTP request itself, has the reason \"Evaluation timed out after <n>s\". Evaluator.evaluate() still returns the result instead of raising; the result is still an EvalResult, and for a request that was refused, failed or timed out it also carries the reason as error. evaluate(engine=\"turing\") reports such a result as status \"failed\" with that text as error (and still as reason), so BatchResult.success_rate no longer counts it as completed. The source contract of Evaluator.evaluate listed here also covers its log-privacy changes.",
+   "docs": "Code that detected a refused or timed-out evaluation from evaluate(engine=\"turing\") by a missing score checks result.status == \"failed\" and reads result.error. A refused Evaluator.evaluate() result shows the server's sentence and the status as its reason, not the raw response body; code that matched the fixed 403 sentence matches InvalidAuthError or the \"(HTTP 403)\" status instead.",
+   "tests": [
+    "tests/evals/test_refused_evaluations.py::test_evaluator_reason_leads_with_the_server_sentence_and_status",
+    "tests/evals/test_refused_evaluations.py::test_evaluator_reason_for_a_body_that_is_not_json_is_a_short_excerpt",
+    "tests/evals/test_refused_evaluations.py::test_a_403_raises_invalid_auth_error_with_the_server_sentence_first",
+    "tests/evals/test_refused_evaluations.py::test_turing_evaluate_reports_a_refused_evaluation_as_failed",
+    "tests/evals/test_refused_evaluations.py::test_refused_turing_evaluations_are_not_counted_as_completed",
+    "tests/evals/test_refused_evaluations.py::test_evaluator_reports_a_timed_out_request_as_failed_with_a_plain_sentence",
+    "tests/evals/test_refused_evaluations.py::test_turing_evaluate_reports_a_timed_out_request_as_failed",
+    "tests/evals/test_compat_examples.py::test_a_403_reason_leads_with_the_server_sentence_then_the_key_hint",
+    "tests/evals/test_evaluator_log_privacy.py::test_request_failure_logs_no_inputs_or_exception_text",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body",
+    "tests/evals/test_provenance.py::test_every_upstream_file_is_present_and_identical_unless_listed"
+   ],
+   "source_contract": {
+    "fi/evals/evaluator.py:EvalResponseHandler._handle_error": {
+     "upstream_ast_sha256": "185ec0c68055f5845b9f3d1bce5ca7269d542ab6cb134281939993350bbc451d",
+     "ast_sha256": "ffd7363b0ba4072e0f60bba63a528087fc249b037d14da1f1a6a0bf85fe3f224"
+    },
+    "fi/evals/evaluator.py:Evaluator.evaluate": {
+     "upstream_ast_sha256": "dc1f24c471429d9b0f3c57ecd241d0bd1de5ddd3bef5e13e5b6f504831d68043",
+     "ast_sha256": "485d843334c15965fdd421a3740dc0b0a74252344a2d4809b73a97478c3671ce"
+    }
+   }
+  },
+  {
+   "id": "configure-needs-opentelemetry",
+   "area": "installation",
+   "ai_evaluation": "Evaluator.evaluate(..., platform=..., custom_eval_name=...) sends the evaluation's configuration for another tracing platform, tagged with the current span and trace, which it reads with OpenTelemetry. When OpenTelemetry could not be imported, the call logged an error asking for fi-instrumentation-otel and returned None without sending anything, so the caller saw no error.",
+   "futureagi": "OpenTelemetry comes with `pip install \"futureagi[evals]\"`, not the base install. When it is not installed, the call raises fi.errors.MissingExtraError before any request is sent, with extra \"evals\", module \"opentelemetry\", install_hint `pip install \"futureagi[evals]\"` and the message \"Evaluator.evaluate(platform=...) reads the current span with OpenTelemetry, which is not installed. Run: pip install \"futureagi[evals]\"\". With OpenTelemetry installed the call sends the configuration, with the span and trace ids the caller passed or those of the current span, and returns the response, as 1.1.0 did. With platform \"langfuse\" it sends the Langfuse key pair, taken as one unit when the Evaluator is built: both langfuse_public_key and langfuse_secret_key arguments when either is given, else both LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY; a pair with one key and not the other raises fi.errors.AuthError from this call before any request, ahead of the OpenTelemetry check, and other calls of that Evaluator do not use the Langfuse keys. The source contract of Evaluator._configure_evaluations listed here also covers its log-privacy changes.",
+   "docs": "Pages that configure evaluations for another platform with evaluate(..., platform=...) install `pip install \"futureagi[evals]\"`. Code that checked that call for None catches fi.errors.MissingExtraError instead.",
+   "tests": [
+    "tests/evals/test_configure_without_opentelemetry.py::test_configure_without_opentelemetry_names_the_evals_extra_and_sends_nothing",
+    "tests/evals/test_configure_without_opentelemetry.py::test_configure_without_opentelemetry_names_a_partial_langfuse_pair_first",
+    "tests/evals/test_configure_without_opentelemetry.py::test_configure_with_opentelemetry_sends_the_request_and_returns_the_response",
+    "tests/evals/test_configure_without_opentelemetry.py::test_configure_inside_a_span_sends_that_span_and_its_trace",
+    "tests/evals/test_evaluator_log_privacy.py::test_configuration_warning_omits_response_body",
+    "tests/evals/test_langfuse_pair_scope.py::test_the_langfuse_configuration_call_refuses_a_partial_pair_before_any_request",
+    "tests/evals/test_langfuse_pair_scope.py::test_one_langfuse_key_in_the_environment_leaves_other_evaluations_working",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body"
+   ],
+   "source_contract": {
+    "fi/evals/evaluator.py:Evaluator._configure_evaluations": {
+     "upstream_ast_sha256": "29c6b61989a256c7c7a4b7155c6d48e7cf88df174a6d1386f1a12f3d831dfdf7",
+     "ast_sha256": "ec1a904db159a9b161982340b75191811012a4e4b072e96fdc6edf106c21c160"
+    }
+   }
+  },
+  {
+   "id": "trace-export-loopback",
+   "area": "trace export",
+   "ai_evaluation": "The OpenTelemetry exporters built for the evals tracer (OTLP over gRPC and HTTP, Arize, Phoenix, Langfuse and Future AGI) sent the export, with its keys in the headers, through HTTP_PROXY, HTTPS_PROXY, ALL_PROXY or grpc_proxy whatever the collector's host was, including a collector on this machine.",
+   "futureagi": "An export to a loopback collector (localhost, an address in 127.0.0.0/8 or ::1) goes straight to this machine: the HTTP exporters use a requests session that sends a loopback request without a proxy, and the gRPC exporter opens its channel with grpc.enable_http_proxy=0. A plain gRPC channel to a target that is not loopback also opens with grpc.enable_http_proxy=0 whenever its final headers hold a key or token, whether the headers come from the exporter configuration or from FI_API_KEY and FI_SECRET_KEY; it needs FI_ALLOW_INSECURE_HTTP=1 (code insecure_http_origin otherwise), and insecure=True for a loopback target named by FI_BASE_URL, FI_TRACES_URL or FI_GRPC_URL raises fi.errors.ConfigurationError (code insecure_loopback_grpc). A gRPC channel is judged plain by the mode the exporter opens: the insecure argument, then OTEL_EXPORTER_OTLP_TRACES_INSECURE or OTEL_EXPORTER_OTLP_INSECURE when the argument is unset, then an http:// scheme; the exporter is handed the mode so judged, and a header whose value holds FI_API_KEY or FI_SECRET_KEY counts as a key under any header name. An export to any other host keeps the environment proxy and NO_PROXY. Certificates and the other environment settings apply. The name localhost. with a trailing dot is not loopback.",
+   "docs": "A collector on this machine needs no NO_PROXY entry. Set HTTP_PROXY, HTTPS_PROXY, ALL_PROXY or grpc_proxy for a collector on another host as before.",
+   "tests": [
+    "tests/evals/test_trace_export_loopback.py::test_a_loopback_collector_skips_the_environment_proxy",
+    "tests/evals/test_trace_export_loopback.py::test_a_remote_plain_http_collector_with_credentials_is_reached_directly_when_opted_in",
+    "tests/evals/test_trace_export_loopback.py::test_a_remote_plain_http_collector_with_credentials_is_refused_without_the_opt_in",
+    "tests/evals/test_trace_export_loopback.py::test_an_https_remote_collector_asks_the_proxy_to_connect",
+    "tests/evals/test_trace_export_loopback.py::test_a_loopback_grpc_collector_gets_the_connection_and_the_proxy_no_bytes",
+    "tests/evals/test_trace_export_loopback.py::test_a_remote_plain_grpc_collector_that_gets_keys_is_reached_directly_when_opted_in",
+    "tests/evals/test_trace_export_loopback.py::test_a_remote_plain_grpc_collector_that_gets_keys_is_refused_without_the_opt_in",
+    "tests/core/test_grpc_plain_keys_proxy.py::test_a_plain_self_hosted_channel_with_environment_keys_bypasses_the_proxy",
+    "tests/core/test_grpc_env_insecure_keyed_headers.py::test_an_environment_insecure_setting_gets_no_plain_channel_for_keyed_headers_to_a_remote_collector",
+    "tests/core/test_grpc_env_insecure_keyed_headers.py::test_an_environment_insecure_setting_with_proxy_variables_sends_no_key_to_the_collector_or_the_proxy",
+    "tests/core/test_grpc_env_insecure_keyed_headers.py::test_a_loopback_collector_with_an_environment_insecure_setting_gets_its_plain_channel_direct",
+    "tests/core/test_grpc_env_insecure_keyed_headers.py::test_an_opted_in_remote_collector_with_an_environment_insecure_setting_gets_its_plain_channel",
+    "tests/core/test_grpc_env_insecure_keyed_headers.py::test_the_mode_the_sdk_judges_is_the_mode_the_exporter_opens",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body"
+   ],
+   "source_contract": {
+    "fi/evals/otel/tracer.py:_create_exporter": {
+     "upstream_ast_sha256": "05e34289f3149a14f17bff08b3aac7859de28e0af50207aca624cd44fb380414",
+     "ast_sha256": "c04b888fa33b05f4b64b794a852ee804e72fdf28f7b6e8557fcf9af7b1821b83"
+    }
+   }
+  },
+  {
+   "id": "future-agi-exporter-headers",
+   "area": "OpenTelemetry exporters for Future AGI",
+   "ai_evaluation": "The OTLP exporters built for the FUTUREAGI type and for an endpoint on a Future AGI host read OTEL_EXPORTER_OTLP_HEADERS, a credential provider session and the user's netrc like any other OpenTelemetry exporter, and followed redirects. An exporter whose headers could not be set was dropped with a log line.",
+   "futureagi": "An exporter bound for a Future AGI host (the FUTUREAGI type, and OTLP_HTTP, OTLP_GRPC, ARIZE, PHOENIX or LANGFUSE with an endpoint on api.futureagi.com, grpc.futureagi.com or the host of FI_BASE_URL, FI_TRACES_URL or FI_GRPC_URL) sends exactly the SDK's headers, over a fresh session that does not follow redirects and ignores netrc credentials and credential providers; an OTLP_GRPC exporter bound for Future AGI is given its own TLS credentials, so a gRPC credential provider named in the environment is not loaded. An endpoint that can be read as more than one host raises fi.errors.ConfigurationError (code ambiguous_otlp_endpoint) before an exporter is built. An exporter whose headers cannot be set raises fi.errors.ConfigurationError with code unsupported_otlp_exporter.",
+   "docs": "Set OTEL_EXPORTER_OTLP_HEADERS and credential providers for your own backend only; they do not apply to Future AGI endpoints. Catch fi.errors.ConfigurationError (code unsupported_otlp_exporter) when building an evals tracer with an exporter version outside 1.39.1 to 1.45.x.",
+   "tests": [
+    "tests/experiments/unit/test_fi_bound_exporter_headers.py::test_evals_futureagi_exporter_with_configured_headers_sends_only_those",
+    "tests/experiments/unit/test_fi_bound_exporter_session.py::test_evals_futureagi_exporter_ignores_a_credential_provider_session",
+    "tests/experiments/unit/test_fi_bound_exporter_redirects.py::test_a_redirect_from_a_futureagi_endpoint_is_not_followed",
+    "tests/experiments/unit/test_fi_bound_exporter_redirects.py::test_evals_refuses_an_exporter_of_an_unknown_shape_instead_of_dropping_spans",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body"
+   ],
+   "source_contract": {
+    "fi/evals/otel/tracer.py:_create_exporter": {
+     "upstream_ast_sha256": "05e34289f3149a14f17bff08b3aac7859de28e0af50207aca624cd44fb380414",
+     "ast_sha256": "c04b888fa33b05f4b64b794a852ee804e72fdf28f7b6e8557fcf9af7b1821b83"
+    }
+   }
+  }
+ ]
+}

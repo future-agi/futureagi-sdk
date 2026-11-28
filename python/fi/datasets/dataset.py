@@ -1,7 +1,9 @@
-import hashlib as _hashlib
+import copy
+import hashlib
 import os
 import re
-from typing import Any, Dict, List, Optional, Union
+import threading
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import time
 import logging
 from urllib.parse import parse_qs, urlparse
@@ -13,6 +15,24 @@ from tqdm import tqdm
 
 from fi.api.auth import APIKeyAuth, ResponseHandler
 from fi.api.types import HttpMethod, RequestConfig
+# Published 0.6.13 eval helpers remain importable, without eagerly importing the
+# eval stack for callers that only use datasets. Each resolves to the canonical
+# supported implementation, retaining its public members.
+def __getattr__(name):
+    if name == "EvalInfoResponseHandler":
+        from fi.evals.evaluator import EvalInfoResponseHandler
+        globals()[name] = EvalInfoResponseHandler
+        return EvalInfoResponseHandler
+    if name == "EvalTemplate":
+        from fi.evals.templates import EvalTemplate
+        globals()[name] = EvalTemplate
+        return EvalTemplate
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__():
+    return sorted(set(globals()) | {"EvalInfoResponseHandler", "EvalTemplate"})
+
 from fi.datasets.types import (
     Cell,
     Column,
@@ -21,12 +41,6 @@ from fi.datasets.types import (
     HuggingfaceDatasetConfig,
     Row,
 )
-try :
-    from fi.evals.evaluator import EvalInfoResponseHandler
-    from fi.evals.templates import EvalTemplate
-except ImportError:
-    logging.warning(f"ai-evaluation is not installed. Please install it to add evaluations to your dataset.")
-
 from fi.utils.constants import (
     DATASET_TEMP_FILE_PREFIX,
     DATASET_TEMP_FILE_SUFFIX,
@@ -43,46 +57,48 @@ from fi.utils.errors import (
     ServiceUnavailableError,
     UnexpectedDataFormatError
 )
-from fi.utils import _http_guard as _guard
 from fi.utils.routes import Routes
-from fi.utils.utils import get_tempfile_path, get_keys_from_env, get_base_url_from_env  # noqa: F401 (names importable from this module since 0.8.0)
+from fi.utils.utils import get_tempfile_path, get_keys_from_env, get_base_url_from_env
 
 DEFAULT_API_TIMEOUT = 30  # seconds
 
 
-def _wrapped_error(message: str, cause: BaseException) -> DatasetError:
-    """A ``DatasetError`` for ``message`` raised in place of ``cause``. It keeps the plain http refusal code
-    (``insecure_http_origin``) when ``cause`` carries it; raised inside the handler, ``cause`` is its context."""
-    error = DatasetError(message)
-    if getattr(cause, "code", None) == _guard.ERROR_CODE:
-        error.code = _guard.ERROR_CODE
-    return error
-
-
 class LRUCache:
+    """A bounded least-recently-used map; every operation holds one lock, so threads can share it."""
+
     def __init__(self, capacity: int = 100):
         self.capacity = capacity
         self.cache: Dict[Any, Any] = {}
         self.access_order: List[Any] = []
+        self._lock = threading.Lock()
 
     def get(self, key: Any) -> Optional[Any]:
-        if key in self.cache:
-            self.access_order.remove(key)
-            self.access_order.append(key)
-            return self.cache[key]
-        return None
-    
+        with self._lock:
+            if key in self.cache:
+                self.access_order.remove(key)
+                self.access_order.append(key)
+                return self.cache[key]
+            return None
+
     def put(self, key: Any, value: Any) -> None:
-        if key in self.cache:
-            self.access_order.remove(key)
-        elif len(self.cache) >= self.capacity:
-            if self.access_order:
-                oldest = self.access_order.pop(0)
-                if oldest in self.cache:
-                    del self.cache[oldest]
-            
-        self.cache[key] = value
-        self.access_order.append(key)
+        with self._lock:
+            if key in self.cache:
+                self.access_order.remove(key)
+            elif len(self.cache) >= self.capacity:
+                if self.access_order:
+                    oldest = self.access_order.pop(0)
+                    if oldest in self.cache:
+                        del self.cache[oldest]
+
+            self.cache[key] = value
+            self.access_order.append(key)
+
+    def evict(self, matches: Callable[[Any], bool]) -> None:
+        """Remove every entry whose key ``matches``."""
+        with self._lock:
+            for key in [k for k in self.cache if matches(k)]:
+                del self.cache[key]
+                self.access_order.remove(key)
 
 
 class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
@@ -259,6 +275,7 @@ class Dataset(APIKeyAuth):
         client.create().download("output.csv").delete()
     """
 
+    # Looked-up DatasetConfig copies keyed by (caller scope, dataset name, exclusions); clients are not cached.
     _dataset_instance_cache = LRUCache(capacity=100)
     __static_attributes__ = ["get_dataset_config"]
 
@@ -279,10 +296,6 @@ class Dataset(APIKeyAuth):
         )
 
         self.file_path: Optional[str] = None
-        self._set_dataset_config(dataset_config)
-
-    def _set_dataset_config(self, dataset_config: Optional[DatasetConfig]) -> None:
-        """Set ``dataset_config``; a config without an id is first looked up by name with this client."""
         if dataset_config and not dataset_config.id:
             try:
                 fetched_config = self._fetch_dataset_config(dataset_config.name)
@@ -291,7 +304,7 @@ class Dataset(APIKeyAuth):
 
                 self.dataset_config = dataset_config
             except DatasetError as e:
-                raise _wrapped_error(f"Failed to initialize dataset configuration for {dataset_config.name}: {e}", e)
+                raise DatasetError(f"Failed to initialize dataset configuration for {dataset_config.name}: {e}")
         elif dataset_config and dataset_config.id:
             self.dataset_config = dataset_config
         else:
@@ -337,25 +350,13 @@ class Dataset(APIKeyAuth):
         if not self.dataset_config or not self.dataset_config.id:
             raise DatasetError("Dataset ID must be configured to delete.")
         self._delete()
-        self._drop_served_config()
         original_name = self.dataset_config.name # type: ignore
+        scope = self._config_cache_scope(self)
+        if scope is not None:
+            # the deleted dataset's looked-up configuration goes for this caller (any exclusions)
+            type(self)._dataset_instance_cache.evict(lambda key: key[0] == scope and key[1] == original_name)
         original_model_type = self.dataset_config.model_type # type: ignore
         self.dataset_config = None
-
-    def _drop_served_config(self) -> None:
-        """Remove the ``get_dataset_config`` cache entry this client's config was served from or stored under,
-        while that entry holds the config of the dataset this client deleted, so a later call looks it up again."""
-        key = getattr(self, "_served_config_key", None)
-        if key is None or not self.dataset_config:
-            return
-        cache = type(self)._dataset_instance_cache
-        cached = cache.cache.get(key)
-        if isinstance(cached, DatasetConfig) and cached.id == self.dataset_config.id:
-            cache.cache.pop(key, None)
-            try:
-                cache.access_order.remove(key)
-            except ValueError:
-                pass
 
     def get_config(self) -> DatasetConfig:
         """Get the current dataset configuration"""
@@ -465,7 +466,13 @@ class Dataset(APIKeyAuth):
         tool_choice: Optional[Any] = None,
         response_format: Optional[Dict] = None,
     ) -> "Dataset":
+        """Add a prompt column and return this dataset.
 
+        Numeric generation options are sent in ``config.run_prompt_config``;
+        model, messages, output format, concurrency, tools, tool choice and
+        response format remain directly under ``config``. Explicit empty tools
+        and response formats are retained; ``None`` omits those optional fields.
+        """
         if not self.dataset_config or not self.dataset_config.id:
             raise DatasetError("Dataset must be configured with an ID to add a run prompt column.")
         if not name:
@@ -544,19 +551,21 @@ class Dataset(APIKeyAuth):
                 "output_format": output_format,
                 "concurrency": concurrency,
                 "messages": processed_messages,
-                "max_tokens": max_tokens,
-                "temperature": temperature,
-                "presence_penalty": presence_penalty,
-                "frequency_penalty": frequency_penalty,
-                "top_p": top_p,
+                "run_prompt_config": {
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                    "presence_penalty": presence_penalty,
+                    "frequency_penalty": frequency_penalty,
+                    "top_p": top_p,
+                },
             },
         }
 
-        if tools:
+        if tools is not None:
             config["config"]["tools"] = tools
         if tool_choice is not None:
             config["config"]["tool_choice"] = tool_choice
-        if response_format:
+        if response_format is not None:
             config["config"]["response_format"] = response_format
 
         url = f"{self._base_url}/{Routes.dataset_add_run_prompt_column.value}"
@@ -581,11 +590,18 @@ class Dataset(APIKeyAuth):
         error_localizer: bool = False,
         kb_id: Optional[str] = None
         ) -> "Dataset":
-        try :
-            from fi.evals.evaluator import EvalInfoResponseHandler
-            from fi.evals.templates import EvalTemplate
-        except ImportError:
-            raise DatasetError("ai-evaluation is not installed. Please install it to add evaluations to your dataset.")
+        """Add a dataset evaluation using the legacy dataset client.
+
+        Selecting Turing/Protect models requires an Enterprise licence including
+        those models on self-managed servers; cloud plan checks are separate.
+        A model-gate denial returns HTTP 402 ENTITLEMENT_DENIED. This legacy
+        method retains DatasetError; FutureAGIClient.evals.add_dataset_user_eval
+        instead raises PaymentRequiredError, not LicenseRequiredError.
+        Select another model or ask the server administrator to enable the
+        licensed models. Code evaluations are exempt from this model gate.
+        """
+        # imported here so `import fi.datasets` does not load the evals package
+        from fi.evals.evaluator import EvalInfoResponseHandler
 
         if not self.dataset_config or not self.dataset_config.id:
             raise DatasetError("Dataset must be configured with an ID to add an evaluation.")
@@ -777,7 +793,7 @@ class Dataset(APIKeyAuth):
             "user_eval_template_ids": eval_template_ids,
             "dataset_id": str(self.dataset_config.id),
             "model_config": model_config or {},
-            "messages": [],  # Required field, empty array for now
+            "messages": [],  # Required by the API; send an empty array.
             "user_eval_template_mapping": user_eval_template_mapping,
         }
 
@@ -812,7 +828,7 @@ class Dataset(APIKeyAuth):
         except DatasetError:
             raise
         except Exception as e: # Catch other unexpected errors during the request
-            raise _wrapped_error(f"An unexpected error occurred while fetching dataset config for '{dataset_name}': {e}", e)
+            raise DatasetError(f"An unexpected error occurred while fetching dataset config for '{dataset_name}': {e}")
 
     def _create_dataset(
         self,
@@ -1082,20 +1098,25 @@ class Dataset(APIKeyAuth):
         instance.delete()
 
     @staticmethod
-    def _config_cache_key(
-        client: "Dataset", dataset_name: str, excluded_datasets: Optional[List[str]]
-    ) -> tuple:
-        """Cache key of a dataset config lookup: the lookup itself plus the client's base URL, its effective
-        plain http opt-in and a digest of its keys (the raw keys are not kept in the cache)."""
-        headers = client._default_headers
-        keys = f"{headers.get('X-Api-Key') or ''}\0{headers.get('X-Secret-Key') or ''}"
-        return (
-            dataset_name,
-            str(excluded_datasets),
-            client._base_url,
-            _guard.insecure_http_allowed(client._allow_insecure_http),
-            _hashlib.sha256(keys.encode("utf-8")).hexdigest(),
-        )
+    def _config_cache_scope(instance: "Dataset") -> Optional[str]:
+        """A fingerprint of who a request is sent as and where: the base URL, the keys and the effective
+        headers (with the extra headers for the base URL). ``None`` when the keys are not resolved, so
+        such a caller has no cache entry."""
+        api_key = getattr(instance, "_fi_api_key", None)
+        secret_key = getattr(instance, "_fi_secret_key", None)
+        base_url = getattr(instance, "_base_url", None)
+        if not all(isinstance(v, str) and v for v in (api_key, secret_key, base_url)):
+            return None
+        headers = instance._platform_headers(base_url + "/", dict(getattr(instance, "_default_headers", {}) or {}))
+        parts = [base_url, api_key, secret_key]
+        for name, value in sorted((str(k).lower(), str(v)) for k, v in headers.items()):
+            parts.extend((name, value))
+        digest = hashlib.sha256()
+        for part in parts:
+            data = part.encode("utf-8", "surrogatepass")
+            digest.update(len(data).to_bytes(8, "big"))
+            digest.update(data)
+        return digest.hexdigest()
 
     @classmethod
     def get_dataset_config(
@@ -1104,18 +1125,20 @@ class Dataset(APIKeyAuth):
         excluded_datasets: Optional[List[str]] = None,
         **kwargs,
     ) -> "Dataset":
-        """Get dataset configuration with caching.
+        """Get a dataset client for ``dataset_name``, built with this caller's keys and base URL.
 
-        A cached result is only served to a call with the same keys, base URL and plain http opt-in. The cache
-        keeps the dataset config, not a client: each call gets a ``Dataset`` built from its own arguments and
-        environment (keys, base URL, plain http opt-in, session), which holds a copy of the config."""
+        The looked-up configuration is cached per caller (base URL, keys and effective headers), so a
+        repeat lookup by the same caller skips the request. Every call returns a new client of its own.
+        """
         request_instance = cls._get_instance(**kwargs)
-        cache_key = cls._config_cache_key(request_instance, dataset_name, excluded_datasets)
+        scope = cls._config_cache_scope(request_instance)
+        cache_key: Optional[Tuple[str, str, Tuple[str, ...]]] = (
+            None if scope is None else (scope, dataset_name, tuple(excluded_datasets or ()))
+        )
 
-        cached_config = cls._dataset_instance_cache.get(cache_key)
-        if isinstance(cached_config, DatasetConfig) and cached_config.id:
-            request_instance._set_dataset_config(cached_config.model_copy(deep=True))
-            request_instance._served_config_key = cache_key
+        cached_config = cls._dataset_instance_cache.get(cache_key) if cache_key is not None else None
+        if cached_config is not None:
+            request_instance.dataset_config = copy.deepcopy(cached_config)
             return request_instance
 
         params = {"search_text": dataset_name}
@@ -1137,17 +1160,14 @@ class Dataset(APIKeyAuth):
         except DatasetNotFoundError:
             raise DatasetNotFoundError(f"Dataset named '{dataset_name}' not found (excluded: {excluded_datasets}).")
         except Exception as e:
-            raise _wrapped_error(f"Error fetching configuration for dataset '{dataset_name}': {e}", e)
+            raise DatasetError(f"Error fetching configuration for dataset '{dataset_name}': {e}")
 
         if not isinstance(fetched_dataset_config, DatasetConfig):
             raise DatasetError(f"API did not return a valid DatasetConfig for '{dataset_name}'. Got: {type(fetched_dataset_config)}")
 
-        # The client whose keys, base URL and opt-in sent the lookup (and made the cache key) holds the result;
-        # building a second client would read the environment again. The cache keeps a copy of the config only.
-        request_instance._set_dataset_config(fetched_dataset_config)
-        if cls._config_cache_key(request_instance, dataset_name, excluded_datasets) == cache_key:
-            cls._dataset_instance_cache.put(cache_key, fetched_dataset_config.model_copy(deep=True))
-            request_instance._served_config_key = cache_key
+        if cache_key is not None:
+            cls._dataset_instance_cache.put(cache_key, copy.deepcopy(fetched_dataset_config))
+        request_instance.dataset_config = fetched_dataset_config
         return request_instance
 
     @classmethod
@@ -1176,3 +1196,10 @@ class Dataset(APIKeyAuth):
 
         instance = cls.get_dataset_config(dataset_name, **kwargs)
         return instance.add_rows(rows=rows)
+
+
+# Preserve star-import visibility as well as direct imports and dir() for the
+# lazily resolved published helpers. Ordinary dataset imports stay lightweight.
+__all__ = [name for name in globals() if not name.startswith("_")] + [
+    "EvalInfoResponseHandler", "EvalTemplate",
+]

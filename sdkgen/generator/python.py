@@ -96,7 +96,7 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
     out = [
         HEADER,
         '"""Response models.\n\n',
-        "Every field is typed optional, so a response that leaves one out or adds one never breaks a\n",
+        "Every field is typed optional, so a response that leaves one out or adds one does not break a\n",
         "call by default. The fields the contract marks required (and not nullable) are listed in each\n",
         "model's `__required__`; `Client(strict_responses=True)` rejects a response that misses one.\n",
         '"""\n\n',
@@ -347,7 +347,7 @@ def scaffold_resource(ns: tuple[str, ...]) -> str:
     sync_doc, async_doc = scaffold_docstrings(ns)
     return (
         f'"""Hand-written additions to `client.{ns[0]}`.\n\n'
-        "Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive\n"
+        "Scaffolded once by sdkgen/generate.py and not overwritten: methods added here survive\n"
         "regeneration. The generated methods live in `fi.platform.resources.base`.\n\n"
         "    class Datasets(DatasetsResource):\n"
         "        def get_by_name(self, name: str):\n"

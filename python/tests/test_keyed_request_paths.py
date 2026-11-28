@@ -8,6 +8,7 @@ real host. Each case reads the connection count and the number of bytes holding 
 from __future__ import annotations
 
 import asyncio
+import socket
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -19,12 +20,22 @@ from requests_futures.sessions import FuturesSession
 
 from fi.api.auth import HttpClient
 from fi.api.types import HttpMethod, RequestConfig
-from fi.gateway import AgentCCError, APIStatusError, AsyncGateway, Gateway
+from fi.errors import ConfigurationError, KeyedProxyRefusedError, KeyedRedirectRefusedError
+from fi.gateway import AsyncGateway, Gateway
 from fi.gateway._utils import check_valid_key, health_check
 from fi.platform import Client
-from tests.test_plain_http_key_guards import CODE, KEY, PLAIN, SECRET, _attempt, _marker_forms, net, refused  # noqa: F401
+from tests.test_plain_http_key_guards import KEY, PLAIN, SECRET, _attempt, _marker_forms, net  # noqa: F401
 
 KEYED = {"X-Api-Key": KEY, "X-Secret-Key": SECRET}
+ORIGIN_CODE = "insecure_http_origin"
+PROXY_CODE = "KEYED_PROXY_REFUSED"
+REDIRECT_CODE = "KEYED_REDIRECT_REFUSED"
+
+
+def _refused(exc, error_type, code):
+    assert isinstance(exc, error_type), repr(exc)
+    assert exc.get_error_code() == code, repr(exc)
+    assert KEY not in str(exc) and SECRET not in str(exc)
 
 
 class Site:
@@ -32,6 +43,7 @@ class Site:
 
     def __init__(self, route) -> None:
         self.requests: list[tuple[str, str]] = []
+        self.messages: list[tuple[dict[str, str], bytes]] = []
         self.connections = 0
         self.raw = b""
         site = self
@@ -47,6 +59,7 @@ class Site:
                 body = self.rfile.read(length) if length else b""
                 with site._lock:
                     site.requests.append((self.command, self.path))
+                    site.messages.append(({k.lower(): v for k, v in self.headers.items()}, body))
                     site.raw += self.requestline.encode() + b"\r\n" + bytes(self.headers) + body
                 status, headers, payload = route(self.command, self.path)
                 self.send_response(status)
@@ -123,8 +136,6 @@ class Closing:
     """A loopback listener that closes every connection without answering, so each attempt fails."""
 
     def __init__(self) -> None:
-        import socket
-
         self.connections = 0
         self.raw = b""
         self._sock = socket.socket()
@@ -194,9 +205,11 @@ def test_authentication_that_adds_a_key_on_its_second_call_sends_no_key_to_a_nam
     session = FuturesSession()
     session.auth = auth
     base = f"http://{PLAIN}:{net.target.port}"
-    _attempt(lambda: send(HttpClient(base_url=base, session=session), base + "/v1/ping"))
-    assert auth.calls == 1
+    exc = _attempt(lambda: send(HttpClient(base_url=base, session=session), base + "/v1/ping"))
     assert (net.target.marker_bytes(), net.proxy.connections) == (0, 0), net.report()
+    net.nothing_sent()
+    assert auth.calls == 0
+    _refused(exc, ConfigurationError, ORIGIN_CODE)
 
 
 def test_callable_authentication_that_adds_a_key_on_its_second_call_sends_no_key_to_a_named_host(net):
@@ -211,14 +224,14 @@ def test_callable_authentication_that_adds_a_key_on_its_second_call_sends_no_key
     session = FuturesSession()
     session.auth = auth
     base = f"http://{PLAIN}:{net.target.port}"
-    _attempt(lambda: send(HttpClient(base_url=base, session=session), base + "/v1/ping"))
-    assert len(calls) == 1
+    exc = _attempt(lambda: send(HttpClient(base_url=base, session=session), base + "/v1/ping"))
     assert net.target.marker_bytes() == 0, net.report()
+    net.nothing_sent()
+    assert len(calls) == 0
+    _refused(exc, ConfigurationError, ORIGIN_CODE)
 
 
-def test_authentication_that_adds_a_key_on_a_retry_is_refused_on_that_attempt(monkeypatch):
-    import socket
-
+def test_authentication_that_adds_a_key_on_a_retry_is_refused_before_the_first_attempt(monkeypatch):
     original = socket.getaddrinfo
 
     def shim(host, *args, **kwargs):
@@ -233,14 +246,14 @@ def test_authentication_that_adds_a_key_on_a_retry_is_refused_on_that_attempt(mo
         base = f"http://{PLAIN}:{closing.port}"
         exc = _attempt(lambda: send(HttpClient(base_url=base, session=session), base + "/v1/ping", retry_attempts=3))
         assert closing.marker_bytes() == 0
-        assert closing.connections == 1
-        assert auth.calls == 2
-        refused(exc, ValueError)
+        assert closing.connections == 0
+        assert auth.calls == 0
+        _refused(exc, ConfigurationError, ORIGIN_CODE)
     finally:
         closing.close()
 
 
-def test_authentication_error_is_raised_and_nothing_is_sent(net):
+def test_named_http_is_refused_before_calling_session_authentication(net):
     class Boom(Exception):
         pass
 
@@ -257,8 +270,9 @@ def test_authentication_error_is_raised_and_nothing_is_sent(net):
     session.auth = auth
     base = f"http://{PLAIN}:{net.target.port}"
     exc = _attempt(lambda: send(HttpClient(base_url=base, session=session), base + "/v1/ping"))
-    assert isinstance(exc, Boom), repr(exc)
     net.nothing_sent()
+    assert calls == []
+    _refused(exc, ConfigurationError, ORIGIN_CODE)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -302,7 +316,13 @@ def test_redirect_location_with_control_characters_is_refused(net, form):
     session.mount("https://", adapter)
     exc = _attempt(lambda: send(HttpClient(base_url="https://api.futureagi.com", default_headers=KEYED, session=session), "https://api.futureagi.com/v1/ping"))
     net.nothing_sent()
-    refused(exc, ValueError)
+    if form == "leading-delete":
+        # requests (and 0.8.1) read this Location as a path on the same origin, not as the named host: it is followed
+        # there (the adapter answers each hop with the same redirect) to the five-redirect limit.
+        assert isinstance(exc, requests.TooManyRedirects), exc
+        assert adapter.sent == ["GET"] * 6
+        return
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
 @pytest.mark.parametrize("method", [HttpMethod.GET, HttpMethod.POST])
@@ -314,7 +334,7 @@ def test_refused_redirect_is_not_retried(net, method):
     exc = _attempt(lambda: send(client, "https://api.futureagi.com/v1/ping", method=method, retry_attempts=3, json={"a": 1}))
     assert adapter.sent == [method.value]
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
 def test_redirect_of_a_request_keyed_by_session_authentication_is_refused(net):
@@ -329,28 +349,30 @@ def test_redirect_of_a_request_keyed_by_session_authentication_is_refused(net):
     session.auth = ApiKey()
     exc = _attempt(lambda: send(HttpClient(base_url="https://api.futureagi.com", session=session), "https://api.futureagi.com/v1/ping"))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
-def test_opted_in_redirect_from_https_to_plain_http_is_delivered_directly(net):
+def test_opted_in_redirect_from_https_to_plain_http_is_refused(monkeypatch, net):
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     adapter = RedirectingAdapter(f"http://{PLAIN}:{net.target.port}/x")
     session = FuturesSession()
     session.mount("https://", adapter)
-    client = HttpClient(base_url="https://api.futureagi.com", default_headers=KEYED, session=session, allow_insecure_http=True)
+    client = HttpClient(base_url="https://api.futureagi.com", default_headers=KEYED, session=session)
     exc = _attempt(lambda: send(client, "https://api.futureagi.com/v1/ping"))
-    assert exc is None, repr(exc)
-    net.delivered_direct()
+    net.nothing_sent()
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
 def test_opted_in_redirect_from_https_that_an_environment_proxy_would_carry_is_refused(monkeypatch, net):
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     monkeypatch.setenv("HTTP_PROXY", f"http://127.0.0.1:{net.proxy.port}")
     adapter = RedirectingAdapter(f"http://{PLAIN}:{net.target.port}/x")
     session = FuturesSession()
     session.mount("https://", adapter)
-    client = HttpClient(base_url="https://api.futureagi.com", default_headers=KEYED, session=session, allow_insecure_http=True)
+    client = HttpClient(base_url="https://api.futureagi.com", default_headers=KEYED, session=session)
     exc = _attempt(lambda: send(client, "https://api.futureagi.com/v1/ping"))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
 @pytest.mark.parametrize("name", ["X-Api-Key", "X-Secret-Key"])
@@ -361,7 +383,7 @@ def test_redirect_that_picks_up_a_key_cookie_from_the_session_is_refused(net, na
     session.cookies.set(name, KEY, domain=PLAIN)
     exc = _attempt(lambda: send(HttpClient(base_url="https://api.futureagi.com", session=session), "https://api.futureagi.com/v1/ping"))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
 def test_redirect_that_picks_up_netrc_credentials_is_refused(monkeypatch, net, tmp_path):
@@ -374,7 +396,7 @@ def test_redirect_that_picks_up_netrc_credentials_is_refused(monkeypatch, net, t
     session.mount("https://", adapter)
     exc = _attempt(lambda: send(HttpClient(base_url="https://api.futureagi.com", session=session), "https://api.futureagi.com/v1/ping"))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
 def test_challenge_response_session_authentication_completes(monkeypatch, sites):
@@ -400,12 +422,44 @@ def test_challenge_response_session_authentication_completes(monkeypatch, sites)
 # ---------------------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("status", [301, 302, 307, 308])
-def test_loopback_redirect_within_the_origin_is_followed(sites, status):
-    site = sites(lambda method, path: ok() if path == "/final" else (status, {"Location": "/final"}, b""))
-    response = send(HttpClient(base_url=site.base, default_headers=KEYED), site.base + "/v1/ping")
-    assert response.status_code == 200
-    assert site.requests == [("GET", "/v1/ping"), ("GET", "/final")]
+@pytest.mark.parametrize("make_session", [None, requests.Session, FuturesSession], ids=["sdk", "requests", "futures"])
+@pytest.mark.parametrize("status,method,hop_method", [
+    (301, HttpMethod.POST, "GET"),
+    (301, HttpMethod.PUT, "PUT"),
+    (302, HttpMethod.PATCH, "GET"),
+    (303, HttpMethod.POST, "GET"),
+    (307, HttpMethod.POST, "POST"),
+    (308, HttpMethod.POST, "POST"),
+], ids=["301-post", "301-put", "302-patch", "303-post", "307-post", "308-post"])
+def test_loopback_redirect_within_the_origin_is_followed(sites, status, method, hop_method, make_session):
+    target = "/final?hop=1"
+
+    def route(_method, path):
+        if path == target:
+            return ok(b'{"landed": true}')
+        return status, {"Location": target}, b""
+
+    site = sites(route)
+    client = HttpClient(base_url=site.base, default_headers=KEYED, session=make_session() if make_session else None)
+    try:
+        response = send(client, site.base + "/v1/ping", method=method, params={"initial": 1}, json={"x": 1})
+    finally:
+        client.close()
+
+    assert response.status_code == 200 and response.json() == {"landed": True}
+    assert site.requests == [(method.value, "/v1/ping?initial=1"), (hop_method, target)]
+    (first_headers, first_body), (hop_headers, hop_body) = site.messages
+    for headers in (first_headers, hop_headers):
+        assert headers["x-api-key"] == KEY and headers["x-secret-key"] == SECRET
+    assert first_headers["content-type"] == "application/json" and first_body
+    if status in (307, 308):
+        assert hop_body == first_body
+        assert hop_headers["content-type"] == first_headers["content-type"]
+        assert hop_headers["content-length"] == first_headers["content-length"]
+    else:
+        assert hop_body == b""
+        assert "content-type" not in hop_headers and "transfer-encoding" not in hop_headers
+        assert hop_headers.get("content-length", "0") == "0"
 
 
 @pytest.mark.parametrize("status", [301, 302, 307, 308])
@@ -414,17 +468,21 @@ def test_loopback_redirect_to_a_named_plain_http_host_is_refused(net, sites, sta
     exc = _attempt(lambda: send(HttpClient(base_url=site.base, default_headers=KEYED), site.base + "/v1/ping"))
     assert len(site.requests) == 1
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
-def test_opted_in_redirect_is_followed_directly_past_environment_proxy(monkeypatch, net, sites):
+def test_opted_in_redirect_is_refused_with_environment_proxy(monkeypatch, net, sites):
+    monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
     monkeypatch.setenv("HTTP_PROXY", f"http://127.0.0.1:{net.proxy.port}")
     monkeypatch.setenv("ALL_PROXY", f"http://127.0.0.1:{net.proxy.port}")
     monkeypatch.setenv("NO_PROXY", "")
     site = sites(lambda method, path: (302, {"Location": f"http://{PLAIN}:{net.target.port}/x"}, b""))
-    client = HttpClient(base_url=site.base, default_headers=KEYED, allow_insecure_http=True)
-    _attempt(lambda: send(client, site.base + "/v1/ping"))
-    net.delivered_direct()
+    client = HttpClient(base_url=site.base, default_headers=KEYED)
+    exc = _attempt(lambda: send(client, site.base + "/v1/ping"))
+    assert site.requests == [("GET", "/v1/ping")]
+    assert site.marker_bytes() > 0
+    net.nothing_sent()
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
 def _kb(base: str, **kwargs):
@@ -452,27 +510,31 @@ def _kb_route(status: int):
 
 
 @pytest.mark.parametrize("status", [307, 308])
-def test_knowledge_base_create_follows_a_loopback_redirect(sites, status):
+def test_knowledge_base_create_follows_a_loopback_redirect_on_its_origin(sites, status):
+    # 0.8.1 followed it with requests: the same method and body go to the target on the same origin, with the keys.
     site = sites(_kb_route(status))
-    kb = _kb(site.base).create_kb(name="docs")
-    assert str(kb.kb.id) == KB_ID
+    exc = _attempt(lambda: _kb(site.base).create_kb(name="docs"))
+    assert exc is None, exc
     assert site.requests == [("POST", KB_PATH), ("POST", "/moved" + KB_PATH)]
+    assert site.marker_bytes() > 0
 
 
 @pytest.mark.parametrize("status", [307, 308])
-def test_knowledge_base_update_follows_a_loopback_redirect(sites, status, tmp_path):
+def test_knowledge_base_update_follows_a_loopback_redirect_on_its_origin(sites, status, tmp_path):
     (tmp_path / "notes.txt").write_text("notes")
     site = sites(_kb_route(status))
-    kb = _kb(site.base, kb_name="docs").update_kb(kb_name="docs", new_name="docs", file_paths=[str(tmp_path / "notes.txt")])
-    assert str(kb.kb.id) == KB_ID
-    assert [entry for entry in site.requests if not entry[1].startswith(KB_LIST_PATH)] == [("PATCH", KB_PATH), ("PATCH", "/moved" + KB_PATH)]
+    kb = _kb(site.base, kb_name="docs")
+    exc = _attempt(lambda: kb.update_kb(kb_name="docs", new_name="docs", file_paths=[str(tmp_path / "notes.txt")]))
+    assert exc is None, exc
+    assert [entry for entry in site.requests if not entry[1].startswith(KB_LIST_PATH)] == [
+        ("PATCH", KB_PATH), ("PATCH", "/moved" + KB_PATH)]
 
 
 def test_knowledge_base_create_redirect_to_a_named_plain_http_host_is_refused(net, sites):
     site = sites(lambda method, path: (307, {"Location": f"http://{PLAIN}:{net.target.port}{KB_PATH}"}, b""))
     exc = _attempt(lambda: _kb(site.base).create_kb(name="docs"))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, KeyedRedirectRefusedError, REDIRECT_CODE)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -483,13 +545,13 @@ def test_knowledge_base_create_redirect_to_a_named_plain_http_host_is_refused(ne
 def test_knowledge_base_by_name_reports_the_refusal(net):
     exc = _attempt(lambda: _kb(f"http://{PLAIN}:{net.target.port}", kb_name="docs"))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, ConfigurationError, ORIGIN_CODE)
 
 
 def test_knowledge_base_delete_reports_the_refusal(net):
     exc = _attempt(lambda: _kb(f"http://{PLAIN}:{net.target.port}").delete_kb(kb_ids=KB_ID))
     net.nothing_sent()
-    refused(exc, ValueError)
+    _refused(exc, ConfigurationError, ORIGIN_CODE)
 
 
 def test_knowledge_base_upload_is_judged_without_the_client_session(sites):
@@ -499,8 +561,12 @@ def test_knowledge_base_upload_is_judged_without_the_client_session(sites):
     session = FuturesSession()
     session.mount("http://", Wrapping())
     site = sites(_kb_route(307))
-    kb = _kb(site.base, session=session).create_kb(name="docs")
-    assert str(kb.kb.id) == KB_ID
+    exc = _attempt(lambda: _kb(site.base, session=session).create_kb(name="docs"))
+    # The upload goes out on a session the SDK builds, not on the caller's: the custom adapter is not used, and the
+    # 307 on the same origin is followed as requests follows it (0.8.1).
+    assert exc is None, exc
+    assert site.requests == [("POST", KB_PATH), ("POST", "/moved" + KB_PATH)]
+    assert site.marker_bytes() > 0
 
 
 # ---------------------------------------------------------------------------------------------
@@ -519,7 +585,11 @@ class AsyncDirectSubclass(httpx.AsyncHTTPTransport):
 class Answering(httpx.BaseTransport):
     """A transport with no connection pool and no inner transport."""
 
+    def __init__(self):
+        self.calls = 0
+
     def handle_request(self, request):
+        self.calls += 1
         return httpx.Response(200, json={})
 
 
@@ -547,13 +617,13 @@ SENDS = {"platform": _platform, "gateway": _gateway}
 
 
 @pytest.mark.parametrize("sender", list(SENDS))
-def test_http_transport_subclass_is_accepted_for_loopback(net, sender):
+def test_http_transport_subclass_is_refused_for_loopback(net, sender):
     exc = SENDS[sender](f"http://127.0.0.1:{net.target.port}", DirectSubclass())
-    assert getattr(exc, "code", None) != CODE, repr(exc)
-    net.delivered_direct()
+    net.nothing_sent()
+    _refused(exc, KeyedProxyRefusedError, PROXY_CODE)
 
 
-def test_async_http_transport_subclass_is_accepted_for_loopback(net):
+def test_async_http_transport_subclass_is_refused_for_loopback(net):
     async def run():
         client = httpx.AsyncClient(transport=AsyncDirectSubclass())
         gw = AsyncGateway(api_key=KEY, base_url=f"http://127.0.0.1:{net.target.port}", http_client=client, max_retries=0, timeout=3)
@@ -563,14 +633,17 @@ def test_async_http_transport_subclass_is_accepted_for_loopback(net):
             await client.aclose()
 
     exc = _attempt(lambda: asyncio.run(run()))
-    assert getattr(exc, "code", None) != CODE, repr(exc)
-    net.delivered_direct()
+    net.nothing_sent()
+    _refused(exc, KeyedProxyRefusedError, PROXY_CODE)
 
 
 @pytest.mark.parametrize("sender", list(SENDS))
-def test_transport_without_pool_or_inner_transport_is_accepted_for_loopback(sender):
-    exc = SENDS[sender]("http://127.0.0.1:9", Answering())
-    assert getattr(exc, "code", None) != CODE, repr(exc)
+def test_transport_without_pool_or_inner_transport_is_refused_for_loopback(net, sender):
+    transport = Answering()
+    exc = SENDS[sender](f"http://127.0.0.1:{net.target.port}", transport)
+    net.nothing_sent()
+    assert transport.calls == 0
+    _refused(exc, KeyedProxyRefusedError, PROXY_CODE)
 
 
 @pytest.mark.parametrize("sender", list(SENDS))
@@ -578,7 +651,7 @@ def test_transport_holding_a_proxy_beside_a_direct_transport_is_refused(net, sen
     routes = {"direct": httpx.HTTPTransport(), "proxied": httpx.HTTPTransport(proxy=f"http://127.0.0.1:{net.proxy.port}")}
     exc = SENDS[sender](f"http://127.0.0.1:{net.target.port}", Routing(routes))
     net.nothing_sent()
-    refused(exc, AgentCCError if sender == "gateway" else ValueError)
+    _refused(exc, KeyedProxyRefusedError, PROXY_CODE)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -587,24 +660,26 @@ def test_transport_holding_a_proxy_beside_a_direct_transport_is_refused(net, sen
 
 
 @pytest.mark.parametrize("status", [301, 302, 307])
-def test_gateway_redirect_response_is_a_status_error(sites, status):
+def test_gateway_redirect_response_is_refused(sites, status):
     site = sites(lambda method, path: (status, {"Location": "/elsewhere"}, b""))
     gw = Gateway(api_key=KEY, base_url=site.base, max_retries=0, timeout=3)
-    with pytest.raises(APIStatusError) as caught:
+    with pytest.raises(KeyedRedirectRefusedError) as caught:
         gw.chat.completions.create(model="m", messages=[{"role": "user", "content": "hi"}])
+    _refused(caught.value, KeyedRedirectRefusedError, REDIRECT_CODE)
     assert caught.value.status_code == status
 
 
-def test_gateway_redirect_response_to_a_stream_is_a_status_error(sites):
+def test_gateway_redirect_response_to_a_stream_is_refused(sites):
     site = sites(lambda method, path: (302, {"Location": "/elsewhere"}, b""))
     gw = Gateway(api_key=KEY, base_url=site.base, max_retries=0, timeout=3)
-    with pytest.raises(APIStatusError) as caught:
+    with pytest.raises(KeyedRedirectRefusedError) as caught:
         for _ in gw.chat.completions.create(model="m", messages=[{"role": "user", "content": "hi"}], stream=True):
             pass
+    _refused(caught.value, KeyedRedirectRefusedError, REDIRECT_CODE)
     assert caught.value.status_code == 302
 
 
-def test_async_gateway_redirect_response_is_a_status_error(sites):
+def test_async_gateway_redirect_response_is_refused(sites):
     site = sites(lambda method, path: (301, {"Location": "/elsewhere"}, b""))
 
     async def run():
@@ -614,31 +689,41 @@ def test_async_gateway_redirect_response_is_a_status_error(sites):
         finally:
             await gw.aclose()
 
-    with pytest.raises(APIStatusError) as caught:
+    with pytest.raises(KeyedRedirectRefusedError) as caught:
         asyncio.run(run())
+    _refused(caught.value, KeyedRedirectRefusedError, REDIRECT_CODE)
     assert caught.value.status_code == 301
 
 
 def test_check_valid_key_reports_the_refusal(net):
-    with pytest.raises(AgentCCError) as caught:
-        check_valid_key(KEY, f"http://{PLAIN}:{net.target.port}")
+    verdict = check_valid_key(KEY, f"http://{PLAIN}:{net.target.port}")
     net.nothing_sent()
-    refused(caught.value, AgentCCError)
+    assert verdict is False
 
 
 def test_health_check_reports_the_refusal(net):
-    with pytest.raises(AgentCCError) as caught:
-        health_check(api_key=KEY, base_url=f"http://{PLAIN}:{net.target.port}", timeout=3)
+    verdict = health_check(api_key=KEY, base_url=f"http://{PLAIN}:{net.target.port}", timeout=3)
     net.nothing_sent()
-    refused(caught.value, AgentCCError)
+    assert verdict["status"] == "error"
+    message = verdict["error"]
+    assert "Credentials are not sent over http://" in message
+    assert KEY not in message and SECRET not in message
 
 
-def test_mock_client_with_a_named_plain_http_base_url_answers(net):
+def test_mock_client_with_a_named_plain_http_base_url_answers_in_process(net):
+    """The 0.8.1 mock client returns its configured response without dialing."""
     from fi.gateway.testing import create_mock_client
 
-    client = create_mock_client(responses={"/v1/models": {"object": "list", "data": []}}, base_url=f"http://{PLAIN}")
-    client.models.list()
-    net.nothing_sent()
+    client = create_mock_client(
+        responses={"/v1/models": {"object": "list", "data": []}},
+        api_key=KEY,
+        base_url=f"http://{PLAIN}:{net.target.port}",
+    )
+    try:
+        assert client.models.list().data == []
+        net.nothing_sent()
+    finally:
+        client.close()
 
 
 # ---------------------------------------------------------------------------------------------
@@ -657,15 +742,44 @@ HOSTS_NOT_UNLOCKED = {
 }
 
 
+def _request_with_base(sender, base):
+    if sender == "http-client":
+        client = HttpClient(base_url=base, default_headers=KEYED, session=FuturesSession())
+        try:
+            return send(client, base + "/v1/ping")
+        finally:
+            client.close()
+    if sender == "platform-sync":
+        with Client(api_key=KEY, secret_key=SECRET, base_url=base, max_retries=0, timeout=3) as client:
+            return client.request("GET", "/v1/ping", unwrap=None)
+    with Gateway(api_key=KEY, base_url=base, max_retries=0, timeout=3) as gw:
+        return gw.chat.completions.create(model="m", messages=[{"role": "user", "content": "hi"}])
+
+
 @pytest.mark.parametrize("form", list(HOSTS_NOT_UNLOCKED))
 @pytest.mark.parametrize("sender", ["http-client", "platform-sync", "gateway-sync"])
 def test_opt_in_does_not_unlock_hosts_written_ambiguously(monkeypatch, net, sender, form):
-    from tests.test_plain_http_key_guards import EXPECTED, SENDERS
-
     monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
-    exc = SENDERS[sender](f"http://{HOSTS_NOT_UNLOCKED[form]}:{net.target.port}")
+    if form == "non-ascii":
+        original = socket.getaddrinfo
+        written = HOSTS_NOT_UNLOCKED[form]
+        normalized = written.encode("idna").decode("ascii")
+
+        def shim(host, *args, **kwargs):
+            text = host.decode("ascii", "replace") if isinstance(host, bytes) else host
+            return original("127.0.0.1" if text in {written, normalized} else host, *args, **kwargs)
+
+        monkeypatch.setattr(socket, "getaddrinfo", shim)
+    base = f"http://{HOSTS_NOT_UNLOCKED[form]}:{net.target.port}"
+    exc = _attempt(lambda: _request_with_base(sender, base))
     net.nothing_sent()
-    refused(exc, *EXPECTED[sender])
+    if sender == "http-client" and form == "octal-ipv4" and isinstance(exc, KeyedProxyRefusedError):
+        _refused(exc, KeyedProxyRefusedError, PROXY_CODE)
+    elif sender == "platform-sync" and form == "octal-ipv4":
+        assert isinstance(exc, httpx.InvalidURL), repr(exc)
+        assert "Invalid IPv4 address" in str(exc)
+    else:
+        _refused(exc, ConfigurationError, ORIGIN_CODE)
 
 
 class HoldsClient(httpx.BaseTransport):
@@ -697,4 +811,4 @@ def test_proxy_held_deeper_inside_a_custom_transport_is_refused(net, sender, hol
     }[holder]()
     exc = SENDS[sender](f"http://127.0.0.1:{net.target.port}", transport)
     net.nothing_sent()
-    refused(exc, AgentCCError if sender == "gateway" else ValueError)
+    _refused(exc, KeyedProxyRefusedError, PROXY_CODE)

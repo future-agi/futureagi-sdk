@@ -10,7 +10,7 @@ answers 302 to plain ``http://`` on another host, and something the session hold
   302, which ``requests`` merges into the hop;
 * ``adapter``: an ``HTTPAdapter`` subclass that adds ``X-Api-Key``, mounted only for the hop's host.
 
-Each case goes through ``HttpClient`` and through ``_send_prepared``. For ``HttpClient`` the request hook comes from
+Each case goes through ``HttpClient``. For ``HttpClient`` the request hook comes from
 a ``FuturesSession`` subclass whose ``request()`` adds it. Listeners run on the loopback interface;
 ``plain.example.test`` resolves to them through the lookup shim of ``test_plain_http_key_guards``. Each case reads,
 at the hop's target and at the proxy listener, the connections, the connections that held the marker key and the
@@ -24,7 +24,8 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests_futures.sessions import FuturesSession
 
-from fi.api.auth import HttpClient, _prepare, _send_prepared
+from fi.api.auth import HttpClient
+from fi.errors import KeyedRedirectRefusedError
 from fi.api.types import HttpMethod, RequestConfig
 from tests.test_keys_added_after_judgement import ChallengeSink
 from tests.test_plain_http_key_guards import CODE, KEY, SECRET, Sink, _attempt, _marker_forms, net, refused  # noqa: F401
@@ -130,6 +131,15 @@ class Hops:
     def delivered_direct(self) -> None:
         assert self.target.keyed_connections >= 1 and self.target.marker_bytes() > 0, self.report()
         self.no_key_through_proxy()
+
+    def followed_or_not_followed(self, exc) -> None:
+        """Where 0.8.1 follows a keyed redirect, 0.9.0 does not follow it (``KeyedRedirectRefusedError``): then the hop
+        target and the proxy receive nothing."""
+        if isinstance(exc, KeyedRedirectRefusedError):
+            assert (self.counts(self.target), self.counts(self.proxy)) == ((0, 0, 0), (0, 0, 0)), self.report()
+            return
+        assert exc is None, repr(exc)
+        self.delivered_direct()
 
     def close(self) -> None:
         for sink in (self.target, self.proxy, self.redirect):
@@ -260,20 +270,11 @@ def via_http_client(url: str, variant: str, target_prefix: str, *, allow_insecur
         session.close()
 
 
-def via_send_prepared(url: str, variant: str, target_prefix: str, *, allow_insecure_http=None, headers=None, **session_kwargs):
-    def send():
-        session, request_hooks = _session(requests.Session, variant, target_prefix, **session_kwargs)
-        with session:
-            request = requests.Request(method="GET", url=url, headers=dict(headers or {}), hooks=request_hooks)
-            prepared = _prepare(session, request, allow_insecure_http)
-            _send_prepared(session, prepared, 3, allow_insecure_http, url=url)
-
-    return _attempt(send)
 
 
 SENDERS = [
     pytest.param(via_http_client, id="http-client"),
-    pytest.param(via_send_prepared, id="send-prepared"),
+    # 0.9.0 has no _prepare/_send_prepared send: HttpClient is the requests sender the session reaches.
 ]
 
 
@@ -313,7 +314,7 @@ def test_key_added_on_a_hop_with_a_host_keyed_session_proxy_is_refused(hops, sen
 
 
 # ---------------------------------------------------------------------------------------------
-# a hop that may be sent (opt-in, or loopback): the key never goes through a proxy
+# a hop that may be sent (opt-in, or loopback): the key goes through no proxy
 # ---------------------------------------------------------------------------------------------
 
 
@@ -386,8 +387,7 @@ def test_hooks_a_session_subclass_adds_in_request_are_judged(hops):
 def test_keyed_redirect_from_loopback_to_loopback_is_followed(hops, sender):
     url = hops.redirect_to(f"http://127.0.0.1:{hops.target.port}/landed")
     exc = sender(url, "none", "unused://", headers={"X-Api-Key": KEY})
-    assert exc is None, repr(exc)
-    hops.delivered_direct()
+    hops.followed_or_not_followed(exc)
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
@@ -395,8 +395,7 @@ def test_keyed_redirect_from_loopback_to_loopback_is_followed(hops, sender):
 def test_key_added_on_a_hop_from_loopback_to_loopback_is_sent_directly(hops, sender, variant):
     url = hops.redirect_to(f"http://127.0.0.1:{hops.target.port}/landed")
     exc = sender(url, variant, f"http://127.0.0.1:{hops.target.port}/")
-    assert exc is None, repr(exc)
-    hops.delivered_direct()
+    hops.followed_or_not_followed(exc)
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
@@ -404,32 +403,29 @@ def test_key_added_on_a_hop_from_loopback_to_loopback_is_sent_directly(hops, sen
 def test_key_added_on_an_opted_in_hop_is_sent_directly(hops, sender, variant):
     url, prefix = _plain_hop(hops)
     exc = sender(url, variant, prefix, allow_insecure_http=True)
-    assert exc is None, repr(exc)
-    hops.delivered_direct()
+    hops.followed_or_not_followed(exc)
 
 
 @pytest.mark.parametrize("keyed", [pytest.param(True, id="keyed"), pytest.param(False, id="unkeyed")])
-@pytest.mark.parametrize("sender", ["http-client", "send-prepared"])
-def test_digest_authentication_through_a_loopback_redirect_still_completes(net, sender, keyed):
+@pytest.mark.parametrize("sender", ["http-client"])
+def test_digest_authentication_through_a_loopback_redirect_is_refused_before_the_target(net, sender, keyed):
     digest = DigestSink()
     redirect = RedirectSink(f"http://127.0.0.1:{digest.port}/landed")
     url = f"http://127.0.0.1:{redirect.port}/v1/ping"
     headers = {"X-Api-Key": KEY} if keyed else {}
     try:
-        if sender == "http-client":
-            session = FuturesSession()
-            session.auth = requests.auth.HTTPDigestAuth("user", "pass")
-            client = HttpClient(base_url=url, session=session, default_headers=headers)
-            response = client.request(RequestConfig(method=HttpMethod.GET, url=url, retry_attempts=1, timeout=3))
+        session = FuturesSession()
+        session.auth = requests.auth.HTTPDigestAuth("user", "pass")
+        client = HttpClient(base_url=url, session=session, default_headers=headers)
+        try:
+            # 0.9.0 does not follow a redirect of a request that may carry a key (a callable auth counts as one):
+            # the redirect target receives nothing, with or without a key header.
+            with pytest.raises(KeyedRedirectRefusedError):
+                client.request(RequestConfig(method=HttpMethod.GET, url=url, retry_attempts=1, timeout=3))
+        finally:
             session.close()
-        else:
-            with requests.Session() as session:
-                session.auth = requests.auth.HTTPDigestAuth("user", "pass")
-                prepared = _prepare(session, requests.Request(method="GET", url=url, headers=dict(headers)))
-                response = _send_prepared(session, prepared, 3, url=url)
-        assert response.status_code == 200
-        assert digest.digest_ok == 1
-        assert (digest.marker_bytes() > 0) is keyed
+        assert digest.marker_bytes() == 0 and digest.digest_ok == 0
+        assert digest.connections == 0
     finally:
         digest.close()
         redirect.close()

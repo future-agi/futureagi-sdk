@@ -1,0 +1,299 @@
+{
+  "operations": [
+    {
+      "py": "projects",
+      "ts": "projects",
+      "method": "GET",
+      "path": "/tracer/project/list_projects/",
+      "args": {},
+      "operation_id": "tracer_project_list_projects",
+      "public": {
+        "py": "client.tracing.projects",
+        "ts": "client.tracing.projects"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "traces",
+      "ts": "traces",
+      "method": "GET",
+      "path": "/tracer/trace/list_traces/",
+      "args": {},
+      "operation_id": "tracer_trace_list_traces",
+      "public": {
+        "py": "client.tracing.traces",
+        "ts": "client.tracing.traces"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "get_trace",
+      "ts": "getTrace",
+      "method": "GET",
+      "path": "/tracer/trace/{id}/",
+      "args": {
+        "id": "trace_id"
+      },
+      "operation_id": "tracer_trace_read",
+      "public": {
+        "py": "client.tracing.get_trace",
+        "ts": "client.tracing.getTrace"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "voice_calls",
+      "ts": "voiceCalls",
+      "method": "GET",
+      "path": "/tracer/trace/list_voice_calls/",
+      "args": {},
+      "operation_id": "tracer_trace_list_voice_calls",
+      "public": {
+        "py": "client.tracing.voice_calls",
+        "ts": "client.tracing.voiceCalls"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "voice_call_detail",
+      "ts": "voiceCallDetail",
+      "method": "GET",
+      "path": "/tracer/trace/voice_call_detail/",
+      "args": {},
+      "operation_id": "tracer_trace_voice_call_detail",
+      "public": {
+        "py": "client.tracing.voice_call_detail",
+        "ts": "client.tracing.voiceCallDetail"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "properties",
+      "ts": "properties",
+      "method": "GET",
+      "path": "/tracer/trace/get_properties/",
+      "args": {},
+      "operation_id": "tracer_trace_get_properties",
+      "public": {
+        "py": "client.tracing.properties",
+        "ts": "client.tracing.properties"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "update_tags",
+      "ts": "updateTags",
+      "method": "PATCH",
+      "path": "/tracer/trace/{id}/tags/",
+      "args": {
+        "id": "trace_id"
+      },
+      "operation_id": "tracer_trace_update_tags",
+      "public": {
+        "py": "client.tracing.update_tags",
+        "ts": "client.tracing.updateTags"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "graph_methods",
+      "ts": "graphMethods",
+      "method": "POST",
+      "path": "/tracer/trace/get_graph_methods/",
+      "args": {},
+      "operation_id": "tracer_trace_get_graph_methods",
+      "public": {
+        "py": "client.tracing.graph_methods",
+        "ts": "client.tracing.graphMethods"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "sessions",
+      "ts": "sessions",
+      "method": "GET",
+      "path": "/tracer/trace-session/list_sessions/",
+      "args": {},
+      "operation_id": "tracer_trace-session_list_sessions",
+      "public": {
+        "py": "client.tracing.sessions",
+        "ts": "client.tracing.sessions"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "get_session",
+      "ts": "getSession",
+      "method": "GET",
+      "path": "/tracer/trace-session/{id}/",
+      "args": {
+        "id": "session_id"
+      },
+      "operation_id": "tracer_trace-session_read",
+      "public": {
+        "py": "client.tracing.get_session",
+        "ts": "client.tracing.getSession"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "session_graph",
+      "ts": "sessionGraph",
+      "method": "POST",
+      "path": "/tracer/trace-session/get_session_graph_data/",
+      "args": {},
+      "operation_id": "tracer_trace-session_get_session_graph_data",
+      "public": {
+        "py": "client.tracing.session_graph",
+        "ts": "client.tracing.sessionGraph"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "users",
+      "ts": "users",
+      "method": "GET",
+      "path": "/tracer/users/",
+      "args": {},
+      "operation_id": "tracer_users_list",
+      "public": {
+        "py": "client.tracing.users",
+        "ts": "client.tracing.users"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "annotation_labels",
+      "ts": "annotationLabels",
+      "method": "GET",
+      "path": "/tracer/get-annotation-labels/",
+      "args": {},
+      "operation_id": "tracer_get-annotation-labels_list",
+      "public": {
+        "py": "client.tracing.annotation_labels",
+        "ts": "client.tracing.annotationLabels"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "bulk_annotation",
+      "ts": "bulkAnnotation",
+      "method": "POST",
+      "path": "/tracer/bulk-annotation/",
+      "args": {},
+      "operation_id": "tracer_bulk-annotation_create",
+      "public": {
+        "py": "client.tracing.bulk_annotation",
+        "ts": "client.tracing.bulkAnnotation"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "issues",
+      "ts": "issues",
+      "method": "GET",
+      "path": "/tracer/feed/issues/",
+      "args": {},
+      "operation_id": "tracer_feed_issues_list",
+      "public": {
+        "py": "client.tracing.issues",
+        "ts": "client.tracing.issues"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "issue",
+      "ts": "issue",
+      "method": "GET",
+      "path": "/tracer/feed/issues/{cluster_id}/",
+      "args": {
+        "cluster_id": "cluster_id"
+      },
+      "operation_id": "tracer_feed_issues_read",
+      "public": {
+        "py": "client.tracing.issue",
+        "ts": "client.tracing.issue"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "issue_stats",
+      "ts": "issueStats",
+      "method": "GET",
+      "path": "/tracer/feed/issues/stats/",
+      "args": {},
+      "operation_id": "tracer_feed_issues_stats_list",
+      "public": {
+        "py": "client.tracing.issue_stats",
+        "ts": "client.tracing.issueStats"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "get_project",
+      "ts": "getProject",
+      "method": "GET",
+      "path": "/tracer/project/{id}/",
+      "args": {
+        "id": "project_id"
+      },
+      "operation_id": "tracer_project_read",
+      "public": {
+        "py": "client.tracing.get_project",
+        "ts": "client.tracing.getProject"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "spans",
+      "ts": "spans",
+      "method": "GET",
+      "path": "/tracer/observation-span/list_spans_observe/",
+      "args": {},
+      "operation_id": "tracer_observation-span_list_spans_observe",
+      "public": {
+        "py": "client.tracing.spans",
+        "ts": "client.tracing.spans"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "get_span",
+      "ts": "getSpan",
+      "method": "GET",
+      "path": "/tracer/observation-span/{id}/",
+      "args": {
+        "id": "span_id"
+      },
+      "operation_id": "tracer_observation-span_read",
+      "public": {
+        "py": "client.tracing.get_span",
+        "ts": "client.tracing.getSpan"
+      },
+      "compat_query": []
+    },
+    {
+      "py": "error_analysis",
+      "ts": "errorAnalysis",
+      "method": "GET",
+      "path": "/tracer/trace-error-analysis/{trace_id}/",
+      "args": {
+        "trace_id": "trace_id"
+      },
+      "operation_id": "tracer_trace-error-analysis_read",
+      "public": {
+        "py": "client.tracing.error_analysis",
+        "ts": "client.tracing.errorAnalysis"
+      },
+      "compat_query": []
+    }
+  ],
+  "derived": [
+    {
+      "py": "client.tracing.spans_by_trace",
+      "ts": "client.tracing.spansByTrace",
+      "from": "spans",
+      "why": "Add a required trace identity filter to the declared span list query."
+    }
+  ]
+}

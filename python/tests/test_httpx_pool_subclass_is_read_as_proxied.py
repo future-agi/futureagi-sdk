@@ -4,7 +4,7 @@
 when the transport the client selects sends directly. A transport counts as direct when its pool is exactly
 ``httpcore.ConnectionPool`` or ``httpcore.AsyncConnectionPool``, with one of httpcore's own network backends and
 no ``proxy=`` setting. Every other pool is read as a proxy, and the request is refused with the code
-``insecure_http_origin`` before any connection is made. The pool shapes under test each send to a proxy listener:
+``KEYED_PROXY_REFUSED`` before any connection is made. The pool shapes under test each send to a proxy listener:
 
 * ``delegating-subclass``: a pool subclass that hands every request to an inner ``httpcore.HTTPProxy``;
 * ``forward-subclass``: a pool subclass whose ``create_connection`` opens a forward-proxy connection, in the way
@@ -22,7 +22,7 @@ no ``proxy=`` setting. Every other pool is read as a proxy, and the request is r
   it hands each connection to.
 
 Each shape is sent to a loopback listener and to ``other-host.test`` (a lookup shim maps it to the loopback
-interface), opted in with ``allow_insecure_http=True`` or ``FI_ALLOW_INSECURE_HTTP=1``. Controls check that the
+interface), opted in with ``FI_ALLOW_INSECURE_HTTP=1``. Controls check that the
 SDK's own transport and a caller's plain ``httpx`` transport send the keyed request directly, and that every shape,
 used on its own, sends to the proxy listener.
 """
@@ -40,24 +40,18 @@ from httpcore._async.http_proxy import AsyncForwardHTTPConnection
 from httpcore._backends.auto import AutoBackend
 from httpcore._sync.http_proxy import ForwardHTTPConnection
 
-from tests.test_plain_http_key_guards import (  # noqa: F401
-    EXPECTED,
-    KEY,
-    SECRET,
-    SENDERS as ALL_SENDERS,
-    Net,
-    _marker_forms,
-    net,
-    refused,
-    use_proxy,
-)
+from fi.errors import KeyedProxyRefusedError
+from fi.gateway import AsyncGateway, Gateway
+from fi.platform import AsyncClient, Client
+from tests.test_plain_http_key_guards import KEY, SECRET, Net, _attempt, _marker_forms, net, use_proxy  # noqa: F401
 
 OTHER = "other-host.test"
-SENDERS = {name: ALL_SENDERS[name] for name in ("platform-sync", "platform-async", "gateway-sync", "gateway-async")}
+SENDERS = ("platform-sync", "platform-async", "gateway-sync", "gateway-async")
 HOSTS = {
-    "loopback": ("127.0.0.1", {}, False),
-    "opted-in-by-argument": (OTHER, {"allow_insecure_http": True}, False),
-    "opted-in-by-environment": (OTHER, {}, True),
+    "loopback": "127.0.0.1",
+    # Retain the released case ID; these clients expose the opt-in through the environment.
+    "opted-in-by-argument": OTHER,
+    "opted-in-by-environment": OTHER,
 }
 
 
@@ -268,16 +262,29 @@ def is_async(sender: str) -> bool:
 
 
 def base_url(net: Net, host: str) -> str:  # noqa: F811
-    return f"http://{HOSTS[host][0]}:{net.target.port}"
+    return f"http://{HOSTS[host]}:{net.target.port}"
 
 
 def send(net: Net, sender: str, host: str, http_client=None):  # noqa: F811
-    """Send one keyed request from ``sender`` to the target listener. The environment opt-in, when ``host`` asks
-    for it, is set by the caller."""
-    kwargs = dict(HOSTS[host][1])
-    if http_client is not None:
-        kwargs["http_client"] = http_client
-    return SENDERS[sender](base_url(net, host), **kwargs)
+    """Send one keyed request from ``sender`` to the target listener, capturing any exception."""
+    kwargs = dict(api_key=KEY, base_url=base_url(net, host), max_retries=0, timeout=3, http_client=http_client)
+    messages = [{"role": "user", "content": "hi"}]
+
+    def run():
+        if sender == "platform-sync":
+            with Client(secret_key=SECRET, **kwargs) as client:
+                return client.request("GET", "/v1/ping", unwrap=None)
+        with Gateway(**kwargs) as client:
+            return client.chat.completions.create(model="m", messages=messages)
+
+    async def run_async():
+        if sender == "platform-async":
+            async with AsyncClient(secret_key=SECRET, **kwargs) as client:
+                return await client.request("GET", "/v1/ping", unwrap=None)
+        async with AsyncGateway(**kwargs) as client:
+            return await client.chat.completions.create(model="m", messages=messages)
+
+    return _attempt(lambda: asyncio.run(run_async())) if is_async(sender) else _attempt(run)
 
 
 def observed(net: Net) -> tuple:  # noqa: F811
@@ -292,7 +299,7 @@ def observed(net: Net) -> tuple:  # noqa: F811
 
 
 def _opt_in_by_environment(monkeypatch, host: str) -> None:
-    if HOSTS[host][2]:
+    if host != "loopback":
         monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
 
 
@@ -314,7 +321,10 @@ def test_keyed_request_through_a_pool_that_is_not_httpcore_direct_is_refused(mon
     _opt_in_by_environment(monkeypatch, host)
     exc = send(net, sender, host, shape_client(shape, is_async(sender), net.proxy.port))
     assert observed(net) == (0, 0, 0, 0), f"proxy conns, proxy markers, target conns, target markers; error: {exc!r}"
-    refused(exc, *EXPECTED[sender])
+    assert exc is not None, "no error was raised"
+    assert isinstance(exc, KeyedProxyRefusedError), f"{type(exc).__name__}: {exc}"
+    assert getattr(exc, "code", None) == "KEYED_PROXY_REFUSED", f"code: {getattr(exc, 'code', None)!r}"
+    assert KEY not in str(exc) and SECRET not in str(exc)
 
 
 # ---------------------------------------------------------------------------------------------

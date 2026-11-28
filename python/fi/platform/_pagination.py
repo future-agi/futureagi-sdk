@@ -15,7 +15,7 @@ from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
-MAX_PAGES = 10_000  # guard against a server that never says "last page"
+MAX_PAGES = 10_000  # guard against a server that does not say "last page"
 
 
 def _get(data: Any, dotted: str) -> Any:
@@ -54,7 +54,7 @@ class _PagerBase(Generic[T]):
 
 
 class SyncPager(_PagerBase[T]):
-    """Iterate to get every item across pages; `.first_page()` for just one page."""
+    """Iterate to get every item across pages; `.first_page()` for one page."""
 
     def __init__(self, fetch: Callable[[int], Any], spec: dict, parse: Callable[[Any], T]) -> None:
         super().__init__(spec, parse)

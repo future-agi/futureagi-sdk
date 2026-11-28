@@ -233,6 +233,7 @@ class TestHealthCheck:
     @respx.mock
     def test_health_check_basic(self) -> None:
         """Mock /health endpoint returning 200."""
+        respx.get("http://localhost:8080/healthz").mock(return_value=httpx.Response(404))
         respx.get("http://localhost:8080/health").mock(
             return_value=httpx.Response(200, json={"status": "ok"})
         )
@@ -242,6 +243,7 @@ class TestHealthCheck:
     @respx.mock
     def test_health_check_returns_latency(self) -> None:
         """Verify latency_ms is present in success response."""
+        respx.get("http://localhost:8080/healthz").mock(return_value=httpx.Response(404))
         respx.get("http://localhost:8080/health").mock(
             return_value=httpx.Response(200, json={"status": "ok"})
         )

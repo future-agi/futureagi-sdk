@@ -1,0 +1,8 @@
+{
+  "name": "@platform-conformance/stub-client",
+  "version": "0.0.0-stub",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./index.mjs" },
+  "description": "A stub SDK used only by the runner shells' own tests: it proves a shell loads an SDK by path."
+}

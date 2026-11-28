@@ -1,0 +1,16 @@
+{
+  "name": "parity-e-old-integrations-1.0.0",
+  "private": true,
+  "description": "E-OLD install for the parity recorder: the five published @agentcc packages at 1.0.0 plus the runtime imports they need (installed with --legacy-peer-deps: langchain and llamaindex import neither peer at runtime; @ai-sdk/openai pinned to agentcc-vercel's own lock at release-source).",
+  "dependencies": {
+    "@agentcc/client": "1.0.0",
+    "@agentcc/langchain": "1.0.0",
+    "@agentcc/llamaindex": "1.0.0",
+    "@agentcc/react": "1.0.0",
+    "@agentcc/vercel": "1.0.0",
+    "@ai-sdk/openai": "1.3.24",
+    "react": "18.3.1",
+    "react-test-renderer": "18.3.1",
+    "zod": "3.25.76"
+  }
+}

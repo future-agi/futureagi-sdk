@@ -1,0 +1,3982 @@
+{
+  "schema_version": 1,
+  "scope": "FutureAGIClient catalog and generated operations, including low-level functions and read-POST twins. Published legacy adapters retain their existing API and wire behavior.",
+  "fa_head": "d502de895f0add84ed2eaacd4bb6b24287935a25",
+  "operations": [
+    {
+      "method": "GET",
+      "path": "/accounts/organization/members/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "limit"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page (1-based); limit (page size).",
+      "evidence": [
+        "accounts/views/rbac_views.py:524-530",
+        "accounts/serializers/rbac.py:281-320",
+        "accounts/serializers/rbac.py:301-301",
+        "accounts/serializers/rbac.py:302-302"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "UsersClient.organization_members"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_organization_members.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_organization_members.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_organization_members.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_organization_members.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "UsersClient.organizationMembers"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listOrganizationMembers"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/workspace/list/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "limit"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page (1-based); limit (page size).",
+      "evidence": [
+        "accounts/views/workspace_management.py:165-180",
+        "accounts/serializers/workspace.py:222-225",
+        "accounts/serializers/workspace.py:216-216",
+        "accounts/serializers/workspace.py:217-217"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "UsersClient.workspaces"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_workspaces.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_workspaces.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_workspaces.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_workspaces.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "UsersClient.workspaces"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listWorkspaces"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/accounts/workspace/{workspace_id}/members/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "limit"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page (1-based); limit (page size).",
+      "evidence": [
+        "accounts/views/rbac_views.py:1147-1153",
+        "accounts/serializers/rbac.py:326-363",
+        "accounts/serializers/rbac.py:346-346",
+        "accounts/serializers/rbac.py:347-347"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "UsersClient.workspace_members"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_workspace_members.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_workspace_members.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_workspace_members.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/users/list_workspace_members.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "UsersClient.workspaceMembers"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listWorkspaceMembers"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/annotation-queues/",
+      "in": "query",
+      "accepted": [
+        "page_size",
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page_size (page size); limit (page size); page (1-based). page_size is a supported size alias; limit takes precedence when both are supplied.",
+      "evidence": [
+        "model_hub/views/annotation_queues.py:3034-3049",
+        "model_hub/serializers/annotation_queues.py:776-781",
+        "model_hub/serializers/annotation_queues.py:781-781",
+        "tfc/utils/pagination.py:4-6",
+        "model_hub/views/annotation_queues.py:3141-3147"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "AnnotationQueuesClient.list"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queues/list_annotation_queues.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queues/list_annotation_queues.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queues/list_annotation_queues.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queues/list_annotation_queues.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "AnnotationQueuesClient.list"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listAnnotationQueues"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/annotation-queues/for-source/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "model_hub/views/annotation_queues.py:4266-4271"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotation_queues_for_source.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotation_queues_for_source.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotation_queues_for_source.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotation_queues_for_source.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubAnnotationQueuesForSource"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/annotation-queues/{queue_id}/automation-rules/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "model_hub/views/annotation_queues.py:7952-7956",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotation_queues_automation_rules_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotation_queues_automation_rules_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotation_queues_automation_rules_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotation_queues_automation_rules_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubAnnotationQueuesAutomationRulesList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/annotation-queues/{queue_id}/items/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "model_hub/views/annotation_queues.py:4908-4912",
+        "model_hub/serializers/annotation_queues.py:964-972",
+        "tfc/utils/pagination.py:4-6"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "AnnotationQueueItemsClient.list"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queue_items/list_annotation_queue_items.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queue_items/list_annotation_queue_items.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queue_items/list_annotation_queue_items.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queue_items/list_annotation_queue_items.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "AnnotationQueueItemsClient.list"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listAnnotationQueueItems"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/annotation-queues/{queue_id}/items/next-item/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters. Use exclude or before for item navigation, not numbered pages.",
+      "evidence": [
+        "model_hub/views/annotation_queues.py:6175-6190"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "AnnotationQueueItemsClient.next"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queue_items/get_next_annotation_queue_item.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queue_items/get_next_annotation_queue_item.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queue_items/get_next_annotation_queue_item.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/annotation_queue_items/get_next_annotation_queue_item.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "AnnotationQueueItemsClient.next"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "getNextAnnotationQueueItem"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/annotations-labels/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "limit"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page (1-based); limit (page size).",
+      "evidence": [
+        "model_hub/views/develop_annotations.py:380-387",
+        "model_hub/serializers/develop_annotations.py:32-44",
+        "model_hub/serializers/develop_annotations.py:33-33",
+        "model_hub/serializers/develop_annotations.py:34-34"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotations_labels_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotations_labels_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotations_labels_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_annotations_labels_list.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/scores/__init__.py",
+            "symbol": "AnnotationLabelsClient.list"
+          },
+          {
+            "file": "python/fi/scores/__init__.py",
+            "symbol": "AsyncAnnotationLabelsClient.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubAnnotationsLabelsList"
+          },
+          {
+            "file": "typescript/futureagi/src/scores/index.ts",
+            "symbol": "AnnotationLabelsClient.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/api-keys/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "model_hub/views/run_prompt.py:189-197",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_api_keys_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_api_keys_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_api_keys_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_api_keys_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubApiKeysList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/develops/get-datasets/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "page_size"
+      ],
+      "bases": {
+        "page": 0
+      },
+      "documentation": "Pagination: page (0-based); page_size (page size).",
+      "evidence": [
+        "model_hub/views/develop_dataset.py:1892-1908",
+        "model_hub/serializers/develop_dataset_contracts.py:134-157",
+        "model_hub/serializers/develop_dataset_contracts.py:145-145",
+        "model_hub/serializers/develop_dataset_contracts.py:146-151"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "DatasetsClient.list"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/datasets/list_datasets.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/datasets/list_datasets.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/datasets/list_datasets.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/datasets/list_datasets.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "DatasetsClient.list"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listDatasets"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/develops/{dataset_id}/get-dataset-table/",
+      "in": "query",
+      "accepted": [
+        "page_size",
+        "current_page_index",
+        "cursor"
+      ],
+      "bases": {
+        "current_page_index": 0
+      },
+      "documentation": "Pagination: page_size (page size); current_page_index (0-based); cursor (opaque continuation token).",
+      "evidence": [
+        "model_hub/views/develop_dataset.py:2555-2570",
+        "model_hub/serializers/contracts.py:1716-1764",
+        "model_hub/serializers/contracts.py:1720-1724",
+        "model_hub/serializers/contracts.py:1725-1727",
+        "model_hub/serializers/contracts.py:1737-1745"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "DatasetsClient.get_table"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/datasets/get_dataset_table.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/datasets/get_dataset_table.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/datasets/get_dataset_table.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/datasets/get_dataset_table.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "DatasetsClient.getTable"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "getDatasetTable"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/develops/{experiment_dataset_id}/get-experiment-dataset-table/",
+      "in": "query",
+      "accepted": [
+        "page_size",
+        "current_page_index"
+      ],
+      "bases": {
+        "current_page_index": 0
+      },
+      "documentation": "Pagination: page_size (page size); current_page_index (0-based).",
+      "evidence": [
+        "model_hub/views/develop_dataset.py:3924-3938",
+        "model_hub/serializers/contracts.py:1767-1780",
+        "model_hub/serializers/contracts.py:1770-1775",
+        "model_hub/serializers/contracts.py:1776-1780"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_develops_get_experiment_dataset_table_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_develops_get_experiment_dataset_table_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_develops_get_experiment_dataset_table_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_develops_get_experiment_dataset_table_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubDevelopsGetExperimentDatasetTableList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/eval-templates/{template_id}/usage/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "page_size"
+      ],
+      "bases": {
+        "page": 0
+      },
+      "documentation": "Pagination: page (0-based); page_size (page size).",
+      "evidence": [
+        "model_hub/views/separate_evals.py:5954-5964",
+        "model_hub/serializers/contracts.py:1981-2015",
+        "model_hub/serializers/contracts.py:1982-1984",
+        "model_hub/serializers/contracts.py:1985-1987"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "EvalsClient.template_usage"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_usage_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_usage_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_usage_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_usage_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "EvalsClient.templateUsage"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubEvalTemplatesUsageList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": [],
+      "wrapper_notes": {
+        "EvalsClient.template_usage": "This facade uses the default page; use the low-level operation to supply pagination parameters.",
+        "EvalsClient.templateUsage": "This facade uses the default page; use the low-level operation to supply pagination parameters."
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/model-hub/eval-templates/list/",
+      "in": "body",
+      "accepted": [
+        "page",
+        "page_size"
+      ],
+      "bases": {
+        "page": 0
+      },
+      "documentation": "Pagination: page (0-based); page_size (page size). Pass these in the request body.",
+      "evidence": [
+        "model_hub/views/separate_evals.py:2472-2479",
+        "model_hub/serializers/eval_list.py:79-92",
+        "model_hub/serializers/eval_list.py:80-80",
+        "model_hub/serializers/eval_list.py:81-81"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "EvalsClient.list_templates"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_list_create.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_list_create.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_list_create.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_list_create.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "EvalsClient.listTemplates"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubEvalTemplatesListCreate"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/experiments/v2/list/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "model_hub/views/experiments.py:2076-2108",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "ExperimentsClient.list"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/list_experiments.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/list_experiments.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/list_experiments.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/list_experiments.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "ExperimentsClient.list"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listExperiments"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/experiments/v2/{experiment_id}/rows/",
+      "in": "query",
+      "accepted": [
+        "page_size",
+        "current_page_index"
+      ],
+      "bases": {
+        "current_page_index": 0
+      },
+      "documentation": "Pagination: page_size (page size); current_page_index (0-based).",
+      "evidence": [
+        "model_hub/views/experiments.py:1072-1081",
+        "model_hub/serializers/contracts.py:1783-1794",
+        "model_hub/serializers/contracts.py:1770-1775",
+        "model_hub/serializers/contracts.py:1776-1780"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "ExperimentsClient.rows"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/list_experiment_rows.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/list_experiment_rows.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/list_experiment_rows.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/list_experiment_rows.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "ExperimentsClient.rows"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listExperimentRows"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/experiments/v2/{experiment_id}/rows/{row_id}/",
+      "in": "query",
+      "accepted": [
+        "page_size",
+        "current_page_index"
+      ],
+      "bases": {
+        "current_page_index": 0
+      },
+      "documentation": "Pagination: page_size (page size); current_page_index (0-based).",
+      "evidence": [
+        "model_hub/views/experiments.py:1072-1081",
+        "model_hub/serializers/contracts.py:1783-1794",
+        "model_hub/serializers/contracts.py:1770-1775",
+        "model_hub/serializers/contracts.py:1776-1780"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "ExperimentsClient.row"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/get_experiment_row.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/get_experiment_row.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/get_experiment_row.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/experiments/get_experiment_row.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "ExperimentsClient.row"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "getExperimentRow"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/prompt-history-executions/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "model_hub/views/prompt_template.py:4322-4326",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_history_executions_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_history_executions_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_history_executions_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_history_executions_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubPromptHistoryExecutionsList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/prompt-history-executions/execution-details/{execution_id}/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "model_hub/views/prompt_template.py:4387-4405"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_history_executions_get_execution_details.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_history_executions_get_execution_details.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_history_executions_get_execution_details.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_history_executions_get_execution_details.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubPromptHistoryExecutionsGetExecutionDetails"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/prompt-labels/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "model_hub/views/prompt_labels.py:67-71",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_list.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "AsyncPromptLabelsClient.list"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "PromptLabelsClient.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubPromptLabelsList"
+          },
+          {
+            "file": "typescript/futureagi/src/prompts/index.ts",
+            "symbol": "PromptLabelsClient.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/prompt-labels/get-by-name/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "model_hub/views/prompt_labels.py:183-195"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_get_by_name.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_get_by_name.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_get_by_name.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_get_by_name.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "AsyncPromptsClient.get_by_name"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "PromptsClient.get_by_name"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubPromptLabelsGetByName"
+          },
+          {
+            "file": "typescript/futureagi/src/prompts/index.ts",
+            "symbol": "PromptsClient.getByName"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/prompt-labels/template-labels/",
+      "in": "query",
+      "accepted": [],
+      "non_paging_query_parameters": [
+        {
+          "name": "template_id",
+          "schema": {
+            "type": "string"
+          },
+          "description": "Select a template by id. Supply either template_id or template_name."
+        },
+        {
+          "name": "template_name",
+          "schema": {
+            "type": "string"
+          },
+          "description": "Select a template by exact name. Supply either template_id or template_name."
+        }
+      ],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "model_hub/views/prompt_labels.py:382-425"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_template_labels.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_template_labels.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_template_labels.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_labels_template_labels.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "AsyncPromptLabelsClient.for_template"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "PromptLabelsClient.for_template"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubPromptLabelsTemplateLabels"
+          },
+          {
+            "file": "typescript/futureagi/src/prompts/index.ts",
+            "symbol": "PromptLabelsClient.forTemplate"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/prompt-templates/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "model_hub/views/prompt_template.py:644-648",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_list.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "AsyncPromptsClient.list"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "PromptsClient.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubPromptTemplatesList"
+          },
+          {
+            "file": "typescript/futureagi/src/prompts/index.ts",
+            "symbol": "PromptsClient.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/prompt-templates/get-template-by-name/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "model_hub/views/prompt_template.py:825-856"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_get_template_by_name.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_get_template_by_name.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_get_template_by_name.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_get_template_by_name.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubPromptTemplatesGetTemplateByName"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/prompt-templates/{id}/versions/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "limit"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page (1-based); limit (page size).",
+      "evidence": [
+        "model_hub/views/prompt_template.py:3245-3276",
+        "model_hub/serializers/prompt_requests.py:67-71",
+        "model_hub/serializers/prompt_requests.py:68-68",
+        "model_hub/serializers/prompt_requests.py:71-71"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_versions.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_versions.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_versions.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_prompt_templates_versions.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "AsyncPromptVersionsClient.list"
+          },
+          {
+            "file": "python/fi/prompts/__init__.py",
+            "symbol": "PromptVersionsClient.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubPromptTemplatesVersions"
+          },
+          {
+            "file": "typescript/futureagi/src/prompts/index.ts",
+            "symbol": "PromptVersionsClient.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/scores/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters. The strict list serializer does not admit page or limit; the server returns its default page.",
+      "evidence": [
+        "model_hub/views/scores.py:378-381",
+        "model_hub/serializers/scores.py:106-113"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_scores_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_scores_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_scores_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_scores_list.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/scores/__init__.py",
+            "symbol": "AsyncScoresClient.list"
+          },
+          {
+            "file": "python/fi/scores/__init__.py",
+            "symbol": "ScoresClient.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubScoresList"
+          },
+          {
+            "file": "typescript/futureagi/src/scores/index.ts",
+            "symbol": "ScoresClient.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/scores/for-source/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "model_hub/views/scores.py:768-773",
+        "model_hub/serializers/scores.py:116-128"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_scores_for_source.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_scores_for_source.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_scores_for_source.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_scores_for_source.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/scores/__init__.py",
+            "symbol": "AsyncScoresClient.for_source"
+          },
+          {
+            "file": "python/fi/scores/__init__.py",
+            "symbol": "ScoresClient.for_source"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubScoresForSource"
+          },
+          {
+            "file": "typescript/futureagi/src/scores/index.ts",
+            "symbol": "ScoresClient.forSource"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/feed/issues/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "offset"
+      ],
+      "bases": {
+        "offset": 0
+      },
+      "documentation": "Pagination: limit (page size); offset (0-based).",
+      "evidence": [
+        "tracer/views/feed/list_view.py:44-77",
+        "tracer/serializers/feed.py:34-54",
+        "tracer/serializers/feed.py:51-53",
+        "tracer/serializers/feed.py:54-54"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_error_feed_issues.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_error_feed_issues.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_error_feed_issues.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_error_feed_issues.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.issues"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.issues"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listErrorFeedIssues"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.issues"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/feed/issues/{cluster_id}/traces/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "offset"
+      ],
+      "bases": {
+        "offset": 0
+      },
+      "documentation": "Pagination: limit (page size); offset (0-based).",
+      "evidence": [
+        "tracer/views/feed/tab_views.py:102-120",
+        "tracer/serializers/feed.py:350-356",
+        "tracer/serializers/feed.py:353-355",
+        "tracer/serializers/feed.py:356-356"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_feed_issues_traces_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_feed_issues_traces_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_feed_issues_traces_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_feed_issues_traces_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerFeedIssuesTracesList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/project/list_projects/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size).",
+      "evidence": [
+        "tracer/views/project.py:630-642",
+        "tracer/serializers/project.py:131-158",
+        "tracer/serializers/project.py:152-152",
+        "tracer/serializers/project.py:153-158"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_projects.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_projects.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_projects.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_projects.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.projects"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.projects"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listTraceProjects"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.projects"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace-annotation/get_annotation_values/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/annotation.py:395-415"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_annotation_get_annotation_values.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_annotation_get_annotation_values.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_annotation_get_annotation_values.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_annotation_get_annotation_values.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceAnnotationGetAnnotationValues"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace-session/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "tracer/views/trace_session.py:840-860",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceSessionList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace-session/get_session_filter_values/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "page_size"
+      ],
+      "bases": {
+        "page": 0
+      },
+      "documentation": "Pagination: page (0-based); page_size (page size).",
+      "evidence": [
+        "tracer/views/trace_session.py:1380-1388",
+        "tracer/serializers/trace_session.py:43-68",
+        "tracer/serializers/trace_session.py:54-54",
+        "tracer/serializers/trace_session.py:55-57"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_get_session_filter_values.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_get_session_filter_values.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_get_session_filter_values.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_get_session_filter_values.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceSessionGetSessionFilterValues"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace-session/get_trace_session_export_data/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination).",
+      "evidence": [
+        "tracer/views/trace_session.py:3864-3878",
+        "tracer/serializers/trace_session.py:107-108",
+        "tracer/serializers/trace_session.py:79-84",
+        "tracer/serializers/trace_session.py:85-87",
+        "tracer/serializers/trace_session.py:88-90",
+        "tracer/serializers/trace_session.py:91-91"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_get_trace_session_export_data.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_get_trace_session_export_data.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_get_trace_session_export_data.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_get_trace_session_export_data.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceSessionGetTraceSessionExportData"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace-session/list_sessions/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination).",
+      "evidence": [
+        "tracer/views/trace_session.py:1850-1863",
+        "tracer/serializers/trace_session.py:71-104",
+        "tracer/serializers/trace_session.py:79-84",
+        "tracer/serializers/trace_session.py:85-87",
+        "tracer/serializers/trace_session.py:88-90",
+        "tracer/serializers/trace_session.py:91-91"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_sessions.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_sessions.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_sessions.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_sessions.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.sessions"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.sessions"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listTraceSessions"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.sessions"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace-session/{id}/query/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size).",
+      "evidence": [
+        "tracer/views/trace_session.py:1072-1081",
+        "tracer/serializers/trace_session.py:122-130",
+        "tracer/serializers/trace_session.py:127-127",
+        "tracer/serializers/trace_session.py:128-130"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_query.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_query.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_query.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_query.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceSessionQuery"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "tracer/views/trace.py:1974-1993",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/agent_graph/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/trace.py:7243-7255",
+        "tracer/serializers/trace.py:831-838"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_agent_graph.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_agent_graph.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_agent_graph.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_agent_graph.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceAgentGraph"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/get_trace_id_by_index/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/trace.py:3378-3390",
+        "tracer/serializers/trace.py:789-792"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_id_by_index.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_id_by_index.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_id_by_index.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_id_by_index.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceGetTraceIdByIndex"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/get_trace_id_by_index_observe/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/trace.py:4461-4473",
+        "tracer/serializers/trace.py:795-798"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_id_by_index_observe.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_id_by_index_observe.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_id_by_index_observe.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_id_by_index_observe.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceGetTraceIdByIndexObserve"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/get_trace_export_data/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/trace.py:4531-4543",
+        "tracer/serializers/trace.py:452-483"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_export_data.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_export_data.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_export_data.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_trace_export_data.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceGetTraceExportData"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/list_traces/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size).",
+      "evidence": [
+        "tracer/views/trace.py:2756-2768",
+        "tracer/serializers/trace.py:144-165",
+        "tracer/serializers/trace.py:149-154",
+        "tracer/serializers/trace.py:155-157"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_traces.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_traces.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_traces.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_traces.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.traces"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.traces"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listTraces"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.traces"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/list_traces_of_session/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination).",
+      "evidence": [
+        "tracer/views/trace.py:3674-3686",
+        "tracer/serializers/trace.py:168-257",
+        "tracer/serializers/trace.py:174-179",
+        "tracer/serializers/trace.py:180-182",
+        "tracer/serializers/trace.py:183-185",
+        "tracer/serializers/trace.py:186-186"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_of_session.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_of_session.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_of_session.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_of_session.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceListTracesOfSession"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/list_voice_calls/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "page_size",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page (1-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination).",
+      "evidence": [
+        "tracer/views/trace.py:3811-3823",
+        "tracer/serializers/trace.py:486-524",
+        "tracer/serializers/trace.py:487-497",
+        "tracer/serializers/trace.py:498-500",
+        "tracer/serializers/trace.py:502-504",
+        "tracer/serializers/trace.py:505-505"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_voice_calls.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_voice_calls.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_voice_calls.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_voice_calls.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.voice_calls"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.voice_calls"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listVoiceCalls"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.voiceCalls"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/get_eval_names/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/trace.py:2655-2670"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_eval_names.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_eval_names.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_eval_names.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_get_eval_names.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceGetEvalNames"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/user-alert-logs/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "tracer/views/monitor.py:888-894",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "AlertsClient.logs"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alert_logs.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alert_logs.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alert_logs.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alert_logs.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "AlertsClient.logs"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listAlertLogs"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/user-alert-logs/all/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/monitor.py:992-999"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "AlertsClient.all_logs"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_all_alert_logs.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_all_alert_logs.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_all_alert_logs.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_all_alert_logs.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "AlertsClient.allLogs"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listAllAlertLogs"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/user-alerts/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size).",
+      "evidence": [
+        "tracer/views/monitor.py:65-74",
+        "tracer/views/monitor.py:172-199"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "AlertsClient.list"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alerts.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alerts.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alerts.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alerts.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "AlertsClient.list"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listAlerts"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": [
+        "page_number",
+        "page_size"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/user-alerts/list_monitors/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size).",
+      "evidence": [
+        "tracer/views/monitor.py:455-464",
+        "tracer/serializers/monitor.py:27-39",
+        "tracer/serializers/monitor.py:28-30",
+        "tracer/serializers/monitor.py:31-31"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_user_alerts_list_monitors.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_user_alerts_list_monitors.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_user_alerts_list_monitors.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_user_alerts_list_monitors.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerUserAlertsListMonitors"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/user-alerts/metric-options/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/monitor.py:686-709"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "AlertsClient.metric_options"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alert_metric_options.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alert_metric_options.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alert_metric_options.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/list_alert_metric_options.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "AlertsClient.metricOptions"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listAlertMetricOptions"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/users/",
+      "in": "query",
+      "accepted": [
+        "page_size",
+        "current_page_index",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "current_page_index": 0
+      },
+      "documentation": "Pagination: page_size (page size); current_page_index (0-based); cursor (opaque continuation token); cursor_mode (enable cursor pagination).",
+      "evidence": [
+        "tracer/views/trace.py:7333-7344",
+        "tracer/serializers/trace.py:896-988",
+        "tracer/serializers/trace.py:899-899",
+        "tracer/serializers/trace.py:900-900",
+        "tracer/serializers/trace.py:904-906",
+        "tracer/serializers/trace.py:907-907"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_users.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_users.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_users.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_users.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.users"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.users"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listTraceUsers"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.users"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/observation-span/list_spans_observe/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination).",
+      "evidence": [
+        "tracer/views/observation_span.py:1928-1940",
+        "tracer/serializers/observation_span.py:338-366",
+        "tracer/serializers/observation_span.py:342-347",
+        "tracer/serializers/observation_span.py:348-350",
+        "tracer/serializers/observation_span.py:351-353",
+        "tracer/serializers/observation_span.py:354-354"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.spans"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.spans"
+          },
+          {
+            "file": "python/fi/tracing/__init__.py",
+            "symbol": "AsyncTracingClient.spans_by_trace"
+          },
+          {
+            "file": "python/fi/tracing/__init__.py",
+            "symbol": "TracingClient.spans_by_trace"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.spans"
+          },
+          {
+            "file": "typescript/futureagi/src/tracing/index.ts",
+            "symbol": "TracingClient.spansByTrace"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/datasets/{dataset_id}/versions/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "offset"
+      ],
+      "bases": {
+        "offset": 0
+      },
+      "documentation": "Pagination: limit (page size); offset (0-based).",
+      "evidence": [
+        "model_hub/views/dataset_versions.py:117-128",
+        "model_hub/serializers/dataset_versions.py:86-88",
+        "model_hub/serializers/dataset_versions.py:87-87",
+        "model_hub/serializers/dataset_versions.py:88-88"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "DatasetVersionsClient.list"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/dataset_versions/list_dataset_versions.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/dataset_versions/list_dataset_versions.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/dataset_versions/list_dataset_versions.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/dataset_versions/list_dataset_versions.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "DatasetVersionsClient.list"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listDatasetVersions"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/datasets/{dataset_id}/versions/{version_id}/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "offset"
+      ],
+      "bases": {
+        "offset": 0
+      },
+      "documentation": "Pagination: limit (page size); offset (0-based).",
+      "evidence": [
+        "model_hub/views/dataset_versions.py:117-128",
+        "model_hub/serializers/dataset_versions.py:86-88",
+        "model_hub/serializers/dataset_versions.py:87-87",
+        "model_hub/serializers/dataset_versions.py:88-88"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "DatasetVersionsClient.get"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/dataset_versions/get_dataset_version.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/dataset_versions/get_dataset_version.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/dataset_versions/get_dataset_version.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/dataset_versions/get_dataset_version.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "DatasetVersionsClient.get"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "getDatasetVersion"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/dataset-optimization/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "limit"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page (1-based); limit (page size).",
+      "evidence": [
+        "model_hub/views/dataset_optimization.py:187-192",
+        "model_hub/serializers/catalog_queries.py:31-38",
+        "model_hub/serializers/catalog_queries.py:35-35",
+        "model_hub/serializers/catalog_queries.py:38-38"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/platform/catalog/optimizations.py",
+            "symbol": "AsyncOptimizations.list"
+          },
+          {
+            "file": "python/fi/generated/platform/catalog/optimizations.py",
+            "symbol": "Optimizations.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/catalog/optimizations.ts",
+            "symbol": "Optimizations.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/dashboard/{dashboard_pk}/widgets/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "tracer/views/dashboard.py:5971-5985",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/platform/catalog/dashboards.py",
+            "symbol": "AsyncDashboardsWidgets.list"
+          },
+          {
+            "file": "python/fi/generated/platform/catalog/dashboards.py",
+            "symbol": "DashboardsWidgets.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/catalog/dashboards.ts",
+            "symbol": "DashboardsWidgets.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/dashboard/metrics/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "page_size",
+        "cursor_mode",
+        "cursor"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page (1-based); page_size (page size); cursor_mode (enable cursor pagination); cursor (opaque continuation token).",
+      "evidence": [
+        "tracer/views/dashboard.py:2569-2582",
+        "tracer/serializers/dashboard.py:922-1044",
+        "tracer/serializers/dashboard.py:961-961",
+        "tracer/serializers/dashboard.py:962-966",
+        "tracer/serializers/dashboard.py:967-967",
+        "tracer/serializers/dashboard.py:968-972"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/platform/catalog/dashboards.py",
+            "symbol": "AsyncDashboardsMetrics.list"
+          },
+          {
+            "file": "python/fi/generated/platform/catalog/dashboards.py",
+            "symbol": "DashboardsMetrics.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/catalog/dashboards.ts",
+            "symbol": "DashboardsMetrics.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/dashboard/filter_values/",
+      "in": "query",
+      "accepted": [
+        "page_size",
+        "cursor"
+      ],
+      "bases": {},
+      "documentation": "Pagination: page_size (page size); cursor (opaque continuation token).",
+      "evidence": [
+        "tracer/views/dashboard.py:3072-3085",
+        "tracer/serializers/dashboard.py:1047-1216",
+        "tracer/serializers/dashboard.py:1099-1103",
+        "tracer/serializers/dashboard.py:1104-1108"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/platform/catalog/dashboards.py",
+            "symbol": "AsyncDashboards.filter_values"
+          },
+          {
+            "file": "python/fi/generated/platform/catalog/dashboards.py",
+            "symbol": "Dashboards.filter_values"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/catalog/dashboards.ts",
+            "symbol": "Dashboards.filterValues"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/api/models_list/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: limit (page size); page (1-based).",
+      "evidence": [
+        "model_hub/views/run_prompt.py:2618-2619",
+        "tfc/utils/pagination.py:4-6",
+        "tfc/settings/settings.py:644-645"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_api_models_list_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_api_models_list_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_api_models_list_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_api_models_list_list.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/catalog/models.py",
+            "symbol": "AsyncModels.list"
+          },
+          {
+            "file": "python/fi/generated/platform/catalog/models.py",
+            "symbol": "Models.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/catalog/models.ts",
+            "symbol": "Models.list"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubApiModelsListList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": [
+        "limit",
+        "page"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/integrations/connections/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size).",
+      "evidence": [
+        "integrations/views/integration_connection.py:190-207",
+        "integrations/serializers/contracts.py:24-31",
+        "integrations/serializers/contracts.py:25-25",
+        "integrations/serializers/contracts.py:26-31"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/integrations/__init__.py",
+            "symbol": "AsyncIntegrations.list"
+          },
+          {
+            "file": "python/fi/integrations/__init__.py",
+            "symbol": "Integrations.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/integrations/index.ts",
+            "symbol": "Integrations.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/integrations/sync-logs/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size).",
+      "evidence": [
+        "integrations/views/sync_log.py:70-87",
+        "integrations/serializers/contracts.py:34-35",
+        "integrations/serializers/contracts.py:25-25",
+        "integrations/serializers/contracts.py:26-31"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/integrations/__init__.py",
+            "symbol": "AsyncSyncLogs.list"
+          },
+          {
+            "file": "python/fi/integrations/__init__.py",
+            "symbol": "SyncLogs.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/integrations/index.ts",
+            "symbol": "SyncLogs.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/integrations/connections/{connection_id}/slack/channels/",
+      "in": "query",
+      "accepted": [
+        "cursor"
+      ],
+      "bases": {},
+      "documentation": "Pagination: cursor (opaque continuation token).",
+      "evidence": [
+        "integrations/views/slack.py:202-210",
+        "integrations/views/slack.py:50-51",
+        "integrations/views/slack.py:51-51"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/integrations/__init__.py",
+            "symbol": "AsyncIntegrations.slack_channels"
+          },
+          {
+            "file": "python/fi/integrations/__init__.py",
+            "symbol": "Integrations.slack_channels"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/integrations/index.ts",
+            "symbol": "Integrations.slackChannels"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/agentcc/api-keys/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {},
+      "documentation": "Pagination: none. limit and page are accepted but ignored; the server does not paginate this response.",
+      "evidence": [
+        "agentcc/views/api_key.py:105-110"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/platform/fa_management/gateway.py",
+            "symbol": "AsyncGatewayKeys.list"
+          },
+          {
+            "file": "python/fi/generated/platform/fa_management/gateway.py",
+            "symbol": "GatewayKeys.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/fa-management/gateway.ts",
+            "symbol": "GatewayKeys.list"
+          }
+        ]
+      },
+      "pagination_effective": false,
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/agentcc/org-configs/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {},
+      "documentation": "Pagination: none. limit and page are accepted but ignored; the server does not paginate this response.",
+      "evidence": [
+        "agentcc/views/org_config.py:67-72"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/platform/fa_management/gateway.py",
+            "symbol": "AsyncGatewayConfigVersions.list"
+          },
+          {
+            "file": "python/fi/generated/platform/fa_management/gateway.py",
+            "symbol": "GatewayConfigVersions.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/fa-management/gateway.ts",
+            "symbol": "GatewayConfigVersions.list"
+          }
+        ]
+      },
+      "pagination_effective": false,
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/agentcc/org-configs/active/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {},
+      "documentation": "Pagination: none. limit and page are accepted but ignored; the server does not paginate this response.",
+      "evidence": [
+        "agentcc/views/org_config.py:314-329"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/platform/fa_management/gateway.py",
+            "symbol": "AsyncGatewayConfig.get_active"
+          },
+          {
+            "file": "python/fi/generated/platform/fa_management/gateway.py",
+            "symbol": "GatewayConfig.get_active"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/fa-management/gateway.ts",
+            "symbol": "GatewayConfig.getActive"
+          }
+        ]
+      },
+      "pagination_effective": false,
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/agentcc/provider-credentials/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "page"
+      ],
+      "bases": {},
+      "documentation": "Pagination: none. limit and page are accepted but ignored; the server does not paginate this response.",
+      "evidence": [
+        "agentcc/views/provider_credential.py:114-119"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/platform/fa_management/gateway.py",
+            "symbol": "AsyncGatewayProviderCredentials.list"
+          },
+          {
+            "file": "python/fi/generated/platform/fa_management/gateway.py",
+            "symbol": "GatewayProviderCredentials.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/fa-management/gateway.ts",
+            "symbol": "GatewayProviderCredentials.list"
+          }
+        ]
+      },
+      "pagination_effective": false,
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "POST",
+      "path": "/tracer/trace-session/list_sessions/",
+      "in": "body",
+      "accepted": [
+        "page_number",
+        "page_size",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination). Pass these in the request body.",
+      "evidence": [
+        "tracer/views/trace_session.py:1850-1863",
+        "tracer/serializers/trace_session.py:71-104",
+        "tracer/serializers/trace_session.py:79-84",
+        "tracer/serializers/trace_session.py:85-87",
+        "tracer/serializers/trace_session.py:88-90",
+        "tracer/serializers/trace_session.py:91-91"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_list_sessions_create.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_list_sessions_create.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_list_sessions_create.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_list_sessions_create.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceSessionListSessionsCreate"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "POST",
+      "path": "/tracer/trace-session/{id}/query/",
+      "in": "body",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size). Pass these in the request body.",
+      "evidence": [
+        "tracer/views/trace_session.py:1072-1081",
+        "tracer/serializers/trace_session.py:122-130",
+        "tracer/serializers/trace_session.py:127-127",
+        "tracer/serializers/trace_session.py:128-130"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_query_create.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_query_create.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_query_create.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_query_create.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceSessionQueryCreate"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "POST",
+      "path": "/tracer/trace/list_traces/",
+      "in": "body",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size). Pass these in the request body.",
+      "evidence": [
+        "tracer/views/trace.py:2756-2768",
+        "tracer/serializers/trace.py:144-165",
+        "tracer/serializers/trace.py:149-154",
+        "tracer/serializers/trace.py:155-157"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_create.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_create.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_create.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_create.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceListTracesCreate"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "POST",
+      "path": "/tracer/trace/list_traces_of_session/",
+      "in": "body",
+      "accepted": [
+        "page_number",
+        "page_size",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination). Pass these in the request body.",
+      "evidence": [
+        "tracer/views/trace.py:3674-3686",
+        "tracer/serializers/trace.py:168-257",
+        "tracer/serializers/trace.py:174-179",
+        "tracer/serializers/trace.py:180-182",
+        "tracer/serializers/trace.py:183-185",
+        "tracer/serializers/trace.py:186-186"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_of_session_create.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_of_session_create.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_of_session_create.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_traces_of_session_create.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceListTracesOfSessionCreate"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "POST",
+      "path": "/tracer/trace/list_voice_calls/",
+      "in": "body",
+      "accepted": [
+        "page",
+        "page_size",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "page": 1
+      },
+      "documentation": "Pagination: page (1-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination). Pass these in the request body.",
+      "evidence": [
+        "tracer/views/trace.py:3811-3823",
+        "tracer/serializers/trace.py:486-524",
+        "tracer/serializers/trace.py:487-497",
+        "tracer/serializers/trace.py:498-500",
+        "tracer/serializers/trace.py:502-504",
+        "tracer/serializers/trace.py:505-505"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_voice_calls_create.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_voice_calls_create.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_voice_calls_create.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_list_voice_calls_create.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceListVoiceCallsCreate"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "POST",
+      "path": "/tracer/users/",
+      "in": "body",
+      "accepted": [
+        "page_size",
+        "current_page_index",
+        "cursor",
+        "cursor_mode"
+      ],
+      "bases": {
+        "current_page_index": 0
+      },
+      "documentation": "Pagination: page_size (page size); current_page_index (0-based); cursor (opaque continuation token); cursor_mode (enable cursor pagination). Pass these in the request body.",
+      "evidence": [
+        "tracer/views/trace.py:7333-7344",
+        "tracer/serializers/trace.py:896-988",
+        "tracer/serializers/trace.py:899-899",
+        "tracer/serializers/trace.py:900-900",
+        "tracer/serializers/trace.py:904-906",
+        "tracer/serializers/trace.py:907-907"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_users_create.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_users_create.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_users_create.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_users_create.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerUsersCreate"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "POST",
+      "path": "/model-hub/knowledge-base/files/",
+      "in": "body",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size). Pass these in the request body.",
+      "evidence": [
+        "model_hub/views/develop_dataset.py:16784-16824",
+        "model_hub/serializers/contracts.py:764-783",
+        "model_hub/serializers/contracts.py:772-772",
+        "model_hub/serializers/contracts.py:773-773"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_knowledge_base_files_create.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_knowledge_base_files_create.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_knowledge_base_files_create.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_knowledge_base_files_create.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/knowledge_bases/__init__.py",
+            "symbol": "AsyncKnowledgeBaseDocumentsClient.list"
+          },
+          {
+            "file": "python/fi/knowledge_bases/__init__.py",
+            "symbol": "KnowledgeBaseDocumentsClient.list"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubKnowledgeBaseFilesCreate"
+          },
+          {
+            "file": "typescript/futureagi/src/knowledge-bases/index.ts",
+            "symbol": "KnowledgeBaseDocumentsClient.list"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/experiment-runs/{run_id}/items/",
+      "in": "query",
+      "accepted": [
+        "limit",
+        "offset"
+      ],
+      "bases": {
+        "offset": 0
+      },
+      "documentation": "Pagination: limit (page size); offset (0-based).",
+      "evidence": [
+        "model_hub/views/experiment_run_api.py:272-311",
+        "model_hub/serializers/experiment_run_api.py:280-319",
+        "model_hub/serializers/experiment_run_api.py:288-288",
+        "model_hub/serializers/experiment_run_api.py:289-289"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "ExperimentRunsClient.list_items"
+          }
+        ],
+        "typescript": []
+      },
+      "not_offered": {
+        "typescript": "typescript/futureagi/src/futureagi-client.ts:972-997 (ExperimentRunsClient has no listItems method)"
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/knowledge-base/get/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size).",
+      "evidence": [
+        "model_hub/views/develop_dataset.py:16566-16599",
+        "model_hub/serializers/contracts.py:857-861",
+        "model_hub/serializers/contracts.py:860-860",
+        "model_hub/serializers/contracts.py:861-861"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_knowledge_base_get_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_knowledge_base_get_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_knowledge_base_get_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_knowledge_base_get_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubKnowledgeBaseGetList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": [
+        "page_number",
+        "page_size"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace-session/{id}/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size).",
+      "evidence": [
+        "tracer/views/trace_session.py:1085-1100",
+        "tracer/serializers/trace_session.py:122-130",
+        "tracer/serializers/trace_session.py:127-127",
+        "tracer/serializers/trace_session.py:128-130"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/get_trace_session.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/get_trace_session.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/get_trace_session.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/get_trace_session.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.get_session"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.get_session"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "getTraceSession"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.getSession"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": [
+        "page_number",
+        "page_size"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/get_properties/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/trace.py:2623-2642"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_properties.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_properties.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_properties.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/list_trace_properties.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.properties"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.properties"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "listTraceProperties"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.properties"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace/voice_call_detail/",
+      "in": "query",
+      "accepted": [],
+      "bases": {},
+      "documentation": "Pagination: no supported paging parameters.",
+      "evidence": [
+        "tracer/views/trace.py:3960-3973"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/get_voice_call_detail.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/get_voice_call_detail.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/get_voice_call_detail.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracing/get_voice_call_detail.py",
+            "symbol": "sync_detailed"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "AsyncTracingQueries.voice_call_detail"
+          },
+          {
+            "file": "python/fi/generated/platform/tracing.py",
+            "symbol": "TracingQueries.voice_call_detail"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "getVoiceCallDetail"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/tracing.ts",
+            "symbol": "TracingQueries.voiceCallDetail"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": []
+    },
+    {
+      "method": "GET",
+      "path": "/model-hub/eval-templates/{template_id}/feedback-list/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "page_size"
+      ],
+      "bases": {
+        "page": 0
+      },
+      "documentation": "Pagination: page (0-based); page_size (page size).",
+      "evidence": [
+        "model_hub/views/separate_evals.py:6590-6605",
+        "model_hub/views/separate_evals.py:6623-6647"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_feedback_list_list.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_feedback_list_list.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_feedback_list_list.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/model_hub/model_hub_eval_templates_feedback_list_list.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "modelHubEvalTemplatesFeedbackListList"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": [
+        "page",
+        "page_size"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/trace-session/{id}/eval_logs/",
+      "in": "query",
+      "accepted": [
+        "page",
+        "page_size"
+      ],
+      "bases": {
+        "page": 0
+      },
+      "documentation": "Pagination: page (0-based); page_size (page size).",
+      "evidence": [
+        "tracer/views/trace_session.py:3908-3924",
+        "tracer/views/trace_session.py:3945-3948",
+        "tracer/serializers/eval_task.py:38-53",
+        "tracer/serializers/eval_task.py:252-255"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_eval_logs.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_eval_logs.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_eval_logs.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/tracer/tracer_trace_session_eval_logs.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "tracerTraceSessionEvalLogs"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": [
+        "page",
+        "page_size"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/tracer/user-alerts/{id}/details/",
+      "in": "query",
+      "accepted": [
+        "page_number",
+        "page_size"
+      ],
+      "bases": {
+        "page_number": 0
+      },
+      "documentation": "Pagination: page_number (0-based); page_size (page size). These parameters page the nested logs list.",
+      "evidence": [
+        "tracer/views/monitor.py:65-74",
+        "tracer/views/monitor.py:204-219",
+        "tracer/views/monitor.py:254-270"
+      ],
+      "methods": {
+        "python": [
+          {
+            "file": "python/fi/futureagi_client.py",
+            "symbol": "AlertsClient.details"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/get_alert_details.py",
+            "symbol": "asyncio"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/get_alert_details.py",
+            "symbol": "asyncio_detailed"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/get_alert_details.py",
+            "symbol": "sync"
+          },
+          {
+            "file": "python/fi/generated/openapi_client/api/alerts/get_alert_details.py",
+            "symbol": "sync_detailed"
+          }
+        ],
+        "typescript": [
+          {
+            "file": "typescript/futureagi/src/futureagi-client.ts",
+            "symbol": "AlertsClient.details"
+          },
+          {
+            "file": "typescript/futureagi/src/generated/openapi/sdk.gen.ts",
+            "symbol": "getAlertDetails"
+          }
+        ]
+      },
+      "upstream_missing_query_parameters": [
+        "page_number",
+        "page_size"
+      ]
+    }
+  ],
+  "sdk_base": "611cc076d74e4c69d643f6c4efea765a039b92ad"
+}

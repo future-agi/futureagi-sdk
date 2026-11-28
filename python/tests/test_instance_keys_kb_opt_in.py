@@ -5,13 +5,14 @@ created first. Client B is a second ``KnowledgeBase``, created afterwards with B
 
 * in the opt-in cases, A has ``allow_insecure_http=True`` and talks to ``http://api.futureagi.com:<port>``,
   a name the ``net`` lookup shim of ``test_plain_http_key_guards`` resolves to A's listener on 127.0.0.1;
+  this Future AGI host refuses the request. With the environment opt-in, a custom host accepts requests;
   B has no opt-in (the default base or an https base) and sends nothing;
 * in the failed-constructor cases, B is given only one of its two keys and raises ``MissingAuthError``.
 
-Then A uploads a file through ``create_kb`` and through ``update_kb``. Every case counts, at each listener
+Then A attempts to upload a file through ``create_kb`` and through ``update_kb``. Every case counts, at each listener
 (A's site, and the ``net`` target and proxy listeners, with the proxy variables pointing at the ``net``
 proxy), the connections and the bytes holding each tenant's markers, and every assertion message prints
-those counts. A's site holds A's markers and none of B's; the ``net`` listeners hold none of either.
+those counts. When permitted, A's site holds A's markers and none of B's. The other listeners receive neither tenant's markers.
 """
 
 from __future__ import annotations
@@ -25,6 +26,8 @@ from typing import Dict, Iterator, Optional, Tuple
 import pytest
 
 from fi.api.auth import APIKeyAuth
+from fi.errors import InsecureHttpRefusedError
+from fi.kb.types import KnowledgeBaseConfig
 from fi.kb.client import KnowledgeBase
 from fi.utils.errors import MissingAuthError
 from tests.test_keyed_request_paths import Site
@@ -147,6 +150,20 @@ def _uploads_from_a(s: _Scene, kb_a: KnowledgeBase, path: str) -> None:
     assert [path for _, path in requests_a] == [KB_PATH, KB_PATH] and requests_a[0][0] == "POST", requests_a
 
 
+def _uploads_from_a_are_refused(s: _Scene, kb_a: KnowledgeBase, path: str) -> None:
+    def update():
+        kb_a.kb = KnowledgeBaseConfig(id=KB_ID, name="docs")
+        return kb_a.update_kb(kb_name="docs", file_paths=[path])
+
+    for call in (lambda: kb_a.create_kb(name="docs", file_paths=[path]), update):
+        error = _attempt(call)
+        counts = s.counts()
+        message = f"{s.report(counts)}; error: {error!r}"
+        assert all(tuple(count.values()) == (0, 0, 0) for count in counts.values()), message
+        assert type(error) is InsecureHttpRefusedError, message
+        assert error.code == error.get_error_code() == "INSECURE_HTTP_REFUSED", message
+
+
 # ---------------------------------------------------------------------------------------------
 # A has the plain-http opt-in; B, built afterwards, has none
 # ---------------------------------------------------------------------------------------------
@@ -167,19 +184,25 @@ def _kb_b_without_opt_in(s: _Scene, monkeypatch, b_base: str, b_keys: str) -> Kn
 
 @pytest.mark.parametrize("b_keys", ["arguments", "environment"], ids=["b-keys-as-arguments", "b-keys-from-environment"])
 @pytest.mark.parametrize("b_base", ["default", "https"], ids=["b-default-base", "b-https-base"])
-def test_kb_uploads_from_opted_in_a_send_a_keys_when_kb_client_b_without_opt_in_exists(net, monkeypatch, tmp_path, b_base, b_keys):
+@pytest.mark.parametrize("host", [SHIM_HOST, "plain.example.test"], ids=["future-agi-host", "custom-host"])
+def test_kb_uploads_from_opted_in_a_when_kb_client_b_without_opt_in_exists(net, monkeypatch, tmp_path, b_base, b_keys, host):
     with _scene(net, monkeypatch) as s:
         site_a = s.listeners["site-a"]
         kb_a = KnowledgeBase(
             fi_api_key=s.a.key,
             fi_secret_key=s.a.secret,
-            fi_base_url=f"http://{SHIM_HOST}:{site_a.port}",
+            fi_base_url=f"http://{host}:{site_a.port}",
             allow_insecure_http=True,
         )
         kb_b = _kb_b_without_opt_in(s, monkeypatch, b_base, b_keys)
         assert kb_b is not kb_a
 
-        _uploads_from_a(s, kb_a, _notes(tmp_path, "A"))
+        path = _notes(tmp_path, "A")
+        if host == SHIM_HOST:
+            _uploads_from_a_are_refused(s, kb_a, path)
+        else:
+            monkeypatch.setenv("FI_ALLOW_INSECURE_HTTP", "1")
+            _uploads_from_a(s, kb_a, path)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -204,7 +227,7 @@ def _kb_a(s: _Scene, a_base: str) -> KnowledgeBase:
 
 @A_BASES
 @pytest.mark.parametrize("given", ["api-key-only", "secret-key-only"], ids=["b-api-key-only", "b-secret-key-only"])
-def test_kb_uploads_from_a_send_a_keys_when_kb_client_b_with_one_key_raises(net, monkeypatch, tmp_path, a_base, given):
+def test_kb_uploads_from_a_when_kb_client_b_with_one_key_raises(net, monkeypatch, tmp_path, a_base, given):
     with _scene(net, monkeypatch) as s:
         kb_a = _kb_a(s, a_base)
 
@@ -218,4 +241,8 @@ def test_kb_uploads_from_a_send_a_keys_when_kb_client_b_with_one_key_raises(net,
             assert (raised.value.missing_api_key, raised.value.missing_secret_key) == (True, False)
         assert s.b.key not in str(raised.value) and s.b.secret not in str(raised.value)
 
-        _uploads_from_a(s, kb_a, _notes(tmp_path, "A"))
+        path = _notes(tmp_path, "A")
+        if a_base == "opt-in":
+            _uploads_from_a_are_refused(s, kb_a, path)
+        else:
+            _uploads_from_a(s, kb_a, path)

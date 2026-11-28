@@ -1,0 +1,231 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "sandboxes",
+  "about": "Snapshots: create, list, restore (files only).",
+  "cases": [
+    {
+      "id": "sandboxes.snapshots.list.ok",
+      "title": "List a sandbox's snapshots",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "snapshots.list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}/snapshots"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "snapshots": "array"
+        }
+      }
+    },
+    {
+      "id": "sandboxes.snapshots.create.ok",
+      "title": "Snapshot a sandbox's files",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "snapshots.create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/snapshots"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {}
+      },
+      "expect": {
+        "status": 201,
+        "contract": true,
+        "fields": {
+          "snapshot.id": "string"
+        }
+      }
+    },
+    {
+      "id": "sandboxes.snapshots.restore.ok",
+      "title": "Restore a snapshot into a new sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "snapshots.restore"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/snapshots/{id}/restore"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating",
+        "slow"
+      ],
+      "needs": [
+        "sandbox",
+        "snapshot"
+      ],
+      "call": {
+        "params": [
+          "${res.sandbox}",
+          "${res.snapshot}"
+        ],
+        "body": {
+          "name": "conf-restored-${run.short}"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "contract": true,
+        "fields": {
+          "sandbox.id": "string"
+        }
+      },
+      "capture": {
+        "sbx": "sandbox.id"
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/sandboxes/{sandbox}"
+          },
+          "params": {
+            "sandbox": "${cap.sbx}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sandboxes.snapshots.create.cross-tenant",
+      "title": "Org B cannot snapshot org A's sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "snapshots.create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/snapshots"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {}
+      },
+      "repeat": 3,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.snapshots.restore.cross-tenant",
+      "title": "Org B cannot restore org A's snapshot",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "snapshots.restore"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/snapshots/{id}/restore"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox",
+        "snapshot"
+      ],
+      "call": {
+        "params": [
+          "${res.sandbox}",
+          "${res.snapshot}"
+        ],
+        "body": {}
+      },
+      "repeat": 3,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    }
+  ]
+}

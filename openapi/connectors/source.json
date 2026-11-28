@@ -1,0 +1,14 @@
+{
+  "ee": {
+    "source_label": "enterprise customer contract",
+    "source_digest": "sha256:22dd9c640668b15a7c1687d57b7a1f9c4f722177cd168f1c4cf7a3de825a92a1",
+    "slice": "openapi/connectors/ee.json",
+    "slice_sha256": "ca2caa72b1c4af051278660628d7b945269a1b93ee93eacf852867091b4db76d"
+  },
+  "fa": {
+    "source_label": "customer connector contract",
+    "source_digest": "sha256:ffe769065665b10dc7ce8301045adb8c6fe913be9fc1eb437543c92bc2bec9eb",
+    "slice": "openapi/connectors/fa.json",
+    "slice_sha256": "096d3b59667e8cdc3ff7dce038f12fd16b65a898c0c72085857a903317b0cc48"
+  }
+}
