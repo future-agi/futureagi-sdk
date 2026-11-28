@@ -9,6 +9,8 @@ import { Agents } from "./agents";
 import { Alerts } from "./alerts";
 import { AnnotationQueues } from "./annotation_queues";
 import { Annotations } from "./annotations";
+import { ContextCredentials } from "./context_credentials";
+import { Contexts } from "./contexts";
 import { Dashboards } from "./dashboards";
 import { Datasets } from "./datasets";
 import { ErrorClusters } from "./error_clusters";
@@ -25,6 +27,8 @@ import { ProviderKeys } from "./provider_keys";
 import { Scores } from "./scores";
 import { Sessions } from "./sessions";
 import { Simulation } from "./simulation";
+import { SkillConsumption } from "./skill_consumption";
+import { Skills } from "./skills";
 import { Spans } from "./spans";
 import { Sql } from "./sql";
 import { Traces } from "./traces";
@@ -40,6 +44,8 @@ export interface Resources {
   alerts: Alerts;
   annotationQueues: AnnotationQueues;
   annotations: Annotations;
+  contextCredentials: ContextCredentials;
+  contexts: Contexts;
   dashboards: Dashboards;
   datasets: Datasets;
   errorClusters: ErrorClusters;
@@ -56,6 +62,8 @@ export interface Resources {
   scores: Scores;
   sessions: Sessions;
   simulation: Simulation;
+  skillConsumption: SkillConsumption;
+  skills: Skills;
   spans: Spans;
   sql: Sql;
   traces: Traces;
@@ -71,6 +79,8 @@ export const DEFAULT_RESOURCES: ResourceClasses = {
   alerts: Alerts,
   annotationQueues: AnnotationQueues,
   annotations: Annotations,
+  contextCredentials: ContextCredentials,
+  contexts: Contexts,
   dashboards: Dashboards,
   datasets: Datasets,
   errorClusters: ErrorClusters,
@@ -87,6 +97,8 @@ export const DEFAULT_RESOURCES: ResourceClasses = {
   scores: Scores,
   sessions: Sessions,
   simulation: Simulation,
+  skillConsumption: SkillConsumption,
+  skills: Skills,
   spans: Spans,
   sql: Sql,
   traces: Traces,
@@ -109,6 +121,8 @@ export {
   Alerts,
   AnnotationQueues,
   Annotations,
+  ContextCredentials,
+  Contexts,
   Dashboards,
   Datasets,
   ErrorClusters,
@@ -125,6 +139,8 @@ export {
   Scores,
   Sessions,
   Simulation,
+  SkillConsumption,
+  Skills,
   Spans,
   Sql,
   Traces,

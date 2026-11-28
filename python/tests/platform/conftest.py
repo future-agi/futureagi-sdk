@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import pytest
@@ -36,6 +37,21 @@ def client():
     # strict: a response that does not match the contract fails the test instead of warning
     with Client(strict_responses=True) as client:
         yield client
+
+
+# --------------------------------------------------------------------------- #
+# Skills routes: a product release from before Skills serves none of them.
+# --------------------------------------------------------------------------- #
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # the shared helper, under any import mode
+from _skills_routes import SKILLS_PROBE, skills_served  # noqa: E402
+
+
+@pytest.fixture
+def requires_skills(client):
+    if not skills_served(client):
+        pytest.skip(f"SKILLS NOT SERVED: GET {SKILLS_PROBE} answered Django's 404 page; this product "
+                    "release has no Skills routes, so the Skills operations are not exercised")
 
 
 # --------------------------------------------------------------------------- #

@@ -1,0 +1,277 @@
+"""Optional OTel bridge. Importing this module never imports OpenTelemetry."""
+from __future__ import annotations
+
+import logging
+import os
+import sys
+from collections.abc import Mapping
+from contextvars import ContextVar
+from dataclasses import dataclass
+from types import MappingProxyType
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ._registry import State
+
+CARRIER_KEY = "futureagi.runtime.span_attributes.v1"
+_scope = ContextVar("futureagi.skills.scope", default=None)
+_suppressed = ContextVar("futureagi.skills.suppressed", default=False)
+_configured_mode = None
+_configured_provider = None
+_debug_logged = False
+
+
+def debug_failure():
+    global _debug_logged
+    if not _debug_logged:
+        _debug_logged = True
+        # Exception messages may contain credentials or file content.
+        try:
+            logging.getLogger("futureagi.telemetry").debug("futureagi: telemetry bridge unavailable")
+        except Exception:
+            pass
+
+
+def mode():
+    value = _configured_mode or os.environ.get("FI_SKILLS_TRACING", "on")
+    return value if value in ("on", "load_only", "off") else "on"
+
+
+def configure(*, skills_tracing=None, tracer_provider=None):
+    global _configured_mode, _configured_provider
+    if skills_tracing is not None and skills_tracing not in ("on", "load_only", "off"):
+        raise ValueError("skills_tracing must be on, load_only or off")
+    _configured_mode = skills_tracing
+    _configured_provider = tracer_provider
+    if mode() == "on" and sys.modules.get("opentelemetry.trace") is not None:
+        try:
+            provider, _ = select_provider()
+            install(provider)
+        except Exception:
+            debug_failure()
+
+
+def select_provider():
+    trace = sys.modules.get("opentelemetry.trace")
+    if trace is None:
+        return None, "none"
+    otel = sys.modules.get("fi_instrumentation.otel")
+    # Optional lifecycle contract: OTel retains the first global even after
+    # shutdown. Older backends and unrelated host providers keep their fallback.
+    closed = getattr(otel, "is_tracer_provider_shutdown", None)
+    if _configured_provider is not None and not (closed and closed(_configured_provider)):
+        return _configured_provider, "configured"
+    if otel is not None:
+        get_providers = getattr(otel, "get_registered_tracer_providers", None)
+        providers = tuple(get_providers()) if get_providers else ()
+        if providers:
+            return providers[-1], "traceai"
+    provider = trace.get_tracer_provider()
+    if type(provider).__name__ in ("ProxyTracerProvider", "NoOpTracerProvider") or (closed and closed(provider)):
+        return None, "none"
+    return provider, "global"
+
+
+def install(provider):
+    if provider is None or mode() != "on":
+        return
+    from .processor import INSTALL_LOCK, FutureAGISkillsSpanProcessor
+    with INSTALL_LOCK:
+        if getattr(provider, "_futureagi_skills_processor", False):
+            return
+        add = getattr(provider, "add_span_processor", None)
+        if add is not None:
+            add(FutureAGISkillsSpanProcessor())
+            provider._futureagi_skills_processor = True
+
+
+def allowlisted(attrs):
+    result = {}
+    for key, value in attrs.items():
+        if not isinstance(key, str) or not key.startswith(("fi.skills.", "fi.context.", "gen_ai.agent.")):
+            continue
+        if isinstance(value, str):
+            # Every Unicode code point occupies at most four UTF-8 bytes. Most
+            # identifiers fit without encoding, slicing, and decoding again.
+            if len(value) > 64:
+                value = value.encode("utf-8")[:256].decode("utf-8", errors="ignore")
+        elif isinstance(value, (tuple, list)):
+            if isinstance(value, tuple) and len(value) <= 32 and all(
+                isinstance(item, str) and len(item) <= 64 for item in value
+            ):
+                pass  # Already immutable and bounded; no attribute copy needed.
+            else:
+                if not all(isinstance(item, str) for item in value):
+                    continue
+                value = tuple(item if len(item) <= 64 else item.encode("utf-8")[:256].decode("utf-8", errors="ignore") for item in value[:32])
+        elif type(value) not in (bool, int, float):
+            continue
+        result[key] = value
+        if len(result) == 64:
+            break
+    return result
+
+
+
+# The shared carrier-consumer contract, identical to traceAI's Python carrier
+# writer and @traceai/fi-core's runtime attribute processor; pinned by the
+# shared processor_v1.json vectors (byte-identical across the repositories).
+_SKILL_LIST_KEYS = ("fi.skills.version_ids", "fi.skills.ids", "fi.skills.refs")
+_MAX_CARRIER_ATTRIBUTES = 64
+_MAX_CARRIER_SKILLS = 32
+_MAX_CARRIER_SCAN = 256
+
+
+def _short_string(value):
+    if not isinstance(value, str):
+        return False
+    try:
+        return len(value.encode("utf-8")) <= 256
+    except UnicodeEncodeError:
+        return False
+
+
+def normalized_carrier(mapping):
+    """Bounded normalization of a foreign carrier before stamping.
+
+    At most 62 copied keys plus the derived skill count and truncation flag;
+    at most 256 keys examined. Over-long strings and invalid lists are dropped.
+    """
+    attrs = {}
+    truncated = False
+    for scanned, (key, value) in enumerate(mapping.items(), 1):
+        if scanned > _MAX_CARRIER_SCAN:
+            break
+        if not _short_string(key) or not key.startswith(("fi.skills.", "fi.context.", "gen_ai.agent.")):
+            continue
+        if key == "fi.context.linked_skill_version_ids":
+            continue
+        if isinstance(value, str):
+            if not _short_string(value):
+                continue
+        elif type(value) in (bool, int, float):
+            pass
+        elif isinstance(value, (list, tuple)):
+            limit = _MAX_CARRIER_SKILLS if key in _SKILL_LIST_KEYS else _MAX_CARRIER_ATTRIBUTES
+            if not all(_short_string(item) for item in value[:limit]):
+                continue
+            if key in _SKILL_LIST_KEYS:
+                truncated = truncated or len(value) > _MAX_CARRIER_SKILLS
+            elif len(value) > limit:
+                continue
+            value = tuple(value[:limit])
+        else:
+            continue
+        attrs[key] = value
+        if len(attrs) == _MAX_CARRIER_ATTRIBUTES - 2:
+            break
+    versions = attrs.get("fi.skills.version_ids")
+    if isinstance(versions, tuple):
+        attrs["fi.skills.count"] = len(versions)
+    if truncated:
+        attrs["fi.skills.truncated"] = True
+    elif attrs.get("fi.skills.truncated") is not True:
+        attrs.pop("fi.skills.truncated", None)
+    return attrs
+
+
+_EMPTY_ATTRS = MappingProxyType({})
+
+
+@dataclass(frozen=True, init=False)
+class _Carrier(Mapping):
+    """Read-only v1 mapping. Each attrs value is an immutable snapshot.
+
+    A plain carrier stays fixed. An explicit scope's carrier follows the last
+    published on-mode snapshot even after an inner OTel span detaches.
+    """
+
+    _attrs: Mapping
+    _scope_state: State | None
+    reset_skills: bool
+
+    def __init__(self, attrs, reset=False, *, scope_state=None):
+        object.__setattr__(self, "_attrs", MappingProxyType(allowlisted(attrs)))
+        object.__setattr__(self, "_scope_state", scope_state)
+        object.__setattr__(self, "reset_skills", reset)
+
+    @property
+    def attrs(self):
+        if self._scope_state is None:
+            return self._attrs
+        return self._scope_state.published_attrs if mode() == "on" else _EMPTY_ATTRS
+
+    def __getitem__(self, key):
+        if key == "v":
+            return 1
+        if key == "attrs":
+            return self.attrs
+        if key == "reset_skills":
+            return self.reset_skills
+        raise KeyError(key)
+
+    def __iter__(self):
+        return iter(("v", "attrs", "reset_skills"))
+
+    def __len__(self):
+        return 3
+
+
+def carrier(attrs, reset=False):
+    return _Carrier(attrs, reset)
+
+
+def publish(state):
+    state.published_attrs = MappingProxyType(allowlisted(state.attrs))
+
+
+def bind_scope(state, *, reset, parent=None):
+    context = sys.modules.get("opentelemetry.context")
+    if context is None:
+        return None
+    publish(state)
+    return context.attach(context.set_value(CARRIER_KEY, _Carrier({}, reset, scope_state=state), parent))
+
+
+def current():
+    trace = sys.modules.get("opentelemetry.trace")
+    return trace.get_current_span() if trace is not None else None
+
+
+def retire_absent_receipt(span, existing, selected):
+    """Never pair a new context identity with the previous immutable receipt.
+
+    OTel's Span API has setters but no unset. Its Python SDK stores attributes
+    in a BoundedAttributes behind a read-only view and serializes writes with
+    the recording span lock. Use that narrow adapter only on recognized native
+    spans. On a foreign host retain the *complete* prior annotation instead;
+    the verified load event and future spans still use the new selection.
+    """
+    if "fi.context.version_id" not in selected:
+        return True
+    stale = [k for k in ("fi.context.binding_id", "fi.context.session_id") if k in existing and k not in selected]
+    if not stale:
+        return True
+    native = getattr(sys.modules.get("opentelemetry.sdk.trace"), "Span", None)
+    bounded = getattr(sys.modules.get("opentelemetry.attributes"), "BoundedAttributes", None)
+    if native is None or bounded is None or not issubclass(type(span), native):
+        return False
+    store, lock = getattr(span, "_attributes", None), getattr(span, "_lock", None)
+    if not isinstance(store, bounded) or lock is None:
+        return False
+    with lock:
+        if getattr(span, "_end_time", None) is not None:
+            return False
+        for key in stale:
+            store.pop(key, None)
+    return True
+
+
+def wire_mode(tracing=True):
+    if not tracing or mode() == "off":
+        return "off"
+    try:
+        return mode() if select_provider()[0] is not None else "no_otel"
+    except Exception:
+        debug_failure()
+        return "no_otel"

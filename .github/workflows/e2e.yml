@@ -189,6 +189,9 @@ jobs:
             python3 "$GITHUB_WORKSPACE/.github/scripts/release_stack.py" > "$compat"
             files+=(-f "$compat")
           fi
+          # Exercise the opt-in consumption facade on this disposable backend.
+          # An unsupported release fails the live suite; no catalog exclusions.
+          files+=(-f "$GITHUB_WORKSPACE/.github/sdk-context.yml")
           compose=(docker compose --env-file e2e/stack/standalone-e2e.env "${files[@]}" -p futureagi-e2e-standalone)
           selector=$("${compose[@]}" config --format json | jq -er '.services.app.image')
           image="futureagi/standalone:$FUTURE_AGI_VERSION"
@@ -336,7 +339,7 @@ jobs:
               app_image: $app, app_image_digest: $app_digest, app_image_id: $app_id,
               mock_google_image: $google, mock_google_image_digest: $google_digest, mock_google_image_id: $google_id}' \
             > "$RUNNER_TEMP/pair/stack.json"
-          compose=(docker compose --env-file e2e/stack/standalone-e2e.env -f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml -f "$PAIRED_PIN" -p futureagi-e2e-standalone)
+          compose=(docker compose --env-file e2e/stack/standalone-e2e.env -f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml -f "$PAIRED_PIN" -f "$GITHUB_WORKSPACE/.github/sdk-context.yml" -p futureagi-e2e-standalone)
           config=$("${compose[@]}" config --format json)
           [[ "$(jq -er '.services.app.image' <<<"$config")" == "$PAIRED_APP_IMAGE" ]]
           [[ "$(jq -er '.services["mock-google"].image' <<<"$config")" == "$PAIRED_GOOGLE_IMAGE" ]]
@@ -388,7 +391,7 @@ jobs:
           python -m pip install -e ./python pytest pyyaml
 
       - name: Sign up an account and write .env.local
-        run: python sdkgen/local_api_key.py --signup --base-url "$FI_BASE_URL" --label "gh${{ github.run_id }}"
+        run: python sdkgen/local_api_key.py --signup --workspace-user-key --base-url "$FI_BASE_URL" --label "gh${{ github.run_id }}"
 
       - name: Python live suite (every catalog operation)
         run: PYTHONPATH=python pytest -q python/tests/platform

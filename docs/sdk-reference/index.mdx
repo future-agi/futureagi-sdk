@@ -5,7 +5,7 @@ description: "Every method of the Future AGI platform client in Python and TypeS
 
 <TLDR>
 - One client, every API: `fi.Client` (Python, `pip install futureagi`) and `Client` from `@future-agi/sdk` (TypeScript)
-- 259 methods across 26 resources, generated from the API contract; each page lists parameters, return types and the REST endpoint
+- 283 methods across 30 resources, generated from the API contract; each page lists parameters, return types and the REST endpoint
 - Omitted arguments are not sent; nullable JSON body fields accept `None` / `null`, nullable query parameters omit them, and SQL `reuse`, `limit`, and `offset` must be omitted rather than null; list calls return pagers; HTTP errors raise typed exceptions
 </TLDR>
 
@@ -60,7 +60,7 @@ Python also ships `AsyncClient` with the same methods, awaited (`await client.da
   Sent with every request.
 </ParamField>
 <ParamField name="strict_responses" type="boolean" optional>
-  Python only. Reject a response that misses a field the contract marks required (see Strict mode).
+  Python `strict_responses` and TypeScript `strictResponses` reject malformed responses for generated operations marked strict-wire (see Strict mode).
 </ParamField>
 <ParamField name="http_client / fetch" type="object" optional>
   Python: an `httpx.Client` (or `httpx.AsyncClient`) to use instead of the SDK's own. TypeScript: a replacement for the global `fetch`.
@@ -90,7 +90,7 @@ Responses are parsed into models (`fi.platform.models` / `@future-agi/sdk/platfo
 
 ### Strict mode
 
-`Client(strict_responses=True)` (Python) raises `ResponseValidationError` when a response misses a field the contract marks required. Use it in tests to catch contract drift; leave it off in production.
+`Client(strict_responses=True)` (Python) and `new Client({ strictResponses: true })` (TypeScript) validate responses for operations marked strict-wire, including required-key presence and field values; they never coerce the wire response. TypeScript `contexts.get` and `skills.latest_load` return `unknown` when called tolerantly; pass `{ strictResponse: true }` in that call's options to validate and receive the corresponding model type. The per-call option only enables validation and cannot disable client strict mode. Use strict validation in tests to catch contract drift; leave it off in production unless the stricter behavior is wanted.
 
 ### Errors
 
@@ -273,5 +273,25 @@ A method marked **Beta** may change without notice; the first call emits a `Beta
   </Card>
   <Card title="Response models" href="/docs/sdk/reference/gateway-models">
     What the gateway methods return.
+  </Card>
+</CardGroup>
+
+### Skills
+
+<CardGroup cols={2}>
+  <Card title="Skills" href="/docs/sdk/reference/skills">
+    `client.skills`: 9 methods.
+  </Card>
+  <Card title="Contexts" href="/docs/sdk/reference/contexts">
+    `client.contexts`: 8 methods.
+  </Card>
+  <Card title="Skill consumption" href="/docs/sdk/reference/skill-consumption">
+    `client.skill_consumption`: 4 methods.
+  </Card>
+  <Card title="Context credentials" href="/docs/sdk/reference/context-credentials">
+    `client.context_credentials`: 3 methods.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/skills-models">
+    What the skills methods return.
   </Card>
 </CardGroup>

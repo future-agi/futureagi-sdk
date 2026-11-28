@@ -25,7 +25,8 @@
     "typescript/futureagi": {
       "release-type": "node",
       "package-name": "@future-agi/sdk",
-      "component": "typescript"
+      "component": "typescript",
+      "extra-files": ["src/telemetry/version.ts"]
     }
   }
 }

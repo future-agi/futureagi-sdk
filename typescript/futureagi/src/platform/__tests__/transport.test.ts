@@ -41,7 +41,7 @@ function fake(...responses: Array<Response | Error | ((seen: Seen) => Response |
   return { fetch, calls };
 }
 
-function client(fetch: FetchLike, extra: ConstructorParameters<typeof Client>[0] = {}): Client {
+function client(fetch: FetchLike, extra: Omit<ConstructorParameters<typeof Client>[0], "auth"> = {}): Client {
   return new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, maxRetries: 0, ...extra });
 }
 

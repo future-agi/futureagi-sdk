@@ -33,6 +33,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # The scoped sync records the SDK target to compare against.
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -44,6 +46,8 @@ jobs:
         # differs from what the contract and catalog produce, or when a
         # resource scaffold is missing.
         run: python sdkgen/generate.py --check
+      - name: Non-Skills operations match their SDK baseline
+        run: python sdkgen/check_skills_baseline.py
       - name: Pick the product revision to pair with
         id: product
         # pinned: a push to main, a pull request into main, or a dispatch without
@@ -79,7 +83,7 @@ jobs:
           persist-credentials: false
       - name: The scoped contract slice matches the paired product commit
         # sdkgen/pair_check.py: the scoped sync's own checks
-        # (sync_scoped_contract.check_scopes: the sql and epoch tool sets, their
+        # (sync_scoped_contract.check_scopes: the SQL, Epoch and Skills tool sets, their
         # exposure, routes, inputs and epoch descriptions) pass against the
         # product commit, the scoped operations and their definitions project
         # identically from that commit and from sdkgen/contracts/swagger.json,
@@ -93,9 +97,7 @@ jobs:
       - name: Catalog MCP names match the paired product commit's tool list (both directions)
         # Reported even when the slice check above failed, so one run shows both.
         if: ${{ !cancelled() && steps.product.outputs.mode == 'paired' }}
-        env:
-          PRODUCT_SHA: ${{ steps.product.outputs.sha }}
-        run: python sdkgen/check_mcp_parity.py --ref "$PRODUCT_SHA"
+        run: python sdkgen/check_mcp_parity.py --tools future-agi/futureagi/mcp_server/catalog/tools.generated.json
       - name: Upload the product pairing record
         if: ${{ !cancelled() && steps.product.outputs.mode == 'paired' && steps.product_checkout.outcome == 'success' }}
         uses: actions/upload-artifact@v4
@@ -109,7 +111,7 @@ jobs:
           echo "::error::no pairing mode for this event"
           exit 1
       - name: Lint the generator, the platform client and its tests
-        run: ruff check --isolated --select E,F,W,I --ignore E501 sdkgen python/fi/platform python/tests/platform
+        run: ruff check --isolated --select E,F,W,I --ignore E501 sdkgen python/fi/platform python/tests/platform python/fi/context python/fi/skills python/fi/telemetry python/tests/r3_l10 python/tests/r3_l11 python/tests/r3_integration python/tests/telemetry python/consumer/context_consumer.py
 
   python:
     name: Python ${{ matrix.python }}
@@ -139,7 +141,61 @@ jobs:
       - name: Unit tests
         # python/tests/platform's live tests skip without a backend; e2e.yml
         # runs them for real.
-        run: PYTHONPATH=python pytest -q python/tests
+        # This leg deliberately has no tracing extras (traceAI does not support 3.9).
+        # context-backend runs the entire telemetry suite with its real prerequisites.
+        run: |
+          PYTHONPATH=python python -m pytest -q python/tests --ignore=python/tests/r3_l10/test_deepagents.py --ignore=python/tests/telemetry
+          PYTHONPATH=python python -m pytest -q python/tests/telemetry/test_no_otel.py
+
+  context-backend:
+    name: Context backend protocol (Python 3.11)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: python/pyproject.toml
+      - name: Resolve the traceAI branch to one commit (head, base, dev, main)
+        id: pair
+        env:
+          HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
+          BASE_BRANCH: ${{ github.base_ref }}
+        run: |
+          # Read one upstream advertisement: a network error is not a missing branch.
+          refs="$RUNNER_TEMP/traceai-heads"
+          git ls-remote --heads https://github.com/future-agi/traceAI.git > "$refs"
+          for branch in "$HEAD_BRANCH" "$BASE_BRANCH" dev main; do
+            [[ -n "$branch" ]] || continue
+            tip=$(awk -v ref="refs/heads/$branch" '$2 == ref {print $1}' "$refs")
+            [[ -n "$tip" ]] || continue
+            [[ "$tip" =~ ^[0-9a-f]{40}$ ]] || exit 1
+            printf 'Pairing with traceAI %s at %s\n' "$branch" "$tip"
+            echo "commit=$tip" >> "$GITHUB_OUTPUT"
+            exit 0
+          done
+          echo '::error::No matching traceAI branch'; exit 1
+      - uses: actions/checkout@v4
+        with:
+          repository: future-agi/traceAI
+          ref: ${{ steps.pair.outputs.commit }}
+          path: .traceai
+          persist-credentials: false
+      - name: Build the paired wheel and install all telemetry and backend prerequisites
+        run: |
+          python -m pip wheel --no-deps .traceai/python --wheel-dir "$RUNNER_TEMP/paired-wheels"
+          python -m pip install -e './python[context-deepagents,otel]' "$RUNNER_TEMP"/paired-wheels/fi_instrumentation_otel-*.whl pytest pytest-asyncio respx pyyaml
+          python -c 'import deepagents, fi_instrumentation.otel, opentelemetry.sdk.trace'
+      - name: Required real backend conformance and snapshot/materializer integration
+        # No importorskip or substitute backend. This tests the real backend
+        # protocol without model calls; it does not certify native delivery.
+        run: |
+          PYTHONPATH=python flock /tmp/ctxhub-pytest.lock python -m pytest -q python/tests/r3_l10 python/tests/r3_l11 python/tests/r3_integration python/tests/telemetry
+          PYTHONPATH=python flock /tmp/ctxhub-pytest.lock python python/tests/r3_l11/integration_snapshot_probe.py
 
   typescript:
     name: TypeScript
@@ -168,6 +224,8 @@ jobs:
         run: pnpm test -- src/platform
       - name: Build (CJS, ESM, ESNext)
         run: pnpm run build
+      - name: Skills, Context and telemetry (including installed package without the optional peer)
+        run: pnpm exec jest --runInBand src/__tests__/r3_l10 src/__tests__/telemetry
 
   packages:
     name: Packages as installed
@@ -193,11 +251,21 @@ jobs:
       - name: Install the wheel into an empty virtualenv, run and type-check the consumer
         run: |
           python -m venv "$RUNNER_TEMP/consumer"
-          "$RUNNER_TEMP/consumer/bin/pip" install --quiet python/dist/*.whl mypy
-          cp python/consumer/consumer.py "$RUNNER_TEMP/consumer/"
+          "$RUNNER_TEMP/consumer/bin/pip" install --quiet python/dist/*.whl mypy pytest pytest-asyncio pyyaml
+          cp python/consumer/*.py "$RUNNER_TEMP/consumer/"
+          mkdir -p "$RUNNER_TEMP/consumer/python/tests" "$RUNNER_TEMP/consumer/.github/actions"
+          cp -R python/tests/r3_l10 python/tests/r3_l11 "$RUNNER_TEMP/consumer/python/tests/"
+          cp -R .github/actions/context-verify "$RUNNER_TEMP/consumer/.github/actions/"
+          ACTION_PATH="$RUNNER_TEMP/consumer/.github/actions/context-verify/action.yml"
           cd "$RUNNER_TEMP/consumer"
+          unset PYTHONPATH
           ./bin/python consumer.py
-          ./bin/python -m mypy --strict --follow-imports=silent consumer.py
+          ./bin/python context_consumer.py
+          ./bin/python -m mypy --strict --follow-imports=silent consumer.py context_consumer.py
+          flock /tmp/ctxhub-pytest.lock ./bin/python -m pytest -q --asyncio-mode=auto python/tests/r3_l10 python/tests/r3_l11 --ignore=python/tests/r3_l10/test_deepagents.py
+          ./bin/python python/tests/r3_l11/integration_snapshot_probe.py
+          ./bin/python python/tests/r3_l11/package_action_probe.py "$ACTION_PATH"
+          ./bin/python docs_examples.py "$GITHUB_WORKSPACE/docs/sdk-reference"
       - uses: pnpm/action-setup@v4
         with:
           version: 8.15.0
@@ -229,7 +297,7 @@ jobs:
 
   ci-pass:
     name: CI Pass
-    needs: [generated, python, typescript, packages, release-guards]
+    needs: [generated, python, context-backend, typescript, packages, release-guards]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5

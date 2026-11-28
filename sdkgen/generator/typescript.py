@@ -30,6 +30,8 @@ from .catalog import (
     model_refs,
     namespace_tree,
     sdk_ops,
+    single_ref,
+    wire_models,
 )
 from .python import camel
 
@@ -73,6 +75,10 @@ def prop_key(name: str) -> str:
     return name if _IDENTIFIER.match(name) else json.dumps(name)
 
 
+def param_key(p: Param) -> str:
+    return p.arg_name if p.location == "header" else p.name
+
+
 def ts_type(schema: dict | None, *, for_input: bool) -> str:
     if not schema:
         return "unknown"
@@ -80,8 +86,8 @@ def ts_type(schema: dict | None, *, for_input: bool) -> str:
         return "FileInput"
     if is_json_value(schema):
         return "JsonValue" if for_input else "unknown"  # any JSON value: a string or number as much as an object
-    if "$ref" in schema:
-        return "Record<string, unknown>" if for_input else f"models.{class_name(schema['$ref'])}"
+    if ref := single_ref(schema):
+        return "Record<string, unknown>" if for_input else f"models.{class_name(ref)}"
     if "enum" in schema:
         # Inputs are strict; outputs accept unknown values so a new server enum never breaks a caller.
         return " | ".join(json.dumps(v) for v in schema["enum"]) if for_input else "string"
@@ -108,7 +114,8 @@ def _doc(lines: list[str], indent: str = "") -> str:
 def emit_models(spec: dict, ops: list[Op]) -> str:
     declared_models = declared_response_models(ops)
     names = model_refs(spec, [op.returns for op in sdk_ops(ops) if op.returns])
-    out = [HEADER, "// Response models. Every field is optional so a missing or new field never breaks a call.\n\n"]
+    wire = wire_models(ops)
+    out = [HEADER, "// Response models. Strict wire contracts distinguish required keys from nullable values.\n\n"]
     for name in names:
         props = spec["definitions"][name].get("properties", {})
         out.append(f"export interface {name} {{\n")
@@ -118,7 +125,9 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
                 # Keep completions for documented states without closing the wire enum.
                 ts = ts_type(prop, for_input=True) + " | (string & Record<never, never>)"
             comment = f" // one of: {', '.join(map(str, prop['enum']))}" if "enum" in prop else ""
-            out.append(f"  {prop_key(prop_name)}?: {ts} | null;{comment}\n")
+            required = name in wire and prop_name in spec["definitions"][name].get("required", [])
+            nullable = name not in wire or prop.get("x-nullable")
+            out.append(f"  {prop_key(prop_name)}{'' if required else '?'}: {ts}{' | null' if nullable else ''};{comment}\n")
         out.append("}\n\n")
     return "".join(out).rstrip("\n") + "\n"
 
@@ -140,6 +149,10 @@ def emit_operations(ops: list[Op]) -> str:
     ]
     for op in sdk_ops(ops):
         spec = {"id": op.id, "method": op.method, "path": op.path, "unwrap": op.unwrap, "pagination": op.pagination}
+        if op.surfaces["sdk"].get("strict_wire"):
+            if op.pagination or not op.returns or "$ref" not in op.returns:
+                raise ValueError(f"{op.id}: strict wire decode needs a single named response")
+            spec["wireModel"] = class_name(op.returns["$ref"])
         if op.multipart:
             spec["multipart"] = True
         if op.decode != "json":
@@ -148,7 +161,12 @@ def emit_operations(ops: list[Op]) -> str:
     return "".join(out)
 
 
+_STRICT_TYPED_RESPONSE_IDS = {"contexts.get", "skills.latest_load"}
+
+
 def _return_type(op: Op) -> str:
+    if op.id in _STRICT_TYPED_RESPONSE_IDS:
+        return "Promise<unknown>"
     returns = op.returns or {}
     if "$ref" in returns:
         item = f"models.{class_name(returns['$ref'])}"
@@ -158,6 +176,8 @@ def _return_type(op: Op) -> str:
         item = ts_type(op.returns, for_input=False)
     if op.pagination:
         return f"Pager<{item}>"
+    if op.decode == "bytes":
+        return "Promise<Uint8Array>"
     if op.decode == "text":
         return "Promise<string>"
     if op.decode == "auto":
@@ -185,7 +205,7 @@ def _params_interface(op: Op) -> tuple[str, list[Param]]:
             and not is_file(p.schema)
             and not op.rejects_optional_null(p)
         )
-        out.append(f"{desc}  {prop_key(p.name)}{'' if p.required else '?'}: {ts + ' | null' if nullable else ts};\n")
+        out.append(f"{desc}  {prop_key(param_key(p))}{'' if p.required else '?'}: {ts + ' | null' if nullable else ts};\n")
     if op.surfaces["sdk"].get("idempotency_key"):
         out.append("  /** Sent as the Idempotency-Key header; a new one when left out. The same key gets the same result back. */\n")
         out.append("  idempotencyKey?: string;\n")
@@ -195,7 +215,7 @@ def _params_interface(op: Op) -> tuple[str, list[Param]]:
 
 def _method(op: Op, fields: list[Param]) -> str:
     path_params = op.params_in("path")
-    args = [f"{ts_arg(p)}: string" for p in path_params]
+    args = [f"{ts_arg(p)}: {ts_type(p.schema, for_input=True)}" for p in path_params]
     if fields:
         optional = "" if any(p.required for p in fields) else " = {}"
         args.append(f"params: {ts_params_type(op)}{optional}")
@@ -207,12 +227,25 @@ def _method(op: Op, fields: list[Param]) -> str:
     if stability == "deprecated":
         doc.append("@deprecated")
     lines = [_doc(doc, "  ")]
+    if op.id in _STRICT_TYPED_RESPONSE_IDS:
+        returns = op.returns or {}
+        if "$ref" not in returns:
+            raise ValueError(f"{op.id}: strict typed response needs a named model")
+        typed = f"Promise<models.{class_name(returns['$ref'])}>"
+        method_args = args[:-1]
+        strict_args = [*method_args, "options: RequestOptions & { strictResponse: true }"]
+        lines.append(f"  {ts_method(op)}({', '.join(strict_args)}): {typed};\n")
+        lines.append(f"  {ts_method(op)}({', '.join(args)}): Promise<unknown>;\n")
     nonnullable = [p for p in fields if op.rejects_optional_null(p)]
     # A validation error on a promise-returning method must reject, not throw synchronously.
     async_prefix = "async " if nonnullable and not op.pagination else ""
     lines.append(f"  {async_prefix}{ts_method(op)}({', '.join(args)}): {_return_type(op)} {{\n")
     if stability != "stable":
         lines.append(f"    warnStability({json.dumps(op.id)}, {json.dumps(stability)});\n")
+    if op.params_in("header"):
+        headers = ", ".join(f"{prop_key(p.name)}: params.{param_key(p)}" for p in op.params_in("header"))
+        required = [p.name for p in op.params_in("header") if p.required]
+        lines.append(f"    options = operationOptions(options, {{ {headers} }}, {json.dumps(required)});\n")
     snapshots = set()
     path = ", ".join(f"{prop_key(p.name)}: {ts_arg(p)}" for p in path_params)
     parts = [f"path: {{ {path} }}" if path else "path: {}"]
@@ -242,7 +275,7 @@ def _method(op: Op, fields: list[Param]) -> str:
         # Forward other options on the original receiver (including headers read again on retry).
         # The mapped type makes adding a public RequestOptions key a compile-time reminder.
         lines.append("    const callOptions = {\n")
-        for key in ("headers", "timeout", "maxRetries", "extraQuery", "extraBody"):
+        for key in ("headers", "timeout", "maxRetries", "resolutionId", "idempotencyKey", "strictResponse", "extraQuery", "extraBody"):
             prop = key if key in snapshots else f"get {key}() {{ return options?.{key}; }}"
             lines.append(f"      {prop},\n")
         lines.append("    } satisfies Record<keyof RequestOptions, unknown>;\n")
@@ -290,6 +323,8 @@ def emit_resources(ops: list[Op]) -> str:
         "import type { FileInput, JsonValue, RequestOptions, Transport } from \"../transport\";\n"
         "import { withIdempotencyKey } from \"../transport\";\n\n",
     ]
+    if any(op.params_in("header") for op in sdk_ops(ops)):
+        out.append('import { operationOptions } from "../transport";\n\n')
     for ns in sorted(tree):
         for op in sorted(tree[ns], key=lambda o: o.method_name):
             out.append(_params_interface(op)[0])

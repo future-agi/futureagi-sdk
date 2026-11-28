@@ -1,0 +1,293 @@
+---
+title: "Skill consumption"
+description: "Reference for client.skill_consumption in the Future AGI Python and TypeScript SDKs: skill_consumption.check_access, skill_consumption.manifest, skill_consumption.read_file, skill_consumption.resolve."
+---
+
+`client.skill_consumption` on `fi.Client` (Python) and `client.skillConsumption` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Skills response models](/docs/sdk/reference/skills-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`skill_consumption.check_access`](#skill_consumptioncheck_access) |  |
+| [`skill_consumption.manifest`](#skill_consumptionmanifest) |  |
+| [`skill_consumption.read_file`](#skill_consumptionread_file) |  |
+| [`skill_consumption.resolve`](#skill_consumptionresolve) |  |
+
+</div>
+
+## client.skill_consumption
+
+### skill_consumption.check_access
+
+
+
+<ApiEndpoint method="POST" path="/model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/" />
+
+<Warning>
+  **Beta.** This method may change without notice; calling it emits a one-time warning.
+</Warning>
+
+<CodeGroup>
+
+```python Python
+result = client.skill_consumption.check_access(
+    "your-resource-id",
+    1,
+    resolution_id="your-X-Context-Resolution",
+)
+```
+
+```typescript TypeScript
+const result = await client.skillConsumption.checkAccess("your-resource-id", 1, { resolution_id: "your-X-Context-Resolution" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skill_consumption.check_access(
+    resource_id: str,
+    number: int,
+    *,
+    resolution_id: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextAccessCheck
+```
+
+```typescript TypeScript
+client.skillConsumption.checkAccess(resourceId: string, number: number, params: SkillConsumptionCheckAccessParams, options?: RequestOptions): Promise<models.SkillsContextAccessCheck>
+
+export interface SkillConsumptionCheckAccessParams {
+  resolution_id: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="resource_id" type="string" required>
+  Positional argument `resource_id`.
+</ParamField>
+<ParamField path="number" type="integer" required>
+  Positional argument `number`.
+</ParamField>
+<ParamField header="X-Context-Resolution" type="string" required>
+  SDK argument `resolution_id`.
+</ParamField>
+
+#### Returns
+
+[`SkillsContextAccessCheck`](/docs/sdk/reference/skills-models#skillscontextaccesscheck).
+
+### skill_consumption.manifest
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/" />
+
+<Warning>
+  **Beta.** This method may change without notice; calling it emits a one-time warning.
+</Warning>
+
+<CodeGroup>
+
+```python Python
+result = client.skill_consumption.manifest(
+    "your-resource-id",
+    1,
+    resolution_id="your-X-Context-Resolution",
+)
+```
+
+```typescript TypeScript
+const result = await client.skillConsumption.manifest("your-resource-id", 1, { resolution_id: "your-X-Context-Resolution" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skill_consumption.manifest(
+    resource_id: str,
+    number: int,
+    *,
+    resolution_id: str,
+    file_offset: int | None | NotGiven = NOT_GIVEN,
+    file_limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextConsumptionManifest
+```
+
+```typescript TypeScript
+client.skillConsumption.manifest(resourceId: string, number: number, params: SkillConsumptionManifestParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionManifest>
+
+export interface SkillConsumptionManifestParams {
+  resolution_id: string;
+  file_offset?: number | null;
+  file_limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="resource_id" type="string" required>
+  Positional argument `resource_id`.
+</ParamField>
+<ParamField path="number" type="integer" required>
+  Positional argument `number`.
+</ParamField>
+<ParamField query="file_offset" type="integer" optional />
+<ParamField query="file_limit" type="integer" optional />
+<ParamField header="X-Context-Resolution" type="string" required>
+  SDK argument `resolution_id`.
+</ParamField>
+
+#### Returns
+
+[`SkillsContextConsumptionManifest`](/docs/sdk/reference/skills-models#skillscontextconsumptionmanifest).
+
+### skill_consumption.read_file
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/consumption/{resource_id}/versions/{number}/files/" />
+
+<Warning>
+  **Beta.** This method may change without notice; calling it emits a one-time warning.
+</Warning>
+
+<CodeGroup>
+
+```python Python
+result = client.skill_consumption.read_file(
+    "your-resource-id",
+    1,
+    path="your-path",
+    resolution_id="your-X-Context-Resolution",
+)
+```
+
+```typescript TypeScript
+const result = await client.skillConsumption.readFile("your-resource-id", 1, {
+  path: "your-path",
+  resolution_id: "your-X-Context-Resolution",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skill_consumption.read_file(
+    resource_id: str,
+    number: int,
+    *,
+    path: str,
+    resolution_id: str,
+    offset: int | None | NotGiven = NOT_GIVEN,
+    max_bytes: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextConsumptionChunk
+```
+
+```typescript TypeScript
+client.skillConsumption.readFile(resourceId: string, number: number, params: SkillConsumptionReadFileParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionChunk>
+
+export interface SkillConsumptionReadFileParams {
+  path: string;
+  resolution_id: string;
+  offset?: number | null;
+  max_bytes?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="resource_id" type="string" required>
+  Positional argument `resource_id`.
+</ParamField>
+<ParamField path="number" type="integer" required>
+  Positional argument `number`.
+</ParamField>
+<ParamField query="path" type="string" required />
+<ParamField query="offset" type="integer" optional />
+<ParamField query="max_bytes" type="integer" optional />
+<ParamField header="X-Context-Resolution" type="string" required>
+  SDK argument `resolution_id`.
+</ParamField>
+
+#### Returns
+
+[`SkillsContextConsumptionChunk`](/docs/sdk/reference/skills-models#skillscontextconsumptionchunk).
+
+### skill_consumption.resolve
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/consumption/resolve/" />
+
+<Warning>
+  **Beta.** This method may change without notice; calling it emits a one-time warning.
+</Warning>
+
+<CodeGroup>
+
+```python Python
+result = client.skill_consumption.resolve(name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.skillConsumption.resolve({ name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skill_consumption.resolve(
+    *,
+    name: str,
+    version: int | None | NotGiven = NOT_GIVEN,
+    label: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextConsumptionManifest
+```
+
+```typescript TypeScript
+client.skillConsumption.resolve(params: SkillConsumptionResolveParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionManifest>
+
+export interface SkillConsumptionResolveParams {
+  name: string;
+  version?: number | null;
+  label?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="name" type="string" required />
+<ParamField query="version" type="integer" optional />
+<ParamField query="label" type="string" optional />
+
+#### Returns
+
+[`SkillsContextConsumptionManifest`](/docs/sdk/reference/skills-models#skillscontextconsumptionmanifest).

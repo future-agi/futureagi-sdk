@@ -151,15 +151,19 @@ def test_surfaces_ship_independently():
 
 def test_mcp_names_keep_existing_tools_or_follow_the_id():
     # The 111 tools of the v1.59.0 release, four of them SQL, plus the 19 tools of the product's
-    # `epoch` group from the scoped product source (x-contract-sources.epoch): 130 in all.
+    # `epoch` group and the 13 of its `skills` group from the scoped product sources
+    # (x-contract-sources.epoch and .skills): 143 in all.
     ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
     names = {op_id: ops[op_id].surfaces["mcp"]["name"] for op_id in MCP_IDS}
+    assert len(set(names.values())) == len(MCP_IDS)
     sql_names = {name for key, name in names.items() if key.startswith("sql.")}
     assert sql_names == {"run_sql", "get_sql_result", "cancel_sql", "get_sql_catalog"}
     epoch_names = {name for key, name in names.items() if ops[key].surfaces["mcp"]["group"] == "epoch"}
     assert epoch_names == set(CONTRACT["x-contract-sources"]["epoch"]["tools"]) and len(epoch_names) == 19
     assert names["simulation.executions.insights.get"] == "get_debug_failures"
-    assert len(names) == 130
+    skill_names = {name for key, name in names.items() if ops[key].surfaces["mcp"]["group"] == "skills"}
+    assert skill_names == set(CONTRACT["x-contract-sources"]["skills"]["tools"]) and len(skill_names) == 13
+    assert len(names) == 143
     assert names["datasets.list"] == "list_datasets"
     assert names["traces.list"] == "search_traces"
     # Without an override the name follows the id.

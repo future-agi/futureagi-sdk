@@ -1,0 +1,142 @@
+"""Release wiring regressions: optional runtime coverage cannot silently vanish."""
+
+import os
+import subprocess
+from importlib.metadata import requires
+from pathlib import Path
+
+import pytest
+import yaml
+from packaging.requirements import Requirement
+
+ROOT = Path(__file__).resolve().parents[3]
+
+
+def workflow():
+    return yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+
+
+def commands(job):
+    return "\n".join(step.get("run", "") for step in job["steps"])
+
+
+def test_leaf_constructor_union_annotations_remain_importable_on_python39():
+    from fi.skills import AsyncSkillsClient, SkillsClient
+
+    # PEP 604 runtime unions cannot be evaluated by the supported Python 3.9.
+    for client in (SkillsClient, AsyncSkillsClient):
+        assert isinstance(client.__init__.__annotations__["source"], str)
+
+
+def test_optional_backend_is_pinned_and_scoped_to_qualified_interpreter():
+    requirements = [Requirement(raw) for raw in requires("futureagi") or []]
+    backend = next(item for item in requirements if item.name == "deepagents")
+    assert str(backend.specifier) == "==0.4.11"
+    assert backend.marker is not None
+    assert backend.marker.evaluate(
+        {"extra": "context-deepagents", "python_version": "3.11"}
+    )
+    assert not backend.marker.evaluate({"extra": "", "python_version": "3.11"})
+    for version in ("3.9", "3.10", "3.12", "3.13"):
+        assert not backend.marker.evaluate(
+            {"extra": "context-deepagents", "python_version": version}
+        )
+
+
+def test_backend_suite_is_a_required_job_not_a_silent_collection_skip():
+    jobs = workflow()["jobs"]
+    assert "context-backend" in jobs["ci-pass"]["needs"]
+    backend = jobs["context-backend"]
+    assert not backend.get("continue-on-error", False)
+    assert "if" not in backend
+    setup = next(
+        step
+        for step in backend["steps"]
+        if step.get("uses", "").startswith("actions/setup-python@")
+    )
+    assert setup["with"]["python-version"] == "3.11"
+    code = commands(backend)
+    assert "./python[context-deepagents,otel]" in code
+    assert "python/tests/r3_l10" in code
+    assert "--ignore" not in code
+    assert "integration_snapshot_probe.py" in code
+    assert "flock /tmp/ctxhub-pytest.lock" in code
+
+
+def test_paired_telemetry_and_no_otel_have_distinct_required_coverage():
+    jobs = workflow()["jobs"]
+    backend = jobs["context-backend"]
+    checkout = next(step for step in backend["steps"] if step.get("with", {}).get("repository") == "future-agi/traceAI")
+    assert checkout["with"]["ref"] == "${{ steps.pair.outputs.commit }}"
+    code = commands(backend)
+    assert code.index("pip wheel --no-deps .traceai/python") < code.index("fi_instrumentation_otel-*.whl") < code.index("python/tests/telemetry")
+    sdk = jobs["python"]
+    assert "3.9" in sdk["strategy"]["matrix"]["python"]
+    assert "python" in jobs["ci-pass"]["needs"]
+    assert "--ignore=python/tests/telemetry" in commands(sdk)
+    assert "pytest -q python/tests/telemetry/test_no_otel.py" in commands(sdk)
+
+
+def test_changed_modules_and_tests_are_in_the_lint_and_typescript_gates():
+    jobs = workflow()["jobs"]
+    lint = commands(jobs["generated"])
+    for path in (
+        "python/fi/context",
+        "python/fi/skills",
+        "python/tests/r3_l10",
+        "python/tests/r3_l11",
+        "python/tests/r3_integration",
+        "python/consumer/context_consumer.py",
+    ):
+        assert path in lint
+    # Retain the target platform test job *and* run Skills suites after building
+    # (the no-OTel fixture packs dist). Do not widen the target's frozen test scope.
+    ts = commands(jobs["typescript"])
+    assert "pnpm test -- src/platform" in ts
+    assert ts.index("pnpm run build") < ts.index("pnpm exec jest --runInBand src/__tests__/r3_l10 src/__tests__/telemetry")
+
+
+def test_installed_package_gate_exercises_cli_action_and_public_types():
+    code = commands(workflow()["jobs"]["packages"])
+    assert "unset PYTHONPATH" in code
+    assert "context_consumer.py" in code
+    assert "integration_snapshot_probe.py" in code
+    assert "package_action_probe.py" in code
+    assert "mypy --strict" in code
+    assert "pnpm run check:consumer" in code
+
+
+def test_public_pr_jobs_stay_on_github_hosted_isolated_runners():
+    for job in workflow()["jobs"].values():
+        assert job["runs-on"] in {"ubuntu-latest", "ubuntu-24.04"}
+
+
+@pytest.mark.parametrize(
+    ("project", "transport_status", "allowed"),
+    [("fagi-omega-staging", 0, True), ("other-project", 0, False), ("", 7, False)],
+)
+def test_cloud_guard_checks_metadata_and_fails_closed(
+    tmp_path, project, transport_status, allowed
+):
+    action = yaml.safe_load(
+        (ROOT / ".github/actions/require-sdk-test-vm/action.yml").read_text()
+    )
+    script = action["runs"]["steps"][0]["run"]
+    fake_curl = tmp_path / "curl"
+    fake_curl.write_text(
+        '#!/bin/sh\nprintf "%s" "$SYNTHETIC_PROJECT"\nexit "$SYNTHETIC_STATUS"\n'
+    )
+    fake_curl.chmod(0o700)
+    result = subprocess.run(
+        ["bash", "-c", script],
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+            "SYNTHETIC_PROJECT": project,
+            "SYNTHETIC_STATUS": str(transport_status),
+        },
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    assert (result.returncode == 0) is allowed

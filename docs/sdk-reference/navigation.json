@@ -181,6 +181,31 @@
           "href": "/docs/sdk/reference/gateway-models"
         }
       ]
+    },
+    {
+      "title": "Skills",
+      "items": [
+        {
+          "title": "Skills",
+          "href": "/docs/sdk/reference/skills"
+        },
+        {
+          "title": "Contexts",
+          "href": "/docs/sdk/reference/contexts"
+        },
+        {
+          "title": "Skill consumption",
+          "href": "/docs/sdk/reference/skill-consumption"
+        },
+        {
+          "title": "Context credentials",
+          "href": "/docs/sdk/reference/context-credentials"
+        },
+        {
+          "title": "Response models",
+          "href": "/docs/sdk/reference/skills-models"
+        }
+      ]
     }
   ]
 }

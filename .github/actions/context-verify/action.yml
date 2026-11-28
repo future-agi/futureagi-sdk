@@ -1,0 +1,51 @@
+name: Verify managed context bytes
+description: Read-only lock verification using a preinstalled, pinned SDK on an approved cloud runner; not behavioral or native-delivery evidence.
+inputs:
+  python:
+    description: Absolute path to the trusted, preprovisioned Python environment containing the SDK. This action installs nothing and runs no project code.
+    required: true
+  sdk-version:
+    description: Exact expected futureagi package version from the qualified wheel.
+    required: true
+  materializer-sha256:
+    description: SHA-256 of fi/context/materialize.py from the same trusted wheel, not a value supplied by the repository under test.
+    required: true
+  project:
+    description: Project directory containing the checked-in .futureagi-context.lock.json.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Verify pinned SDK and managed bytes
+      shell: bash
+      env:
+        FI_VERIFY_PYTHON: ${{ inputs.python }}
+        FI_VERIFY_VERSION: ${{ inputs.sdk-version }}
+        FI_VERIFY_MATERIALIZER_SHA256: ${{ inputs.materializer-sha256 }}
+        FI_VERIFY_PROJECT: ${{ inputs.project }}
+      run: |
+        set -euo pipefail
+        # -I ignores project/PYTHONPATH imports and user site packages. The caller
+        # provisions this interpreter from a hash-verified wheel on GCP/E2B.
+        test "${FI_VERIFY_PYTHON:0:1}" = /
+        "$FI_VERIFY_PYTHON" -I - <<'PY'
+        import hashlib
+        import importlib.metadata
+        import os
+        import pathlib
+        import re
+        import sys
+
+        distribution = importlib.metadata.distribution("futureagi")
+        if distribution.version != os.environ["FI_VERIFY_VERSION"]:
+            raise SystemExit("Pinned SDK version mismatch")
+        expected = os.environ["FI_VERIFY_MATERIALIZER_SHA256"]
+        if not re.fullmatch(r"[a-f0-9]{64}", expected):
+            raise SystemExit("Expected a trusted materializer SHA-256")
+        module = pathlib.Path(distribution.locate_file("fi/context/materialize.py"))
+        if hashlib.sha256(module.read_bytes()).hexdigest() != expected:
+            raise SystemExit("Pinned materializer bytes mismatch")
+        from fi.context.__main__ import main
+        project = pathlib.Path(os.environ["FI_VERIFY_PROJECT"]).absolute()
+        sys.exit(main(["verify", "--project", str(project), "--lock", str(project / ".futureagi-context.lock.json")]))
+        PY

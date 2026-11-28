@@ -1,0 +1,5 @@
+# Opt-in facade for the disposable E2E stack only.
+services:
+  app:
+    environment:
+      SKILLS_CONTEXT_CONSUMPTION_ENABLED: "true"

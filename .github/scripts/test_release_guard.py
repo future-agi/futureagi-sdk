@@ -23,6 +23,7 @@ def fixture():
                 'node_modules/fixture': {'version': '9.9.9', 'resolved': 'https://registry.npmjs.org/fixture/-/fixture-9.9.9.tgz', 'integrity': 'sha512-synthetic'},
             },
         }),
+        'typescript/futureagi/src/telemetry/version.ts': 'export const SDK_VERSION = "0.1.2"; // x-release-please-version\n',
         'typescript/futureagi/CHANGELOG.md': None,
     }
     after = {key: (value.replace('0.6.14', '0.7.0').replace('0.1.2', '0.2.0') if value else '# Changelog\n\nNew version.') for key, value in before.items()}
@@ -47,6 +48,16 @@ class VersionDiffTests(unittest.TestCase):
         with self.assertRaises(GuardError):
             validate_version_changes(before, after)
 
+    def test_wire_version_must_match_manifest_without_other_source_edits(self):
+        path = 'typescript/futureagi/src/telemetry/version.ts'
+        for change in ('missing', 'stale', 'extra_code'):
+            with self.subTest(change=change):
+                before, after = fixture()
+                if change == 'missing': del after[path]
+                if change == 'stale': after[path] = before[path]
+                if change == 'extra_code': after[path] += 'extra();\n'
+                with self.assertRaises(GuardError): validate_version_changes(before, after)
+
     def test_rejects_package_script_change(self):
         before, after = fixture()
         package = json.loads(after['typescript/futureagi/package.json'])
@@ -57,7 +68,7 @@ class VersionDiffTests(unittest.TestCase):
 
     def test_lockfile_matches_real_release_please_diff(self):
         before, after = fixture()
-        self.assertEqual(len(after), 7)
+        self.assertEqual(len(after), 8)
         path = 'typescript/futureagi/package-lock.json'
         old, new = json.loads(before[path]), json.loads(after[path])
         self.assertEqual(old['packages']['node_modules/fixture'], new['packages']['node_modules/fixture'])

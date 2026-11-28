@@ -54,6 +54,7 @@ AREAS: list[tuple[str, list[str]]] = [
     ("Simulation", ["agents", "simulation"]),
     ("Knowledge bases", ["knowledge_bases", "file_knowledge_bases"]),
     ("Gateway", ["gateway", "models", "provider_keys"]),
+    ("Skills", ["skills", "contexts", "skill_consumption", "context_credentials"]),
 ]
 OTHER_AREA = "Other"
 
@@ -228,6 +229,8 @@ def _example_for(
 
 def _placeholder(p: Param) -> str:
     """A path argument's example value: `"your-dataset-id"`."""
+    if p.schema.get("type") in {"integer", "number"}:
+        return "1"
     return json.dumps(f"your-{py.arg_name(p).replace('_', '-')}")
 
 
@@ -268,7 +271,7 @@ def typescript_example(op: Op, definitions: dict) -> str:
     call = f"client.{dotted(op.namespace, 'typescript')}.{ts.ts_method(op)}"
     args = [_placeholder(p) for p in op.params_in("path")]
     fields = [
-        f"{ts.prop_key(p.name)}: {_example_value(p, 'typescript', definitions)}"
+        f"{ts.prop_key(ts.param_key(p))}: {_example_value(p, 'typescript', definitions)}"
         for p in _example_params(op)
     ]
     if len(fields) > 1:
@@ -293,7 +296,7 @@ def python_signature(op: Op) -> str:
 
 def typescript_signature(op: Op) -> str:
     interface, fields = ts._params_interface(op)
-    args = [f"{ts.ts_arg(p)}: string" for p in op.params_in("path")]
+    args = [f"{ts.ts_arg(p)}: {ts.ts_type(p.schema, for_input=True)}" for p in op.params_in("path")]
     if fields:
         optional = "" if any(p.required for p in fields) else " = {}"
         args.append(f"params: {ts.ts_params_type(op)}{optional}")
@@ -320,7 +323,17 @@ def typescript_signature(op: Op) -> str:
 
 
 def _returns(op: Op, homes: dict[str, str]) -> str:
+    if op.id in {"contexts.get", "skills.latest_load"}:
+        returns = op.returns or {}
+        model = _model_link(class_name(returns["$ref"]), homes, None)
+        return (
+            f"TypeScript returns `unknown` by default because parsing is tolerant. "
+            f"Pass `{{ strictResponse: true }}` as the per-call options to validate the response and receive {model}. "
+            "A client configured with `strictResponses: true` also validates the response at runtime."
+        )
     returns = op.returns or {}
+    if op.decode == "bytes":
+        return "The response body as bytes."
     if op.decode == "text":
         return "The response body as text."
     if op.decode == "auto":
@@ -339,13 +352,15 @@ def _returns(op: Op, homes: dict[str, str]) -> str:
 
 
 def _param_field(p: Param) -> str:
-    kind = {"path": "path", "query": "query", "body": "body"}[p.location]
+    kind = {"path": "path", "query": "query", "body": "body", "header": "header"}[p.location]
     attrs = [f'{kind}="{p.name}"', f'type="{doc_type(p.schema, for_input=True)}"']
     attrs.append("required" if p.required else "optional")
     schema = p.schema or {}
     if "enum" in schema:
         attrs.append(f"enum={{{json.dumps([str(v) for v in schema['enum']])}}}")
     text = md(real_description(p.name, p.description))
+    if p.location == "header":
+        text = f"SDK argument `{ts.param_key(p)}`." + (f" {text}" if text else "")
     if p.location == "path" and not text:
         text = f"Positional argument `{py.arg_name(p)}`."
     if not text:
@@ -396,7 +411,7 @@ def _method_section(op: Op, homes: dict[str, str], definitions: dict) -> str:
     page_params = {op.pagination["page_param"]} if op.pagination else set()
     params = [p for p in op.params if p.name not in page_params]
     params.sort(
-        key=lambda p: ({"path": 0, "query": 1, "body": 2}[p.location], not p.required)
+        key=lambda p: ({"path": 0, "query": 1, "body": 2, "header": 3}[p.location], not p.required)
     )
     out.append("#### Parameters\n\n")
     if params:
@@ -500,11 +515,21 @@ def models_page(
     title = f"{area} response models"
     description = f"The {len(names)} response models returned by the {area.lower()} resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
     out = [_frontmatter(title, description)]
+    if area == "Datasets & evals":
+        # This generated page is a frozen release input; leave its bytes pinned.
+        strict_note = (
+            f"In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview]({SITE_PATH}#strict-mode)); TypeScript has no strict mode.\n\n"
+        )
+    else:
+        strict_note = (
+            f"In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires; in TypeScript, `Client({{ strictResponses: true }})` validates strict-wire operations. "
+            f"For typed TypeScript results from `contexts.get` and `skills.latest_load`, pass `{{ strictResponse: true }}` in the per-call options; without it those methods return `unknown`. See the [overview]({SITE_PATH}#strict-mode).\n\n"
+        )
     out.append(
         f"The models returned by {resources}, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). "
         "Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. "
         "Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. "
-        f"In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview]({SITE_PATH}#strict-mode)); TypeScript has no strict mode.\n\n"
+        + strict_note
     )
     out.append(
         '## Models\n\n<div class="sdk-ref-table">\n\n| Model | Fields |\n|---|---|\n'
@@ -566,7 +591,7 @@ def index_page(
         '<ParamField name="timeout" type="number" optional>\n  Per-request timeout: seconds in Python (default 60), milliseconds in TypeScript (default 60000).\n</ParamField>\n'
         '<ParamField name="max_retries / maxRetries" type="integer" optional>\n  Default 2. Retries 429 on every call, and timeouts and 5xx on calls that are safe to repeat.\n</ParamField>\n'
         '<ParamField name="default_headers / defaultHeaders" type="object" optional>\n  Sent with every request.\n</ParamField>\n'
-        '<ParamField name="strict_responses" type="boolean" optional>\n  Python only. Reject a response that misses a field the contract marks required (see Strict mode).\n</ParamField>\n'
+        '<ParamField name="strict_responses" type="boolean" optional>\n  Python `strict_responses` and TypeScript `strictResponses` reject malformed responses for generated operations marked strict-wire (see Strict mode).\n</ParamField>\n'
         '<ParamField name="http_client / fetch" type="object" optional>\n  Python: an `httpx.Client` (or `httpx.AsyncClient`) to use instead of the SDK\'s own. TypeScript: a replacement for the global `fetch`.\n</ParamField>\n\n'
         "## Conventions\n\n"
         "### Arguments\n\n"
@@ -588,8 +613,9 @@ def index_page(
         "Parsing is tolerant: a field the backend leaves out is `None` / `undefined`, an extra field is kept. "
         "The backend's `{status, result}` envelope is unwrapped for you.\n\n"
         "### Strict mode\n\n"
-        "`Client(strict_responses=True)` (Python) raises `ResponseValidationError` when a response misses a field the contract marks required. "
-        "Use it in tests to catch contract drift; leave it off in production.\n\n"
+        "`Client(strict_responses=True)` (Python) and `new Client({ strictResponses: true })` (TypeScript) validate responses for operations marked strict-wire, including required-key presence and field values; they never coerce the wire response. "
+        "TypeScript `contexts.get` and `skills.latest_load` return `unknown` when called tolerantly; pass `{ strictResponse: true }` in that call's options to validate and receive the corresponding model type. The per-call option only enables validation and cannot disable client strict mode. "
+        "Use strict validation in tests to catch contract drift; leave it off in production unless the stricter behavior is wanted.\n\n"
         "### Errors\n\n"
         "HTTP errors raise a subclass of `APIError` with `status_code` / `status`, `body`, `detail` and `request_id` / `requestId`. "
         "Import the error classes from `fi.platform` (Python) and from **`@future-agi/sdk/platform`** (TypeScript): the package root does not export them, "

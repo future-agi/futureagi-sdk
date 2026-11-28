@@ -49,7 +49,8 @@ def mcp_input(schema: dict) -> dict:
 
 
 def scoped_entries() -> list[dict]:
-    return [e for e in CATALOG["operations"] if mcp_name(e) in EPOCH_TOOLS | set(SQL_PROJECTIONS)]
+    return [e for e in CATALOG["operations"] if mcp_name(e) in EPOCH_TOOLS | set(SQL_PROJECTIONS)
+            or e["operation"]["path"].startswith("/model-hub/skills/")]
 
 
 def fingerprint(manifest: dict) -> None:
@@ -66,6 +67,8 @@ def product() -> dict:
     source = copy.deepcopy({k: v for k, v in SPEC.items() if k != "x-contract-sources"})  # tests edit it
     tools, described = [], []
     for op, entry in zip(load(SPEC, {"operations": scoped}), scoped):
+        if "mcp" not in op.surfaces:  # Skills has SDK-only operations.
+            continue
         mapping = op.surfaces["mcp"]
         name = mapping["name"]
         placement = {loc: [p.name for p in op.params_in(loc)] for loc in ("path", "query", "body")}

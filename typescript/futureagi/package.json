@@ -21,6 +21,32 @@
       "import": "./dist/esm/platform/models.js",
       "require": "./dist/src/platform/models.js",
       "types": "./dist/esm/platform/models.d.ts"
+    },
+    "./context": {
+      "types": "./dist/esm/context/index.d.ts",
+      "import": "./dist/esm/context/index.js",
+      "require": "./dist/src/context/index.js"
+    },
+    "./telemetry": {
+      "types": "./dist/esm/telemetry/index.d.ts",
+      "import": "./dist/esm/telemetry/index.js",
+      "require": "./dist/src/telemetry/index.js"
+    },
+    "./skills": {
+      "types": "./dist/esm/skills/index.d.ts",
+      "import": "./dist/esm/skills/index.js",
+      "require": "./dist/src/skills/index.js"
+    }
+  },
+  "bin": {
+    "futureagi-telemetry": "./dist/src/telemetry/doctor.js"
+  },
+  "peerDependencies": {
+    "@opentelemetry/api": "^1.9.0"
+  },
+  "peerDependenciesMeta": {
+    "@opentelemetry/api": {
+      "optional": true
     }
   },
   "files": [
@@ -72,6 +98,9 @@
   "packageManager": "pnpm@8.15.0",
   "devDependencies": {
     "@jest/globals": "^29.5.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/context-async-hooks": "^2.0.0",
+    "@opentelemetry/sdk-trace-base": "^2.0.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
@@ -89,6 +118,7 @@
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",
+    "ajv": "^8.17.1",
     "axios": "^1.6.0",
     "form-data": "^4.0.6",
     "uuid": "^11.1.0",

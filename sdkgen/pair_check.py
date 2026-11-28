@@ -9,7 +9,8 @@ tree), and fails unless the scoped part of sdkgen/contracts/swagger.json is what
 the commit serves. The scopes and every per-tool rule are the ones the scoped
 sync applies before it writes the slice (sync_scoped_contract.SCOPES and
 check_scopes): today `sql` (the four SQL tools) and `epoch` (every product MCP
-tool in group epoch), each mapped exactly once, with group, access, open-world,
+tool in group epoch), and `skills` (including its SDK-only routes). Every scoped
+tool is mapped exactly once, with group, access, open-world,
 method, path, operationId, inputs, page caps and unwrap matching the product
 tool, and epoch descriptions equal to product tools.yaml byte for byte.
 
@@ -74,6 +75,11 @@ def compare_projection(product: dict, committed: dict, entries: list[dict], scop
     except ValueError as exc:
         return [f"{scope}: {exc}"]
     (their_paths, their_defs), (our_paths, our_defs) = theirs, ours
+    if product["security"] != committed["security"]:
+        problems.append(f"{scope}: default auth differs from the product contract")
+    for scheme in sync_scoped_contract.used_schemes(product, entries):
+        if scheme not in product["securityDefinitions"] or product["securityDefinitions"][scheme] != committed["securityDefinitions"].get(scheme):
+            problems.append(f"{scope}: auth scheme {scheme} differs from the product contract")
     for path in sorted(set(their_paths) | set(our_paths)):
         a, b = their_paths.get(path, {}), our_paths.get(path, {})
         for key in sorted(set(a) | set(b)):

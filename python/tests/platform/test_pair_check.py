@@ -74,14 +74,15 @@ def test_the_committed_slice_pairs_and_the_record_names_the_commit_hashes_and_st
     assert code == 0, record["problems"]
     assert record["product"] == {"repository": "future-agi/future-agi", "sha": sha, "resolved_branch": "dev"}
     assert record["slice_matches"] is True and record["problems"] == []
-    assert record["scope_groups"] == ["epoch", "sql"]
+    assert record["scope_groups"] == ["epoch", "skills", "sql"]
     assert len(record["scope"]["sql"]) == N_SQL and all(i.startswith("sql.") for i in record["scope"]["sql"])
     assert len(record["scope"]["epoch"]) == N_EPOCH
+    assert len(record["scope"]["skills"]) == 24 and "contexts.manifest" in record["scope"]["skills"]
     assert record["contract_sources"] == fixture.SPEC["x-contract-sources"]
     assert record["stack"] == {"image_digest": "sha256:" + "1" * 64}
     assert record["hashes"]["openapi_sha256"] == pc._sha256((path / pc.SWAGGER).read_bytes())
     assert set(record["hashes"]) == {"openapi_sha256", "mcp_sha256", "tools_yaml_sha256", "sdk_slice_sha256", "sdk_catalog_sha256"}
-    assert record["mcp"]["tool_count"] == N_SQL + N_EPOCH + 1
+    assert record["mcp"]["tool_count"] == N_SQL + N_EPOCH + 13 + 1
 
 
 def test_drift_outside_the_scopes_is_ignored(tmp_path, product):
@@ -191,3 +192,18 @@ def test_a_wrong_live_coverage_table_fails(tmp_path, monkeypatch, edit, message)
     entries = yaml.safe_load(pc.CATALOG.read_text())["operations"]
     _, problems = pc.live_coverage(entries)
     assert any(message in problem for problem in problems), problems
+
+
+def test_sdk_only_context_route_is_part_of_the_pair(tmp_path, product):
+    path, built = product
+    route = "/model-hub/skills/contexts/resolve/"
+    del built["source"]["paths"][route]["get"]
+    code, record = _run(tmp_path, path, _commit(path, built))
+    assert code == 1 and any(f"missing on product: GET {route}" in p for p in record["problems"])
+
+
+def test_pair_rejects_changed_context_credential_scheme(tmp_path, product):
+    path, built = product
+    built["source"]["securityDefinitions"]["ContextCredential"]["name"] = "X-Different-Credential"
+    code, record = _run(tmp_path, path, _commit(path, built))
+    assert code == 1 and record["problems"] == ["skills: auth scheme ContextCredential differs from the product contract"]

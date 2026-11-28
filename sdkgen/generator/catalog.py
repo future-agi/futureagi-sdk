@@ -17,7 +17,8 @@ MCP_ACCESS = {"read", "write", "destructive"}
 MCP_KEYS = {"name", "group", "access", "open_world", "max_page_size", "stability"}
 CONTRACT_FIXES = {"note", "untyped", "page_items", "returns", "optional_in_response", "body", "body_fields", "body_required", "query"}
 FIX_TYPES = {"string", "integer", "number", "boolean", "object", "array", "file", "json"}
-DECODE_MODES = {"json", "text", "auto"}  # auto: JSON when the response says so, else the body text
+DECODE_MODES = {"json", "text", "auto", "bytes"}  # bytes: lossless ZIP/download response
+OPERATION_HEADERS = {"idempotency-key": "idempotency_key", "x-context-resolution": "resolution_id"}
 BODY_METHODS = ("post", "put", "patch")
 
 
@@ -28,7 +29,7 @@ class CatalogError(Exception):
 @dataclass
 class Param:
     name: str  # as sent on the wire
-    location: str  # path | query | body
+    location: str  # path | query | body | header
     schema: dict
     required: bool
     description: str = ""
@@ -120,6 +121,24 @@ def is_method_field(prop: dict) -> bool:
         return False
     # Also read-only lists of plain strings: drf-yasg's default for an untyped ListField (seen live: objects).
     return plain(prop) or (prop.get("type") == "array" and plain(prop.get("items", {})))
+
+
+def single_ref(schema: dict) -> str | None:
+    """A composed, nullable use site still has the type of its one reference."""
+    parts = schema.get("allOf", [])
+    if set(schema) == {"allOf", "x-nullable"} and len(parts) == 1 and set(parts[0]) == {"$ref"}:
+        return parts[0]["$ref"]
+    return schema.get("$ref")
+
+
+def wire_models(ops: list[Op]) -> set[str]:
+    roots = set()
+    for op in sdk_ops(ops):
+        if op.surfaces["sdk"].get("strict_wire"):
+            if not op.returns or "$ref" not in op.returns:
+                raise CatalogError(f"{op.id}: strict_wire requires a named response model")
+            roots.add(class_name(op.returns["$ref"]))
+    return roots
 
 
 def declared_response_models(ops: list[Op]) -> set[str]:
@@ -365,7 +384,19 @@ def _apply_response_fix(op_id: str, spec: dict, fix: dict | None, returns: dict 
 
 def _contract_params(op_id: str, spec: dict, method: str, item: dict, contract_op: dict) -> list[Param]:
     params: list[Param] = []
-    for p in item.get("parameters", []) + contract_op.get("parameters", []):
+    # OpenAPI operation-level parameters override path-item declarations by
+    # (name, in). Do not concatenate them into duplicate function arguments.
+    parameters: dict[tuple[str, str], dict] = {}
+    for level in (item.get("parameters", []), contract_op.get("parameters", [])):
+        seen: set[tuple[str, str]] = set()
+        for parameter in level:
+            name, location = parameter["name"], parameter["in"]
+            key = (name.lower() if location == "header" else name, location)
+            if key in seen:
+                raise CatalogError(f"{op_id}: duplicate operation parameter {name}")
+            seen.add(key)
+            parameters[key] = parameter
+    for p in parameters.values():
         if p["in"] == "body":
             body = resolve(spec, p["schema"]) or {}
             # A PATCH is a partial update: the backend accepts any subset of the fields, whatever
@@ -376,9 +407,18 @@ def _contract_params(op_id: str, spec: dict, method: str, item: dict, contract_o
                 if prop.get("readOnly"):
                     continue  # server-owned fields never appear in inputs
                 params.append(Param(name, "body", prop, name in required, prop.get("title", "")))
-        elif p["in"] in ("path", "query"):
+        elif p["in"] in ("path", "query", "header"):
             schema = {k: v for k, v in p.items() if k not in ("name", "in", "required", "description")}
-            params.append(Param(p["name"], p["in"], schema, p["in"] == "path" or p.get("required", False), p.get("description", "")))
+            alias = None
+            if p["in"] == "header":
+                alias = OPERATION_HEADERS.get(p["name"].lower())
+                if alias is None:
+                    raise CatalogError(f"{op_id}: header is not allowlisted: {p['name']}")
+                if schema.get("type") != "string":
+                    raise CatalogError(f"{op_id}: operation headers must be strings")
+                if any(other.location == "header" and other.name.lower() == p["name"].lower() for other in params):
+                    raise CatalogError(f"{op_id}: duplicate operation header")
+            params.append(Param(p["name"], p["in"], schema, p["in"] == "path" or p.get("required", False), p.get("description", ""), alias))
         elif p["in"] == "formData":
             # A real multipart form (drf-yasg writes one for a view with MultiPartParser):
             # form fields and files are both body params, and the entry needs
@@ -422,6 +462,9 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
     fix = entry.get("contract_fix")
 
     params = _apply_request_fix(op_id, fix, _contract_params(op_id, spec, method, item, contract_op))
+    for header in (p for p in params if p.location == "header"):
+        if any(p is not header and (p.arg_name or re.sub(r"\W", "_", p.name)) == header.arg_name for p in params):
+            raise CatalogError(f"{op_id}: operation header argument collides with another parameter")
 
     multipart = bool(entry["operation"].get("multipart", False))
     decode = entry["operation"].get("decode", "json")

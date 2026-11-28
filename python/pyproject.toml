@@ -42,13 +42,17 @@ typing-extensions = ">=4.7"
 # pydantic needs it to read `X | None` annotations in fi.gateway types on Python 3.9
 eval-type-backport = { version = ">=0.2", python = "<3.10" }
 tiktoken = { version = ">=0.5", optional = true }
-opentelemetry-api = { version = ">=1.0", optional = true }
-opentelemetry-sdk = { version = ">=1.0", optional = true }
+opentelemetry-api = { version = ">=1.20", optional = true }
+opentelemetry-sdk = { version = ">=1.20", optional = true }
+# Backend protocol conformance is qualified on Python 3.11, not a native-session certification.
+deepagents = { version = "==0.4.11", python = ">=3.11,<3.12", optional = true }
 
 [tool.poetry.extras]
 # pip install "futureagi[gateway-tokens]" / "futureagi[gateway-otel]"
 gateway-tokens = ["tiktoken"]
 gateway-otel = ["opentelemetry-api", "opentelemetry-sdk"]
+otel = ["opentelemetry-api", "opentelemetry-sdk"]
+context-deepagents = ["deepagents"]
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"
@@ -62,6 +66,8 @@ respx = ">=0.21"
 [tool.pytest.ini_options]
 # tests/gateway (ported from agentcc) uses bare `async def` tests
 asyncio_mode = "auto"
+# Print every skip reason (e.g. "SKILLS NOT SERVED" on a product release without Skills routes).
+addopts = "-rs"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,0 +1,16 @@
+name: Require approved SDK test VM
+description: Fail closed outside the disposable GCP SDK test runner pool.
+runs:
+  using: composite
+  steps:
+    - name: Check the GCP project before running project code
+      shell: bash
+      run: |
+        set -euo pipefail
+        project=$(curl --fail --silent --show-error --max-time 5 --noproxy '*' \
+          -H 'Metadata-Flavor: Google' \
+          http://metadata.google.internal/computeMetadata/v1/project/project-id)
+        if [ "$project" != fagi-omega-staging ]; then
+          echo 'SDK checks require a disposable labelled fagi-omega-staging GCP runner.' >&2
+          exit 1
+        fi

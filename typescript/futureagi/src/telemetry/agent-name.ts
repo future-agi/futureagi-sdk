@@ -1,0 +1,103 @@
+// Keep the observer structural: either package may be installed without the
+// optional SDK/OTel declarations. Standard recording spans expose both APIs.
+import type { Attributes } from './otel';
+const VIEW = Symbol.for('futureagi.runtime.agent-identity.v1');
+const SET_CONTEXT_NAME = Symbol.for('futureagi.runtime.set-context-name.v1');
+const FILL_IDENTITY = Symbol.for('futureagi.runtime.fill-agent-identity.v1');
+// Older FI wrappers supplied only an export view: absent write flags convey no authority.
+interface View { name?: string; id?: string; automatic: boolean; nameWritable?: boolean; idWritable?: boolean }
+interface Writers {
+  [VIEW]?(mark?: true): View;
+  [SET_CONTEXT_NAME]?(name: string): void;
+  [FILL_IDENTITY]?(key: string, value: unknown): void;
+  setAttribute(key: string, value: unknown): unknown;
+  setAttributes?(attributes: Readonly<Record<string, unknown>>): unknown;
+}
+
+export const AGENT_NAME = 'gen_ai.agent.name';
+// The optional fi-core processor looks up the exact SDK-published attributes
+// object it just copied. Foreign carriers and equal strings prove no origin.
+const SOURCES = Symbol.for('futureagi.runtime.context-agent.sources.v1');
+const ORIGIN = Symbol.for('futureagi.runtime.context-agent.writer.v1');
+type Origin = { automatic: boolean };
+type ObservedSetter = Writers['setAttribute'] & { [ORIGIN]?: Origin };
+type Source = 'context' | 'agent_scope';
+// Keep the callback ABI read by the optional runtime processor. Older callbacks
+// represented context alone; absence is never evidence of an SDK writer.
+interface Observer { (span: Writers): void; source?: Source }
+type Observers = WeakMap<object, Observer>;
+const globals = globalThis as unknown as { [SOURCES]?: Observers };
+
+export function agentIdentity(span: Writers): View {
+  if (span[VIEW]) return span[VIEW]();
+  const attrs = (span as Writers & { attributes?: Attributes }).attributes;
+  const name = attrs?.[AGENT_NAME], id = attrs?.['gen_ai.agent.id'];
+  const automatic = (span.setAttribute as ObservedSetter)[ORIGIN]?.automatic === true;
+  return {name: typeof name === 'string' ? name : undefined, id: typeof id === 'string' ? id : undefined,
+    automatic, nameWritable: !!attrs && (!(AGENT_NAME in attrs) || automatic),
+    idWritable: !!attrs && !('gen_ai.agent.id' in attrs)};
+}
+
+// A framework may intentionally write even the same name later. OTel has no
+// attribute-change listener; observe only the two public setters of spans on
+// which we actually wrote a derived name. Nothing is added to exported data.
+export function markInheritedName(span: Writers): void {
+  if (span[VIEW]) { span[VIEW](true); return; }
+  const single = span.setAttribute as ObservedSetter;
+  let origin = single[ORIGIN];
+  if (!origin) {
+    const tracked = { automatic: false };
+    const bulk = span.setAttributes;
+    if (typeof bulk !== "function") return;
+    const observed: ObservedSetter = function(this: Writers, key, value) {
+      if (key === AGENT_NAME) tracked.automatic = false;
+      return single.call(this, key, value);
+    };
+    observed[ORIGIN] = tracked;
+    try {
+      span.setAttributes = function(attributes) {
+        if (Object.prototype.hasOwnProperty.call(attributes, AGENT_NAME)) tracked.automatic = false;
+        return bulk.call(this, attributes);
+      };
+      span.setAttribute = observed;
+    } catch { return; } // Non-standard read-only spans: preserve unknown writers.
+    origin = tracked;
+  }
+  origin.automatic = true;
+}
+
+// Keep the generated write and its mark adjacent. A standalone FI wrapper
+// can safely defer the write if the host already distributed native setters.
+export function writeContextName(span: Writers, name: string): void {
+  if (span[SET_CONTEXT_NAME]) { span[SET_CONTEXT_NAME](name); return; }
+  if (!agentIdentity(span).nameWritable) return;
+  span.setAttribute(AGENT_NAME, name);
+  markInheritedName(span);
+}
+
+// Keep SDK defaults separate from explicit application writes. The wrapper
+// rechecks the native slot after the other enrichment attributes have run.
+export function fillIdentity(span: Writers, key: string, value: unknown): void {
+  const copy = Array.isArray(value) ? [...value] : value;
+  if (span[FILL_IDENTITY]) span[FILL_IDENTITY](key, copy);
+  else if (!span[VIEW]) {
+    const view = agentIdentity(span);
+    if (key === AGENT_NAME ? view.nameWritable : view.idWritable) span.setAttribute(key, copy);
+  }
+}
+
+const markScope = Object.assign((span: Writers) => markInheritedName(span), {source: 'agent_scope' as const});
+export function publishedSource<T extends object>(attrs: T, source: string): T {
+  if (source === 'context' || source === 'agent_scope')
+    (globals[SOURCES] ??= new WeakMap()).set(attrs, source === 'context' ? markInheritedName : markScope);
+  return attrs;
+}
+
+export function inheritedSource(attrs: unknown): Source | 'none' {
+  const observer = typeof attrs === 'object' && attrs !== null ? globals[SOURCES]?.get(attrs) : undefined;
+  return observer ? observer.source ?? 'context' : 'none';
+}
+
+export function markPublishedName(span: Writers, attrs: unknown): void {
+  if (typeof attrs === 'object' && attrs !== null) globals[SOURCES]?.get(attrs)?.(span);
+}
