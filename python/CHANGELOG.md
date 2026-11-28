@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/future-agi/futureagi-sdk/compare/python-v0.8.0...python-v0.8.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **python:** send API keys only to the configured host over https or loopback ([5491aab](https://github.com/future-agi/futureagi-sdk/commit/5491aaba0dd0940193840d0e1d64004c32f43848))
+
 ## 0.8.1
 
 ### Changed
