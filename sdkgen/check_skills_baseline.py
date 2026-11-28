@@ -2,9 +2,18 @@
 
 Run against a checkout containing the SDK commit recorded in swagger.json under x-contract-sources.other.
 Checks public generator inputs and emitted operation records; never opens implementation files.
+
+    python sdkgen/check_skills_baseline.py                                    # against x-contract-sources.other
+    python sdkgen/check_skills_baseline.py --paired SDK_COMMIT --product-commit PRODUCT_COMMIT
+
+Product-side pairing re-syncs only the Skills scope (sync_scoped_contract.py --scopes skills) over
+the paired SDK commit. --paired compares everything that is not Skills, including every other
+x-contract-sources record, byte for byte with that commit instead, and requires the Skills record
+to name the product commit synced in the same run (its scope check ran in that sync).
 """
 from __future__ import annotations
 
+import argparse
 import copy
 import hashlib
 import json
@@ -22,14 +31,22 @@ SKILL_IDS = SCOPES["skills"]["id_prefixes"]
 SKILL_PATH = SCOPES["skills"]["path_prefix"]
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--paired", metavar="SDK_COMMIT", help="compare with this SDK commit, not x-contract-sources.other")
+    parser.add_argument("--product-commit", help="with --paired: the product commit the Skills scope was synced from")
+    args = parser.parse_args(argv)
+    if bool(args.paired) != bool(args.product_commit):
+        raise SystemExit("--paired and --product-commit go together")
     contracts = ROOT / "sdkgen/contracts"
     after = json.loads((contracts / "swagger.json").read_bytes())
     if "x-contract-sources" not in after and "x-source-sha256" in after:
+        if args.paired:
+            raise SystemExit("--paired needs a scoped slice")
         print("Release slice; no scoped baseline to compare")
         return
     metadata = after["x-contract-sources"]["other"]
-    commit = metadata["sdk_commit"]
+    commit = args.paired or metadata["sdk_commit"]
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         raise SystemExit("invalid SDK baseline commit")
 
@@ -50,6 +67,17 @@ def main() -> None:
     raw = baseline("sdkgen/contracts/swagger.json")
     digest = hashlib.sha256(raw).hexdigest()
     before = json.loads(raw)
+    if args.paired:
+        if not re.fullmatch(r"[0-9a-f]{40}", args.product_commit):
+            raise SystemExit("invalid product commit")
+        # Only the Skills record may change; sql, epoch and other stay as the paired commit ships them.
+        pinned = before.get("x-contract-sources") or {}
+        recorded = after["x-contract-sources"]
+        equal(set(pinned), set(recorded), "x-contract-sources scopes")
+        for name in sorted(set(pinned) - {"skills"}):
+            equal(pinned[name], recorded[name], f"x-contract-sources.{name}")
+        if recorded.get("skills", {}).get("backend_commit") != args.product_commit:
+            raise SystemExit("the Skills scope was not synced from this product commit in this run")
     # Compare the generated id -> tool mapping, not just a tool count. A new SDK
     # baseline can add tools, but a scoped sync cannot rename or reassign them.
     expected_names = {op["id"]: mcp.get("name", op["id"].replace(".", "_")) for op in original
@@ -60,7 +88,8 @@ def main() -> None:
              if "mcp" in op.surfaces and not op.id.startswith(SKILL_IDS)}
     equal(expected_names, names, "MCP mappings")
     print(f"{len(names)} non-Skills MCP mappings match {commit}")
-    equal(digest, metadata["slice_sha256"], "baseline slice digest")
+    if not args.paired:  # the paired commit is not `other`; its records were compared above
+        equal(digest, metadata["slice_sha256"], "baseline slice digest")
     paths, definitions = sync_contract.project(before, original)
     other_paths = {p: v for p, v in after["paths"].items() if not p.startswith(SKILL_PATH)}
     equal(paths, other_paths, "public paths/parameters/responses")
