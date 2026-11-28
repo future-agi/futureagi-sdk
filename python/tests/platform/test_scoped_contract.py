@@ -114,6 +114,38 @@ def test_a_skills_sync_cannot_change_a_definition_a_pinned_scope_shares(paired_s
         compose(("skills",))
 
 
+def _skills_route():
+    entry = next(e for e in fixture.scoped_entries() if (e["surfaces"].get("mcp") or {}).get("group") == "skills")
+    return entry["operation"]["path"], entry["operation"]["method"].lower(), mcp_name(entry)
+
+
+def test_a_skills_sync_refuses_a_definition_only_a_pinned_scope_and_skills_share(paired_sync):
+    # A definition no unscoped operation reaches: shared by one Epoch and one Skills route only.
+    compose, state = paired_sync
+    probe = {"description": "probe", "schema": {"$ref": "#/definitions/ScopeSharedProbe"}}
+    for doc in (state["source"], state["baseline"]):
+        doc["definitions"]["ScopeSharedProbe"] = {"type": "object", "title": "shared"}
+        for path, method, _ in (_epoch_route(), _skills_route()):
+            doc["paths"][path][method].setdefault("responses", {})["299"] = copy.deepcopy(probe)
+    result = compose(("skills",))
+    assert result["definitions"]["ScopeSharedProbe"] == {"type": "object", "title": "shared"}
+    state["source"]["definitions"]["ScopeSharedProbe"]["title"] = "drifted product shape"
+    with pytest.raises(ValueError, match="collides"):
+        compose(("skills",))
+
+
+def test_a_skills_only_sync_still_checks_and_resyncs_skills(paired_sync):
+    compose, state = paired_sync
+    path, method, name = _skills_route()
+    # The selected scope comes from the product: a product-side change to a Skills route lands.
+    state["source"]["paths"][path][method].setdefault("responses", {})["298"] = {"description": "probe"}
+    assert compose(("skills",))["paths"][path][method]["responses"]["298"] == {"description": "probe"}
+    # And it is still checked against the product's MCP manifest.
+    state["manifest"]["tools"] = [t for t in state["manifest"]["tools"] if t["name"] != name]
+    with pytest.raises(ValueError, match="skills"):
+        compose(("skills",))
+
+
 def test_an_epoch_input_change_fails_the_full_sync_but_not_a_skills_only_one(paired_sync):
     compose, state = paired_sync
     path, method, name = _epoch_route()
