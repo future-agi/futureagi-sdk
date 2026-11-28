@@ -45,12 +45,99 @@ def scoped_sync(monkeypatch):
     monkeypatch.setattr(sync, "_blob", blob)
     state = {"source": built["source"], "baseline": baseline, "manifest": manifest, "tools": built["tools"], "tools_yaml": tools_yaml}
 
-    def compose():
+    def compose(scopes=None):
         if not state.get("keep_fingerprint"):  # a test that adds a tool gets a consistent manifest
             fixture.fingerprint(manifest)
-        return sync.compose(ROOT, "0" * 40, "1" * 40)
+        return sync.compose(ROOT, "0" * 40, "1" * 40, scopes)
 
     return compose, state
+
+
+@pytest.fixture
+def paired_sync(scoped_sync):
+    """Product pairing: the baseline is the paired SDK slice itself, every scope recorded."""
+    compose, state = scoped_sync
+    state["baseline"].clear()
+    state["baseline"].update(copy.deepcopy(SPEC))
+    return compose, state
+
+
+def _epoch_route():
+    entry = next(e for e in fixture.scoped_entries() if (e["surfaces"].get("mcp") or {}).get("group") == "epoch")
+    return entry["operation"]["path"], entry["operation"]["method"].lower(), mcp_name(entry)
+
+
+def mcp_name(entry):
+    return _mcp_name(entry)
+
+
+def test_selecting_every_scope_is_byte_identical_to_the_default(scoped_sync):
+    import sync_scoped_contract as sync
+
+    compose, _ = scoped_sync
+    default = json.dumps(compose(), indent=2)
+    assert json.dumps(compose(tuple(sync.SCOPES)), indent=2) == default
+    assert json.dumps(compose(tuple(reversed(list(sync.SCOPES)))), indent=2) == default
+
+
+def test_a_skills_only_sync_keeps_every_pinned_scope_as_the_paired_slice_has_it(paired_sync):
+    compose, state = paired_sync
+    # The product moves an Epoch route and drops an unscoped route the SDK wraps; neither may
+    # reach a Skills-only sync, nor fail it.
+    path, method, _ = _epoch_route()
+    state["source"]["paths"][path][method].setdefault("parameters", []).append(
+        {"name": "probe", "in": "query", "required": False, "type": "string"})
+    unscoped = next(e for e in CATALOG["operations"] if e not in fixture.scoped_entries())
+    del state["source"]["paths"][unscoped["operation"]["path"]][unscoped["operation"]["method"].lower()]
+    result = compose(("skills",))
+    assert (result["paths"], result["definitions"]) == (SPEC["paths"], SPEC["definitions"])
+    sources, committed = result["x-contract-sources"], SPEC["x-contract-sources"]
+    assert {name: sources[name] for name in ("sql", "epoch", "other")} == {
+        name: committed[name] for name in ("sql", "epoch", "other")}
+    assert sources["skills"]["backend_commit"] == "0" * 40
+    assert sources["skills"]["tools"] == committed["skills"]["tools"]
+
+
+def test_a_pinned_scope_is_not_checked_for_missing_or_extra_tools(paired_sync):
+    compose, state = paired_sync
+    _, _, name = _epoch_route()
+    state["manifest"]["tools"] = [t for t in state["manifest"]["tools"] if t["name"] != name]
+    with pytest.raises(ValueError, match="epoch"):
+        compose()
+    assert compose(("skills",))["x-contract-sources"]["epoch"] == SPEC["x-contract-sources"]["epoch"]
+
+
+def test_a_skills_sync_cannot_change_a_definition_a_pinned_scope_shares(paired_sync):
+    compose, state = paired_sync
+    state["source"]["definitions"]["ManagementAPIErrorResponse"]["title"] = "drifted product shape"
+    with pytest.raises(ValueError, match="collides"):
+        compose(("skills",))
+
+
+def test_an_epoch_input_change_fails_the_full_sync_but_not_a_skills_only_one(paired_sync):
+    compose, state = paired_sync
+    path, method, name = _epoch_route()
+    for tool in state["manifest"]["tools"]:
+        if tool["name"] == name:
+            tool.setdefault("inputSchema", {}).setdefault("properties", {})["probe"] = {"type": "string"}
+    state["source"]["paths"][path][method].setdefault("parameters", []).append(
+        {"name": "probe", "in": "query", "required": False, "type": "string"})
+    with pytest.raises(ValueError):
+        compose()
+    assert compose(("skills",))["paths"][path] == SPEC["paths"][path]
+
+
+@pytest.mark.parametrize("scopes", [(), ("nope",), ("skills", "skills")])
+def test_an_invalid_scope_selection_is_rejected(paired_sync, scopes):
+    compose, _ = paired_sync
+    with pytest.raises(ValueError, match="scope selection"):
+        compose(scopes)
+
+
+def test_pinning_needs_a_scoped_baseline_slice(scoped_sync):
+    compose, _ = scoped_sync  # the default fixture's baseline is a release slice
+    with pytest.raises(ValueError, match="previously synced scoped SDK slice"):
+        compose(("skills",))
 
 
 def test_scoped_groups_come_from_one_commit_and_the_rest_from_the_baseline(scoped_sync):
