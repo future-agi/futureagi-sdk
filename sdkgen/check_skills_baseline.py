@@ -74,6 +74,18 @@ def main(argv: list[str] | None = None) -> None:
     else:
         held = "unscoped"
         exempt = {op["id"] for op in baseline_catalog + selected if catalog_scope(op) is not None}
+        # An operation that joins or leaves a scope would drop out of the comparison on both sides
+        # unseen. Refuse it: a deliberate move bumps the baseline to a commit that already has it.
+        was = {op["id"]: catalog_scope(op) for op in baseline_catalog}
+        moved = sorted(
+            f"{op['id']} (baseline {was[op['id']] or 'unscoped'}, now {catalog_scope(op) or 'unscoped'})"
+            for op in selected if op["id"] in was and was[op["id"]] != catalog_scope(op)
+        )
+        if moved:
+            raise SystemExit(
+                "operation changed scope: " + "; ".join(moved)
+                + ". To move it on purpose, bump x-contract-sources.other to an SDK commit that already has the move."
+            )
     original = [op for op in baseline_catalog if op["id"] not in exempt]
     surviving = [op for op in selected if op["id"] not in exempt]
     equal(original, surviving, "catalog entries or ordering")

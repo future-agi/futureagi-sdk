@@ -58,7 +58,8 @@ def baseline(tmp_path, monkeypatch):
     def as_other(doc):  # the committed slice stands in for x-contract-sources.other's slice
         doc["x-contract-sources"]["other"]["slice_sha256"] = hashlib.sha256(committed[FILES[0]]).hexdigest()
 
-    return SimpleNamespace(run=run, edit=edit, as_other=as_other, committed=json.loads(committed[FILES[0]]))
+    return SimpleNamespace(run=run, edit=edit, as_other=as_other, root=tmp_path,
+                           committed=json.loads(committed[FILES[0]]))
 
 
 def _unscoped_route() -> tuple[str, str]:
@@ -171,4 +172,30 @@ def test_default_mode_rejects_a_definition_scoped_and_unscoped_operations_share(
         doc["definitions"][name] = {**doc["definitions"][name], "title": "changed"}
     baseline.edit(change)
     with pytest.raises(SystemExit, match="changed unscoped public schema definitions"):
+        baseline.run()
+
+
+def _catalog_edit(baseline, change):
+    import yaml
+
+    path = baseline.root / FILES[1]
+    catalog = yaml.safe_load(path.read_bytes())
+    change(catalog["operations"])
+    path.write_text(yaml.safe_dump(catalog, sort_keys=False))
+
+
+@pytest.mark.parametrize("direction", ["into a scope", "out of a scope"])
+def test_default_mode_refuses_an_operation_that_changed_scope(baseline, direction):
+    from sync_scoped_contract import catalog_scope
+
+    def change(operations):
+        if direction == "into a scope":
+            entry = next(e for e in operations if catalog_scope(e) is None and isinstance(e["surfaces"].get("mcp"), dict))
+            entry["surfaces"]["mcp"]["group"] = "epoch"
+        else:
+            entry = next(e for e in operations if catalog_scope(e) == "epoch")
+            entry["surfaces"]["mcp"]["group"] = "simulation"
+    baseline.edit(baseline.as_other)
+    _catalog_edit(baseline, change)
+    with pytest.raises(SystemExit, match="operation changed scope"):
         baseline.run()
