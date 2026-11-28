@@ -217,3 +217,33 @@ def test_the_body_is_neutral_and_bounded(tmp_path, product):
     body = drift.report_body(record, problems, ["simulation.epochs.list"], [], "https://run")
     assert "… and 5 more" in body
     assert "TH-" not in body and "linear" not in body.lower()
+
+
+def test_catalog_scope_agrees_with_the_scoped_sync_on_the_committed_contract():
+    import sync_scoped_contract as ssc
+
+    built = fixture.product()
+    fixture.fingerprint(built["manifest"])
+    _, in_scope, _ = ssc.check_scopes(built["source"], json.dumps(built["source"]).encode(), built["manifest"],
+                                      yaml.safe_dump(built["tools_yaml"]).encode(), fixture.CATALOG["operations"])
+    expected = {entry["id"]: scope for scope, entries in in_scope.items() for entry in entries}
+    found = {e["id"]: ssc.catalog_scope(e) for e in fixture.CATALOG["operations"] if ssc.catalog_scope(e)}
+    assert found == expected and set(found.values()) == set(ssc.SCOPES)
+
+
+def test_a_clean_product_reports_no_drifted_operation_or_new_tool(tmp_path, product):
+    path, built = product
+    assert drift.drifted(path, _commit(path, built)) == ([], [])
+
+
+def test_scopes_synced_from_different_commits_get_one_range_each(tmp_path, product):
+    path, built = product
+    record = json.loads(_pair(tmp_path, path, _commit(path, built)).read_text())
+    sha = record["product"]["sha"]
+    sources = record["contract_sources"]
+    scopes = sorted(drift.sync_scoped_contract.SCOPES)
+    sources[scopes[0]] = {**sources[scopes[0]], "backend_commit": "a" * 40}
+    body = drift.report_body(record, ["drift"], [], [], "https://run")
+    assert "per scope" in body
+    assert f"- {scopes[0]}: `{'a' * 12}...{sha[:12]}`" in body
+    assert sum(1 for line in body.splitlines() if line.startswith("- ") and "/compare/" in line) == len(scopes)

@@ -150,6 +150,23 @@ def scope_tools(name: str, tools: dict[str, dict]) -> set[str]:
     return {tool for tool, spec in tools.items() if spec["group"] == scope["product_group"]}
 
 
+def catalog_scope(entry: dict) -> str | None:
+    """The scope a catalog entry belongs to, from the catalog alone: by id prefix for a scope that
+    lists them (SDK-only entries included where the scope says so), else by its MCP group.
+    check_scopes decides the same membership against the product's tools and refuses any entry
+    whose id, path and tool disagree, so on a contract it accepts the two agree."""
+    mapping = (entry.get("surfaces") or {}).get("mcp")
+    for name, spec in SCOPES.items():
+        if "id_prefixes" in spec:
+            if entry["id"].startswith(spec["id_prefixes"]) and (
+                isinstance(mapping, dict) or spec.get("include_sdk_only")
+            ):
+                return name
+        elif isinstance(mapping, dict) and mapping.get("group") == spec.get("product_group"):
+            return name
+    return None
+
+
 def _scope_of(entry: dict, scoped: dict[str, set[str]]) -> str | None:
     mapping = entry.get("surfaces", {}).get("mcp")
     if mapping in (None, False):
