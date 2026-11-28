@@ -66,6 +66,8 @@ respx = ">=0.21"
 [tool.pytest.ini_options]
 # tests/gateway (ported from agentcc) uses bare `async def` tests
 asyncio_mode = "auto"
+# Print every skip reason (e.g. "SKILLS NOT SERVED" on a product release without Skills routes).
+addopts = "-rs"
 
 [build-system]
 requires = ["poetry-core"]
