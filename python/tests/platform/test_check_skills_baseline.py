@@ -81,9 +81,13 @@ def test_paired_mode_rejects_a_changed_pinned_record(baseline, scope):
 def test_paired_mode_rejects_a_changed_unscoped_route(baseline):
     def change(doc):
         _skills_synced_from(PRODUCT)(doc)
-        path = next(p for p in doc["paths"] if not p.startswith("/model-hub/skills/"))
-        method = next(iter(doc["paths"][path]))
-        doc["paths"][path][method] = {**copy.deepcopy(doc["paths"][path][method]), "summary": "changed"}
+        methods = ("get", "put", "post", "delete", "patch")
+        path, method = next((p, m) for p, item in doc["paths"].items() if not p.startswith("/model-hub/skills/")
+                            for m in item if m in methods)
+        operation = copy.deepcopy(doc["paths"][path][method])
+        operation.setdefault("parameters", []).append(
+            {"name": "probe", "in": "query", "required": True, "type": "string"})
+        doc["paths"][path][method] = operation
     baseline.edit(change)
     with pytest.raises(SystemExit, match="public paths"):
         baseline.run("--paired", PAIRED, "--product-commit", PRODUCT)
