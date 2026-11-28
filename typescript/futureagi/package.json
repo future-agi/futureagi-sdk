@@ -50,12 +50,14 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/__tests__/**",
+    "!dist/**/__fixtures__/**"
   ],
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc --build tsconfig.json tsconfig.esm.json tsconfig.esnext.json && tsc-alias -p tsconfig.esm.json && pnpm run postbuild",
-    "postbuild": "echo '{\"type\": \"module\"}' > ./dist/esm/package.json && echo '{\"type\": \"commonjs\"}' > ./dist/src/package.json",
+    "postbuild": "echo '{\"type\": \"module\"}' > ./dist/esm/package.json && echo '{\"type\": \"commonjs\"}' > ./dist/src/package.json && node scripts/build-esm-root.mjs",
     "build:watch": "tsc --build --watch tsconfig.json",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -114,7 +116,8 @@
     "ts-jest": "^29.1.0",
     "tsc-alias": "^1.8.0",
     "tsx": "^4.0.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "undici": "6.21.0"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",

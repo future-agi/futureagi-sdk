@@ -15,7 +15,7 @@ function setup(handler: (url: string, init: RequestInit) => Response | Promise<R
     calls.push({ url, init, headers: new Headers(init.headers) });
     return handler(url, init);
   };
-  const client = new Client({ auth, baseUrl: BASE, fetch, ...extra } as ClientConfig);
+  const client = new Client({ auth, baseUrl: BASE, fetch, customFetchReceivesKeys: true, ...extra } as ClientConfig);
   return { client, calls };
 }
 
@@ -120,9 +120,15 @@ describe("immutable continuation", () => {
     expect(calls).toHaveLength(3);
   });
 
-  test.each([401, 403, 410, 422, 304])("denial %s is never retried or replaced by a label resolve", async status => {
-    const { client, calls } = setup(() => new Response(status === 304 ? null : JSON.stringify({ code: "denied" }), { status }));
+  test.each([401, 403, 410, 422])("denial %s is never retried or replaced by a label resolve", async status => {
+    const { client, calls } = setup(() => new Response(JSON.stringify({ code: "denied" }), { status }));
     await expect(client.request("GET", MANIFEST, { decode: "bytes" }, { resolutionId: "lease" })).rejects.toMatchObject({ status });
+    expect(calls).toHaveLength(1);
+  });
+
+  test("a 304 is refused like a redirect, never retried or replaced by a label resolve", async () => {
+    const { client, calls } = setup(() => new Response(null, { status: 304 }));
+    await expect(client.request("GET", MANIFEST, { decode: "bytes" }, { resolutionId: "lease" })).rejects.toThrow(/cannot follow redirects/);
     expect(calls).toHaveLength(1);
   });
 
@@ -170,6 +176,26 @@ describe("immutable continuation", () => {
   test("typed headers cannot hide conflicting defaults", async () => {
     const { client } = setup(undefined, { defaultHeaders: { "x-context-resolution": "old" } });
     await expect(client.request("GET", RESOLVE, {}, { resolutionId: "new" })).rejects.toThrow(/conflicting X-Context-Resolution/);
+  });
+
+  test("a letter-case variant cannot hide a conflicting lease or workspace header", async () => {
+    const { client, calls } = setup();
+    const headers = { "x-context-resolution": "stale", "X-Context-Resolution": "new" };
+    await expect(client.request("GET", RESOLVE, {}, { resolutionId: "new", headers })).rejects.toThrow(/conflicting X-Context-Resolution/);
+    const workspace = { "x-workspace-id": "other", "X-Workspace-Id": "workspace-1" };
+    await expect(client.request("GET", RESOLVE, {}, { headers: workspace })).rejects.toThrow(/workspace header/);
+    expect(calls).toHaveLength(0);
+  });
+
+  test("a replay does not read a pinned identity header again", async () => {
+    let reads = 0;
+    let attempts = 0;
+    const { client, calls } = setup(() => ++attempts === 1 ? new Response(null, { status: 429, headers: { "retry-after": "0" } }) : ok(), { maxRetries: 1 });
+    const headers = { get "Idempotency-Key"() { if (++reads > 1) throw new Error("read again"); return "original-key"; } } as unknown as Record<string, string>;
+    await client.request("POST", "/model-hub/skills/contexts/bindings/b/receipts/", { body: {} }, { headers });
+    expect(calls).toHaveLength(2);
+    expect(reads).toBe(1);
+    for (const { headers: sent } of calls) expect(sent.get("idempotency-key")).toBe("original-key");
   });
 });
 

@@ -87,3 +87,16 @@ export class PromptTemplate {
 }
 
 export type Variables = Record<string, string | string[]>;
+
+/**
+ * What `Prompt.generate()` and `Prompt.improve()` resolve to.
+ *
+ * `jobId` is the id of the job the server queued (its `generation_id` or `improve_id`); the
+ * server answers with the id only, so the SDK does not receive the generated text and the
+ * template's messages are unchanged. `prompt` is set when the server answers with the text
+ * itself, which then replaces the content of the last message (or becomes a user message when
+ * the template has none).
+ */
+export type PromptGenerationResult =
+  | { jobId: string; prompt?: never }
+  | { prompt: string; jobId?: never };

@@ -186,6 +186,119 @@ import {
 See the full **TypeDoc API reference** at  
 <https://futureagi.com/docs/sdk/typescript>.
 
+## Keys over plain http
+
+A request that carries your key (`X-Api-Key`, `X-Secret-Key`, `Authorization` and the other credential headers) is
+not sent over plain http to a host that is not loopback (`localhost`, `127.0.0.0/8`, `::1`). The call rejects before
+any connection is made with an `Error` whose `code` is `insecure_http_origin`, and the client does not retry it:
+
+```ts
+try {
+  await kb.listKbs(); // any call of a client that sends your key
+} catch (err) {
+  if ((err as { code?: string }).code === 'insecure_http_origin') {
+    // use an https:// base URL, or opt in to plain http
+  }
+}
+```
+
+To send keyed requests over plain http to such a host, set `allowInsecureHttp: true` in the client options, or set
+`FI_ALLOW_INSECURE_HTTP=1` when the option is not given. An explicit `allowInsecureHttp: false` wins over the
+variable. A request that carries your key does not follow redirects: on `HttpClient` and the classes built on it a
+3xx response rejects with `UnexpectedRedirectError` (code `UNEXPECTED_REDIRECT`), and on the platform `Client` with
+an `APIConnectionError`, for a redirect to the same origin as well. Configure the final address of the endpoint as
+the base URL. A keyed `HttpClient` request does not use the Axios `proxy` option. A `Proxy-Authorization` header in a
+call's headers, default headers or `fetchOptions` goes to a proxy alone (see
+[Upgrading from 0.3 to 0.4](#upgrading-from-03-to-04)). A keyed request goes through an Axios adapter of your own
+only with `customAdapterReceivesKeys: true`, and through a `fetch` of your own given to the platform `Client` only
+with `customFetchReceivesKeys: true`. The SDK checks where a request goes before your own adapter or `fetch` runs; a
+change that code makes afterwards (another adapter, a proxy, a URL, agent or DNS lookup) is not checked again. See the
+[CHANGELOG](https://github.com/future-agi/futureagi-sdk/blob/main/typescript/futureagi/CHANGELOG.md) for the details.
+
+## Upgrading from 0.3 to 0.4
+
+### Breaking: `Proxy-Authorization` goes to a proxy alone
+A `Proxy-Authorization` header (any letter case, in any header container) in a call's headers, a client's default
+headers, `fetchOptions.headers` or one that an interceptor adds is withheld from every send that reaches its host: a
+keyed request, a host that `NO_PROXY` names, a request with no proxy, Axios's `fetch` adapter, an adapter function,
+and the platform `Client`. Only a plain `http://` `HttpClient` request sent through the proxy named in its Axios
+`proxy` option carries it. A request that the proxy environment routes, and an `https://` request, which goes through
+a CONNECT tunnel (Axios's, the runtime's environment proxy, or a proxy agent or dispatcher of yours), carry none,
+where 0.3.1 sent a per-call value to the environment proxy.
+
+Migration: give proxy credentials in the proxy URL (`HTTP_PROXY=http://user:password@proxy:port`), in the `proxy`
+option's `auth`, or to the agent or dispatcher.
+
+### Added: extra headers on every request to the base URL (`FI_EXTRA_HEADERS`, `extraHeaders`)
+`HttpClient` and the dataset, prompt, knowledge-base, annotation and queue clients built on it add the
+`FI_EXTRA_HEADERS` setting (`Name=value` entries separated by `;`, CR or LF) to every request to their base URL, for
+example a `Proxy-Authorization` for a reverse proxy such as Google IAP. `HttpClient` also takes an `extraHeaders`
+option (a record, or text in the same format) that wins over the setting for the same name:
+
+```ts
+// FI_EXTRA_HEADERS="Proxy-Authorization=Bearer <identity token>"
+```
+
+- They go only to URLs under the base URL, and a redirect does not carry them to another host.
+- `X-Api-Key`, `X-Secret-Key`, `Authorization`, `X-Workspace-Id` and `X-Organization-Id` are refused with an
+  `ExtraHeadersError` (exported from `@future-agi/sdk`, with `EXTRA_HEADERS_ENV`) naming the setting; values are not
+  put in an error or in `util.inspect` output.
+- Browsers drop `Proxy-*` request headers: use Node.js for a proxy-authenticated environment.
+
+### Breaking: per-call header containers merge with client defaults
+`HttpClient.request` merges a per-call list of header pairs, a `Map`, a `Headers` object or another supported
+non-record container with the client's default headers. In 0.3.1 these containers replaced the defaults.
+An empty list or `null` also retains client headers, including `X-Api-Key` and `X-Secret-Key` if configured.
+
+Migration: pass a plain object to override individual defaults by name. In JavaScript, set each default you want
+omitted to `undefined` in that object. In TypeScript, `headers` takes string values; use a client without those defaults.
+
+### Breaking: keyed requests refuse same-origin redirects
+A request carrying API keys refuses a redirect, even when the destination has the same
+origin. Call the final URL directly instead of using a URL that redirects. With `customAdapterReceivesKeys: true`,
+an Axios adapter other than Axios's `http` adapter (one of your own, or Axios's `fetch` or `xhr`) decides itself
+whether to follow a redirect.
+
+### Breaking: `ProviderAPIKeyClient` takes a boolean after `fiBaseUrl`
+In `new ProviderAPIKeyClient(apiKey, fiApiKey, fiSecretKey, fiBaseUrl, customAdapterReceivesKeys)`, the final
+argument replaces the options object. Any value other than `true`, `false` or `undefined` (an options object
+included) throws a `TypeError` that names `customAdapterReceivesKeys`. Omit the argument or pass `false`
+to keep keys out of custom adapters. Pass `true` to opt in when you own the adapter and want it to receive keys.
+
+### Breaking: a `fetch` of your own receives keys only with `customFetchReceivesKeys: true`
+The platform `Client` sends keyed calls through a `fetch` you pass (or a `globalThis.fetch` replaced after the SDK
+loaded) only with `customFetchReceivesKeys: true`; without it the call is refused before any connection with code
+`custom_fetch_not_opted_in`. With it, the destination rules apply to that `fetch` and the proxy rules do not.
+These rules also apply to a `Client` given explicit `auth`, a Context credential included. Such a client
+rejects an authentication or `Proxy-Authorization` header override, and refuses a base URL with user info when it
+is built.
+`HttpClient` and the classes built on it take `customAdapterReceivesKeys` for an Axios adapter of your own.
+The static methods of `ProviderAPIKeyClient`, `APIKeyManager.getInstance` and `getAPIKeyManager` take
+`customAdapterReceivesKeys` in their options in place of `allowInsecureHttp`; plain http to a host that is not
+loopback follows `FI_ALLOW_INSECURE_HTTP=1`. `ConfigurationError` and `UnexpectedRedirectError` are exported from
+`@future-agi/sdk`.
+
+### Other changes
+- A request that carries your key to a base URL that writes user info (`user:password@host`) is refused with
+  `insecure_http_origin` before any connection. Put credentials in the key options, not in the URL.
+- The platform `Client` raises `WrongRegionError` (a `PermissionDeniedError`, code `wrong_region`) for a 403
+  `wrong_region` response, and `client.usage.overview` raises `UsageOverviewUnavailableError` for a 404.
+- The default request timeout of the dataset, prompt, knowledge-base, annotation and queue clients is 30 seconds
+  (Axios measures it in milliseconds; 0.3.1 set 200 ms).
+- Prompt templates: `generate`, `improve` and `create`; the template GET and DELETE routes end in `/`.
+  `generate()` and `improve()` resolve to a `PromptGenerationResult`. The server runs generation as a job and
+  answers with the job id only, so the result holds `jobId`, the SDK does not receive the generated text and the
+  template's messages stay as they are; set the message content yourself or generate the prompt in the Future AGI
+  app. A server that answers with the text gives `prompt`, which replaces the content of the last message (or
+  becomes a user message when the template has none).
+- Annotation queues: `getOrCreateDefault(scope)`, and `labelIds`, `autoAssign`, `annotatorIds` and `annotatorRoles`
+  on create.
+- Responses of the dataset, knowledge-base, annotation and queue clients carry the camelCase field names of earlier
+  releases as deprecated aliases of the snake_case fields.
+
+See the [CHANGELOG](https://github.com/future-agi/futureagi-sdk/blob/main/typescript/futureagi/CHANGELOG.md) for the
+release notes.
+
 ## Error handling
 
 All SDK-specific failures extend `SDKException`.

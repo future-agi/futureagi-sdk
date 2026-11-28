@@ -1,15 +1,3 @@
-export * from './api';
-export * from './datasets';
-export * from './kb';
-export * from './prompt';
-export * from './annotations';
-export * from './queues';
-export * from './utils';
-// The generated platform client (`new Client()`), with its errors and models under `platform`.
-export { Auth, Client, ClientConfig, RequestOptions } from './platform';
-export * as platform from './platform';
-// Snapshot clients reuse platform auth; leaf consumption requires a bound source adapter.
-export { ContextClient } from './context';
-export { SkillsClient } from './skills';
-export * as telemetry from './telemetry';
-export { withAgentScope, declareSkill, FutureAGISkillsSpanProcessor } from './telemetry';
+// The runtime's undici classes are read before any other module of the SDK can load the runtime's undici.
+import './_core/dispatcher-provenance';
+export * from './public-api';

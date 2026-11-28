@@ -139,6 +139,7 @@ function fixture(kind: SnapshotKind) {
     auth: { type: "context", credential: "synthetic-credential" },
     baseUrl: "https://fixture.invalid",
     fetch,
+    customFetchReceivesKeys: true,
     maxRetries: 0,
   });
   return {

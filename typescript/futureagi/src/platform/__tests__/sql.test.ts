@@ -15,7 +15,7 @@ test("SQL snapshots, REST defaults, bounded pages and cancellation keep their wi
     { version: 1, identity_semantics: "project", datasets: [], examples: [], max_rows: 10000, max_window_days: 31, can_save: false },
   ];
   const calls: unknown[] = [];
-  const client = new Client({ apiKey: "example", secretKey: "example", baseUrl: "http://mock.invalid", fetch: async (url, init) => {
+  const client = new Client({ apiKey: "example", secretKey: "example", baseUrl: "https://mock.invalid", customFetchReceivesKeys: true, fetch: async (url, init) => {
     const target = new URL(url);
     calls.push([init.method, target.pathname, Object.fromEntries(target.searchParams), init.body ? JSON.parse(String(init.body)) : null]);
     return new Response(JSON.stringify(replies[calls.length - 1]), { status: calls.length === 1 ? 202 : 200 });
@@ -41,7 +41,7 @@ test("SQL snapshots, REST defaults, bounded pages and cancellation keep their wi
 
 test("optional SQL fields allow omission, not null", async () => {
   const bodies: unknown[] = [];
-  const client = new Client({ apiKey: "example", secretKey: "example", fetch: async (_url, init) => {
+  const client = new Client({ apiKey: "example", secretKey: "example", customFetchReceivesKeys: true, fetch: async (_url, init) => {
     bodies.push(JSON.parse(String(init.body)));
     return new Response("{}", { status: 202 });
   } });
@@ -64,7 +64,7 @@ test("SQL retries use the validated body and query overrides for the entire call
   const extraBody = { reuse: false as boolean | null };
   const extraQuery = { limit: 1 as number | null, offset: 0 as number | null };
   const sent: unknown[] = [];
-  const client = new Client({ apiKey: "example", secretKey: "example", maxRetries: 1, fetch: async (url, init) => {
+  const client = new Client({ apiKey: "example", secretKey: "example", maxRetries: 1, customFetchReceivesKeys: true, fetch: async (url, init) => {
     sent.push(init.method === "POST" ? JSON.parse(String(init.body)).reuse : Object.fromEntries(new URL(url).searchParams));
     if (sent.length % 2 === 1) {
       if (init.method === "POST") extraBody.reuse = null;
@@ -85,7 +85,7 @@ test("SQL request timeout is bounded while a retried call keeps validated option
   try {
     const extraBody = { reuse: false as boolean | null };
     let calls = 0;
-    const client = new Client({ apiKey: "example", secretKey: "example", maxRetries: 1, fetch: async (_url, init) => {
+    const client = new Client({ apiKey: "example", secretKey: "example", maxRetries: 1, customFetchReceivesKeys: true, fetch: async (_url, init) => {
       calls++;
       if (calls === 1) {
         expect(JSON.parse(String(init.body)).reuse).toBe(false);
@@ -127,7 +127,7 @@ test("SQL validates the same values it sends without losing request option gette
     get extraBody() { return { reuse: false }; }
     get headers() { return { "X-Test": this.#token }; }
   }
-  const client = new Client({ apiKey: "example", secretKey: "example", fetch: async (_url, init) => {
+  const client = new Client({ apiKey: "example", secretKey: "example", customFetchReceivesKeys: true, fetch: async (_url, init) => {
     expect(new Headers(init.headers).get("x-test")).toBe("scoped");
     expect(JSON.parse(String(init.body)).reuse).toBe(false);
     return new Response("{}", { status: 202 });
@@ -139,7 +139,7 @@ test("SQL validates the same values it sends without losing request option gette
 test("SQL refreshes ordinary headers after a 429 without changing the operation identity", async () => {
   const sent: Array<Array<string | null>> = [];
   let attempts = 0, leases = 0;
-  const client = new Client({ apiKey: "example", secretKey: "example", maxRetries: 1, fetch: async (_url, init) => {
+  const client = new Client({ apiKey: "example", secretKey: "example", maxRetries: 1, customFetchReceivesKeys: true, fetch: async (_url, init) => {
     const headers = new Headers(init.headers);
     sent.push([headers.get("x-attempt"), headers.get("idempotency-key"), headers.get("x-context-resolution")]);
     return sent.length === 1 ? new Response(null, { status: 429, headers: { "Retry-After": "0" } }) : new Response("{}");

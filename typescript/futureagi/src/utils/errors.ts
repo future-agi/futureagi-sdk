@@ -274,7 +274,7 @@ class InvalidSupportedType extends SDKException {
     }
 
     public getMessage(): string {
-        return `${this.valueName} with value ${JSON.stringify(this.value)} is not supported as of now. Supported types/values are: ${this.correctType}.`;
+        return `${this.valueName} with value ${JSON.stringify(this.value)} is not supported at this time. Supported types/values are: ${this.correctType}.`;
     }
 
     public getErrorCode(): string {

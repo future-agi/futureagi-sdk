@@ -3,7 +3,7 @@
 import { Client } from "../client";
 import type { FetchLike } from "../transport";
 
-const BASE = "http://backend.test";
+const BASE = "https://backend.test";
 const CALL = "22222222-2222-4222-8222-22222222222b";
 const PATH = `/simulate/v3/call-executions/${CALL}/workers/`;
 
@@ -18,7 +18,7 @@ function answering(status: number, body?: unknown): { fetch: FetchLike; seen: UR
   return { fetch, seen };
 }
 
-const client = (fetch: FetchLike) => new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, maxRetries: 0 });
+const client = (fetch: FetchLike) => new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, customFetchReceivesKeys: true, maxRetries: 0 });
 
 describe("simulation call workers", () => {
   test("reads one trial's workers, optionally an earlier attempt", async () => {

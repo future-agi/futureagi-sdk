@@ -42,6 +42,7 @@ for (const sdk of [esm, require("@future-agi/sdk")]) {
       auth: { type: "context", credential: "synthetic" },
       baseUrl: "https://fixture.invalid",
       maxRetries: 0,
+      customFetchReceivesKeys: true,
       fetch: async (input, init) => {
         const url = new URL(input);
         const headers = new Headers(init.headers);

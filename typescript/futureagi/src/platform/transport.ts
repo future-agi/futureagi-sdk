@@ -1,6 +1,11 @@
 // The one HTTP layer every resource uses: auth, retries, envelope unwrap, errors.
 // Mirrors the Python `fi/platform/_transport.py`; the same catalog drives both.
 
+import { headerRecord, normalizeHeaders } from "../_core/key-headers";
+import { isProxyAuthorization } from "../_core/proxy-authorization";
+import { checkHttpSecurity, customFetchRefusal, plainHttpRouting, writtenUrl } from "../_core/http-security";
+import { loopbackInit } from "../_core/loopback";
+import { isRuntimeFetch, setRuntimeFetch } from "../_core/runtime-fetch";
 import { APIConnectionError, APIError, errorFromResponse, isRecord } from "./errors";
 import { getPath, Pager, Pagination } from "./pagination";
 import { SDK_VERSION } from "../telemetry/version";
@@ -122,10 +127,19 @@ export interface ResolvedConfig {
   /** Milliseconds. */
   timeout: number;
   maxRetries: number;
+  /** Allow API keys over http:// to a host that is not loopback; the environment does not set it; it does not apply to a Future AGI host or when HTTP_PROXY or ALL_PROXY routes the request. */
+  allowInsecureHttp?: boolean;
   defaultHeaders?: Record<string, string>;
   strictResponses?: boolean;
   fetch: FetchLike;
+  /** Keys go through a supplied `fetch` only with this set. */
+  customFetchReceivesKeys?: boolean;
 }
+
+/** The runtime's own `fetch` is the one captured when the SDK loaded (`_core/runtime-fetch.ts`, shared by every
+ * sender). A `fetch` that is any other function, a replacement somebody installed on `globalThis` included, is a
+ * transport the SDK cannot inspect. `setRuntimeFetch` is the test seam of that rule. */
+export { setRuntimeFetch };
 
 // 429 means the server did not process the request, so any method may retry it. A
 // timeout, a 5xx or a dropped connection may have happened after a write was applied,
@@ -133,20 +147,25 @@ export interface ResolvedConfig {
 const RETRY_ANY_METHOD = new Set([429]);
 const RETRY_IDEMPOTENT = new Set([408, 500, 502, 503, 504]);
 const IDEMPOTENT_METHODS = new Set(["GET", "HEAD", "OPTIONS", "PUT", "DELETE"]);
-const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
-const MAX_REDIRECTS = 5;
 
 /** Later layers replace earlier ones whatever the letter case: `x-workspace-id` set per call replaces the
  * client's `X-Workspace-Id` instead of being sent next to it (header names are case-insensitive, and a
  * server given both may combine or reject them). */
-function mergeHeaders(...layers: Array<Record<string, string> | undefined>): Record<string, string> {
+function mergeHeaders(...layers: Record<string, string>[]): Record<string, string> {
   const byName = new Map<string, [string, string]>();
   for (const layer of layers) {
-    for (const [key, value] of Object.entries(layer ?? {})) {
+    for (const [key, value] of Object.entries(layer)) {
       byName.set(key.toLowerCase(), [key, value]);
     }
   }
   return Object.fromEntries(byName.values());
+}
+
+/** A record of header fields, as opposed to a `Headers`, a `Map` or a list of pairs. */
+function isPlainRecord(layer: unknown): layer is Record<string, string> {
+  if (typeof layer !== "object" || layer === null || Array.isArray(layer)) return false;
+  const methods = layer as { forEach?: unknown; get?: unknown; [Symbol.iterator]?: unknown };
+  return typeof methods.forEach !== "function" && typeof methods.get !== "function" && typeof methods[Symbol.iterator] !== "function";
 }
 
 /** Merge generated allowlisted headers without replacing a caller's operation/lease identity. */
@@ -169,19 +188,12 @@ export function operationOptions(options: RequestOptions | undefined, headers: R
   return { ...rest, resolutionId, idempotencyKey, headers: merged };
 }
 
-const originOf = (url: string) => new URL(url).origin.toLowerCase();
-
-/** Where to follow a redirect, when its target is on the client's own origin. The credentials travel in
- * custom headers (`X-Api-Key`, `X-Secret-Key`) that fetch does not strip on a cross-origin redirect the way
- * it strips `Authorization`, so a redirect that leaves the origin is refused instead of followed. */
-function followRedirect(baseUrl: string, from: string, status: number, location: string, method: string): { url: string; method: string } {
-  const target = new URL(location, from).toString();
-  if (originOf(target) !== originOf(baseUrl)) {
-    throw new APIConnectionError(`${status} redirect to ${target} was not followed: it leaves ${baseUrl} and the API keys would go with it`);
-  }
-  const asGet = status === 303 || ((status === 301 || status === 302) && method === "POST"); // the way browsers re-issue these
-  return { url: target, method: asGet ? "GET" : method };
-}
+/** The refusal of a 3xx answer to a call that carries keys. The keys travel in custom headers (`X-Api-Key`,
+ * `X-Secret-Key`) that fetch does not strip on a redirect the way it strips `Authorization`, so no redirect is followed,
+ * same origin included. The message does not name the target. */
+class RedirectRefused extends APIConnectionError {}
+const redirectRefusal = (op: Operation, status: number): RedirectRefused =>
+  new RedirectRefused(`${op.id}: Redirect was not followed: the server answered ${status}, and a call that carries keys does not follow a redirect, not even within the configured origin`);
 
 /** Release a response we will not read, so its connection is free for the next attempt. Not awaited:
  * cancelling one branch of a cloned body settles only when the other is done too, which would hang. */
@@ -374,13 +386,23 @@ export class Transport {
   private attemptHeaders(options?: RequestOptions, pinnedIdentity?: Record<string, string>): Record<string, string> {
     // Materialize getters only once per attempt. On replay even the *absence* of
     // an identity header is pinned; only ordinary headers are read again.
-    const snapshot = (layer: Record<string, string> = {}) => Object.fromEntries(Object.keys(layer)
-      .filter(name => !pinnedIdentity || !OPERATION_HEADERS.has(name.toLowerCase()))
-      .map(name => [name, layer[name]]));
-    const defaults = snapshot(this.config.defaultHeaders);
-    const perCall = snapshot(options?.headers);
-    this.validateHeaders(defaults);
-    this.validateHeaders(perCall);
+    // A plain record is copied name by name, so each getter is read once (and a pinned name not at all); every name
+    // as written, letter-case variants included, is checked before the layer is reduced to one value per name.
+    const snapshot = (layer?: Record<string, string>) => {
+      const read = isPlainRecord(layer) ? Object.fromEntries(Object.keys(layer)
+        .filter(name => !pinnedIdentity || !OPERATION_HEADERS.has(name.toLowerCase()))
+        .map(name => [name, layer[name]])) : layer;
+      const written = Object.entries(normalizeHeaders(read))
+        .filter(([name]) => !pinnedIdentity || !OPERATION_HEADERS.has(name.toLowerCase()));
+      this.validateHeaders(Object.fromEntries(written) as Record<string, string>);
+      const merged = Object.fromEntries(Object.entries(headerRecord(read))
+        .filter(([name]) => !pinnedIdentity || !OPERATION_HEADERS.has(name.toLowerCase())));
+      return { written, merged };
+    };
+    const defaultLayer = snapshot(this.config.defaultHeaders);
+    const perCallLayer = snapshot(options?.headers);
+    const defaults = defaultLayer.merged;
+    const perCall = perCallLayer.merged;
     const headers: Record<string, string> = { "User-Agent": `futureagi-typescript/${SDK_VERSION}` };
     if (this.config.auth?.type === "context") {
       headers.Authorization = `Context ${this.config.auth.credential}`;
@@ -395,53 +417,78 @@ export class Transport {
     for (const [name, value] of Object.entries({ "X-Context-Resolution": options?.resolutionId, "Idempotency-Key": options?.idempotencyKey })) {
       if (value === undefined) continue;
       headerToken(value, name);
-      for (const layer of [defaults, perCall]) {
-        if (Object.entries(layer).some(([k, v]) => k.toLowerCase() === name.toLowerCase() && v !== value)) throw new Error(`conflicting ${name} values`);
+      for (const layer of [defaultLayer.written, perCallLayer.written]) {
+        if (layer.some(([k, v]) => k.toLowerCase() === name.toLowerCase() && v !== value)) throw new Error(`conflicting ${name} values`);
       }
       merged = mergeHeaders(merged, { [name]: value });
     }
     return merged;
   }
 
+  /** The destination rules for one send to `written`, the URL text as the caller wrote it: they throw before any connection. */
+  private judge(written: string): void {
+    if (!isRuntimeFetch(this.config.fetch)) {
+      // A fetch the caller supplied is the caller's own transport: keys go through it only with the opt-in, and then
+      // the destination rules apply (plain http, Future AGI host, URL shape) but not the proxy rules.
+      if (this.config.customFetchReceivesKeys !== true) throw customFetchRefusal();
+      checkHttpSecurity(written, "keys", this.config.allowInsecureHttp, false, true);
+    } else {
+      const routing = plainHttpRouting(written, { fetchSupplied: false });
+      checkHttpSecurity(written, "keys", this.config.allowInsecureHttp, routing.callerProxied, routing.proxiesDisabled, routing.refusal);
+    }
+  }
+
   /** One HTTP call for `op`: auth, retries, envelope unwrap, typed errors. Resolves to decoded JSON. */
   async request(op: Operation, args: RequestArgs = {}, options?: RequestOptions): Promise<unknown> {
     // A typed strict read must not change mode while its HTTP request is pending.
     const strictResponse = this.config.strictResponses || options?.strictResponse === true;
-    let url = buildUrl(this.config, op, args, options);
-    let method = op.method;
+    let url: string;
+    try {
+      url = buildUrl(this.config, op, args, options);
+    } catch (error) {
+      // A base URL the runtime cannot make a request of (no host, say) is refused by the SDK's own rule, not by the
+      // parser's error; a URL the rule lets through keeps the parser's error.
+      this.judge(`${this.config.baseUrl}${op.path}`);
+      throw error;
+    }
     const timeout = options?.timeout ?? this.config.timeout;
     const maxRetries = options?.maxRetries ?? this.config.maxRetries;
     let pinnedIdentity: Record<string, string> | undefined;
     let attempt = 0;
-    let redirects = 0;
     for (;;) {
+      // Released clients use keys; share the lane's policy and warning budget.
+      this.judge(writtenUrl(url, this.config.baseUrl));
       // A caller option error must not be wrapped or retried as a network failure.
       const requestHeaders = this.attemptHeaders(options, pinnedIdentity);
       pinnedIdentity ??= Object.fromEntries(Object.entries(requestHeaders).filter(([name]) => OPERATION_HEADERS.has(name.toLowerCase())));
-      // Rebuilt per attempt (a FormData stream is single-use); a request re-issued as a GET after a redirect has no body.
-      const { body, headers } = method === op.method ? await buildBody(op, args, options) : { body: undefined, headers: {} };
+      // Rebuilt per attempt: a FormData stream is single-use.
+      const { body, headers } = await buildBody(op, args, options);
+      // read before the send: headers that cannot be read are a configuration error, not a connection failure
+      const sendHeaders = mergeHeaders(requestHeaders, headers);
+      // The runtime's own fetch reaches a loopback host directly, not through an environment proxy; a keyed loopback
+      // request with no direct route the SDK can prove or build is a configuration error, refused before the send.
+      const extra = loopbackInit(url, isRuntimeFetch(this.config.fetch), true) as RequestInit;
       let response: Response;
       let text: string;
       try {
+        for (const name of Object.keys(sendHeaders)) {
+          if (isProxyAuthorization(name)) delete sendHeaders[name];
+        }
         response = await this.config.fetch(url, {
-          method,
-          headers: mergeHeaders(requestHeaders, headers),
+          ...extra,
+          method: op.method,
+          headers: sendHeaders,
           ...(this.config.auth ? { credentials: "omit" as const } : {}),
           body,
           signal: AbortSignal.timeout(timeout),
-          redirect: "manual", // followed below, and only within the client's own origin
+          redirect: "manual", // a 3xx is refused below
         });
-        const location = response.headers.get("location");
-        if (REDIRECT_STATUSES.has(response.status) && location) {
+        if (response.type === "opaqueredirect" || (response.status >= 300 && response.status < 400)) {
           discard(response);
           if (this.config.auth?.type === "context" || Object.keys(requestHeaders).some(k => k.toLowerCase() === "x-context-resolution")) {
-            throw new APIConnectionError("Context credentials and resolution leases cannot follow redirects");
+            throw new RedirectRefused("Context credentials and resolution leases cannot follow redirects");
           }
-          if (++redirects > MAX_REDIRECTS) {
-            throw new APIConnectionError(`${op.id}: more than ${MAX_REDIRECTS} redirects`);
-          }
-          ({ url, method } = followRedirect(this.config.baseUrl, url, response.status, location, method));
-          continue;
+          throw redirectRefusal(op, response.status);
         }
         if (canRetry(op, response.status, attempt, maxRetries)) {
           discard(response); // release the connection before waiting, not after
@@ -452,9 +499,9 @@ export class Transport {
         if (op.decode === "bytes" && response.status < 300 && response.status !== 204) {
           return new Uint8Array(await response.arrayBuffer());
         }
-        text = await response.text(); // the connection can still drop or time out mid-body: a transport error like any other
+        text = await response.text(); // the connection can drop or time out mid-body: a transport error like any other
       } catch (error) {
-        if (error instanceof APIConnectionError) {
+        if (error instanceof RedirectRefused) {
           throw error; // a refused redirect: a decision, not a transport failure
         }
         if (canRetry(op, null, attempt, maxRetries)) {

@@ -1,6 +1,8 @@
-import { APIKeyAuth, ResponseHandler } from './auth';
+import { APIKeyAuth, ResponseHandler, type APIKeyAuthConfig } from './auth';
+import { ConfigurationError } from '../_core/errors';
 import { AUTH_ENVVAR_NAME, get_base_url } from '../utils/constants';
-import { ModelProvider, ApiKey, RequestConfig, HttpMethod } from './types';
+import { ModelProvider, HttpMethod } from './types';
+import type { ApiKey, RequestConfig } from './types';
 import { Routes } from '../utils/routes';
 import { AxiosResponse } from 'axios';
 
@@ -80,12 +82,18 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         apiKey: ApiKey,
         fiApiKey?: string,
         fiSecretKey?: string,
-        fiBaseUrl?: string
+        fiBaseUrl?: string,
+        /** The HttpClient option of that name. */
+        customAdapterReceivesKeys?: boolean
     ) {
+        if (customAdapterReceivesKeys !== undefined && typeof customAdapterReceivesKeys !== "boolean") {
+            throw new TypeError("customAdapterReceivesKeys must be a boolean; pass true to opt in.");
+        }
         super({
             fiApiKey,
             fiSecretKey,
-            fiBaseUrl
+            fiBaseUrl,
+            customAdapterReceivesKeys
         });
         this.apiKey = apiKey;
     }
@@ -161,12 +169,14 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         fiApiKey?: string;
         fiSecretKey?: string;
         fiBaseUrl?: string;
+        customAdapterReceivesKeys?: boolean;
     } = {}): ProviderAPIKeyClient {
         return new ProviderAPIKeyClient(
             apiKey,
             options.fiApiKey,
             options.fiSecretKey,
-            options.fiBaseUrl
+            options.fiBaseUrl,
+            options.customAdapterReceivesKeys
         );
     }
 
@@ -177,6 +187,7 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         fiApiKey?: string;
         fiSecretKey?: string;
         fiBaseUrl?: string;
+        customAdapterReceivesKeys?: boolean;
     } = {}): Promise<ApiKey> {
         const instance = this._getInstance(apiKey, options);
         await instance.set();
@@ -190,6 +201,7 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         fiApiKey?: string;
         fiSecretKey?: string;
         fiBaseUrl?: string;
+        customAdapterReceivesKeys?: boolean;
     } = {}): Promise<ApiKey | undefined> {
         const apiKey: ApiKey = { provider };
         const instance = this._getInstance(apiKey, options);
@@ -203,6 +215,7 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         fiApiKey?: string;
         fiSecretKey?: string;
         fiBaseUrl?: string;
+        customAdapterReceivesKeys?: boolean;
     } = {}): Promise<ApiKey[]> {
         // The apiKey object is required for the constructor, but not used in this method.
         const instance = this._getInstance({} as ApiKey, options);
@@ -218,14 +231,17 @@ class ProviderAPIKeyClient extends APIKeyAuth {
 }
 
 /**
- * Singleton API Key Manager for managing FutureAGI credentials (fi_api_key, fi_secret_key)
+ * Process-scoped singleton with environment-derived credentials, not a per-tenant store.
+ * setProviderApiKey updates provider keys via the API for the shared account used by the whole
+ * process; credential isolation applies only to separate APIKeyAuth client instances.
+ * Behaviour is unchanged in 0.7.0; deprecation is planned for 0.7.x.
  */
 class APIKeyManager extends APIKeyAuth {
     private static _instance?: APIKeyManager;
     private _initialized = false;
 
-    private constructor() {
-        super();
+    private constructor(options: Pick<APIKeyAuthConfig, 'customAdapterReceivesKeys'> = {}) {
+        super({ customAdapterReceivesKeys: options.customAdapterReceivesKeys });
         const fiApiKey = this.getFiApiKey();
         const fiSecretKey = this.getFiSecretKey();
 
@@ -235,11 +251,16 @@ class APIKeyManager extends APIKeyAuth {
     }
 
     /**
-     * Get the singleton instance
+     * Get the singleton instance. `customAdapterReceivesKeys` (the HttpClient option of that name) applies to the
+     * manager's requests and the provider key calls it makes; a call that asks for another setting than the instance
+     * holds is refused with `ConfigurationError` code `invalid_option` (resetInstance() first).
      */
-    public static getInstance(): APIKeyManager {
+    public static getInstance(options: Pick<APIKeyAuthConfig, 'customAdapterReceivesKeys'> = {}): APIKeyManager {
         if (!APIKeyManager._instance) {
-            APIKeyManager._instance = new APIKeyManager();
+            APIKeyManager._instance = new APIKeyManager(options);
+        } else if (options.customAdapterReceivesKeys !== undefined
+            && (options.customAdapterReceivesKeys === true) !== APIKeyManager._instance._customAdapterReceivesKeys) {
+            throw new ConfigurationError('APIKeyManager is one instance per process and holds another customAdapterReceivesKeys setting; call APIKeyManager.resetInstance() first');
         }
         return APIKeyManager._instance;
     }
@@ -294,12 +315,16 @@ class APIKeyManager extends APIKeyAuth {
      */
 
     /**
-     * Set a provider API key via FutureAGI API
+     * Set a provider key via the API for the shared account used by the whole process.
+     * This environment-derived singleton is not a per-tenant store; credential
+     * isolation applies only to separate APIKeyAuth client instances.
+     * Behaviour is unchanged in 0.7.0; deprecation is planned for 0.7.x.
      */
     async setProviderApiKey(provider: ModelProvider, key: string): Promise<void> {
         await ProviderAPIKeyClient.setApiKey({ provider, key }, {
             fiApiKey: this.getFiApiKey(),
-            fiSecretKey: this.getFiSecretKey()
+            fiSecretKey: this.getFiSecretKey(),
+            customAdapterReceivesKeys: this._customAdapterReceivesKeys
         });
     }
 
@@ -309,7 +334,8 @@ class APIKeyManager extends APIKeyAuth {
     async getProviderApiKey(provider: ModelProvider): Promise<ApiKey | undefined> {
         return await ProviderAPIKeyClient.getApiKey(provider, {
             fiApiKey: this.getFiApiKey(),
-            fiSecretKey: this.getFiSecretKey()
+            fiSecretKey: this.getFiSecretKey(),
+            customAdapterReceivesKeys: this._customAdapterReceivesKeys
         });
     }
 
@@ -319,7 +345,8 @@ class APIKeyManager extends APIKeyAuth {
     async listProviderApiKeys(): Promise<ApiKey[]> {
         return await ProviderAPIKeyClient.listApiKeys({
             fiApiKey: this.getFiApiKey(),
-            fiSecretKey: this.getFiSecretKey()
+            fiSecretKey: this.getFiSecretKey(),
+            customAdapterReceivesKeys: this._customAdapterReceivesKeys
         });
     }
 
@@ -376,8 +403,8 @@ class APIKeyManager extends APIKeyAuth {
 /**
  * Factory function to get API key manager instance
  */
-function getAPIKeyManager(): APIKeyManager {
-    return APIKeyManager.getInstance();
+function getAPIKeyManager(options: Pick<APIKeyAuthConfig, 'customAdapterReceivesKeys'> = {}): APIKeyManager {
+    return APIKeyManager.getInstance(options);
 }
 
 /**
@@ -401,10 +428,10 @@ export {
     getAPIKeyManager,
     isSupportedProvider,
     getSupportedProviders,
-    ApiKeyConfig,
-    ApiKeySetResponse,
-    ApiKey,
-    RequestConfig,
+    type ApiKeyConfig,
+    type ApiKeySetResponse,
+    type ApiKey,
+    type RequestConfig,
     HttpMethod,
     ModelProvider,
 };

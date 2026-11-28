@@ -196,6 +196,7 @@ function client(fixture: Fixture): ContextClient {
       auth: { type: "context", credential: "synthetic-credential" },
       baseUrl: "https://fixture.invalid",
       fetch: fixture.fetch,
+      customFetchReceivesKeys: true,
       maxRetries: 0,
     }),
   );

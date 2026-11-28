@@ -60,4 +60,4 @@ interface ApiKey {
     key?: string;
 }
 
-export { HttpMethod, RequestConfig, ModelProvider, ApiKey };
+export { HttpMethod, type RequestConfig, ModelProvider, type ApiKey };

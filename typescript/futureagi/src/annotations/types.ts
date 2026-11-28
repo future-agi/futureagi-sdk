@@ -17,14 +17,46 @@ export interface Project {
   created_at?: string;
 }
 
+/** Published 0.2.0 contract; camelCase aliases are optional on caller-owned objects. */
 export interface BulkAnnotationResponse {
   message: string;
+  /** @deprecated Use annotations_created. SDK response access warns once per alias per process. */
+  annotationsCreated?: number;
   annotations_created: number;
+  /** @deprecated Use annotations_updated. SDK response access warns once per alias per process. */
+  annotationsUpdated?: number;
   annotations_updated: number;
+  /** @deprecated Use notes_created. SDK response access warns once per alias per process. */
+  notesCreated?: number;
   notes_created: number;
+  /** @deprecated Use succeeded_count. SDK response access warns once per alias per process. */
+  succeededCount?: number;
   succeeded_count: number;
+  /** @deprecated Use errors_count. SDK response access warns once per alias per process. */
+  errorsCount?: number;
   errors_count: number;
+  /** @deprecated Use warnings_count. SDK response access warns once per alias per process. */
+  warningsCount?: number;
   warnings_count: number;
+  warnings?: Array<Record<string, any>>;
+  errors?: Array<Record<string, any>>;
+}
+
+/** Older camelCase input shape, separate from the 0.2.0 canonical interface. */
+export interface LegacyBulkAnnotationResponse {
+  message: string;
+  annotationsCreated: number;
+  annotationsUpdated: number;
+  notesCreated: number;
+  succeededCount: number;
+  errorsCount: number;
+  warningsCount: number;
+  annotations_created?: number;
+  annotations_updated?: number;
+  notes_created?: number;
+  succeeded_count?: number;
+  errors_count?: number;
+  warnings_count?: number;
   warnings?: Array<Record<string, any>>;
   errors?: Array<Record<string, any>>;
 }
@@ -51,5 +83,13 @@ export interface AnnotationOptions {
   fiApiKey?: string;
   fiSecretKey?: string;
   fiBaseUrl?: string;
+  /** Send API keys over plain `http://` to a host that is not loopback (else `FI_ALLOW_INSECURE_HTTP=1`). */
+  allowInsecureHttp?: boolean;
   timeout?: number;
 }
+
+/** Canonical server payload; retained as an alias of the published contract. */
+export type BulkAnnotationCanonicalResponse = BulkAnnotationResponse;
+
+/** SDK responses expose both spellings; legacy getters warn once per alias. */
+export type BulkAnnotationResult = BulkAnnotationResponse & LegacyBulkAnnotationResponse;

@@ -25,7 +25,7 @@ it.each(["on", "load_only", "off", "no_otel", "client_off"])("reports %s only on
     requests.push(init);
     return new Response(JSON.stringify({ allowed: true, version_id: identity.versionId, digest: identity.digest }), { status: 200, headers: { "Content-Type": "application/json" } });
   });
-  const client = new Client({ apiKey: "test-key", secretKey: "test-secret", baseUrl: "https://example.invalid", fetch, maxRetries: 0 });
+  const client = new Client({ apiKey: "test-key", secretKey: "test-secret", baseUrl: "https://example.invalid", fetch, customFetchReceivesKeys: true, maxRetries: 0 });
   const source = new ConsumptionSource(client, "skill", { tracing: scenario !== "client_off" });
   try {
     await source.resolve("refund", { label: "production" });
