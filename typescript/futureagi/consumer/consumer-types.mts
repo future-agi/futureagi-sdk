@@ -4,7 +4,12 @@
 //
 // Each block names the review finding it guards (nik13, PR #35, 2026-11-03).
 
-import { Client } from "@future-agi/sdk";
+import { Client, Gateway, gateway } from "@future-agi/sdk";
+import { Gateway as GatewayFromEntry } from "@future-agi/sdk/gateway";
+import type { AgentCC, ChatCompletion, Stream } from "@future-agi/sdk/gateway";
+import { agentccMiddleware } from "@future-agi/sdk/gateway/express";
+import { createAgentCCClient } from "@future-agi/sdk/gateway/nextjs";
+import { mockCompletion } from "@future-agi/sdk/gateway/testing";
 import type { JsonValue, WaitOptions } from "@future-agi/sdk/platform";
 import { WaitTimeoutError, openQuestion } from "@future-agi/sdk/platform";
 import type { DashboardDetail, KnowledgeBaseItem, PromptsRunResult } from "@future-agi/sdk/platform/models";
@@ -38,6 +43,19 @@ const run: { job: Record<string, unknown>; executionStatus: string | null } = aw
 const timedOut: Error = new WaitTimeoutError("job j1", 1000);
 await c.simulation.jobs.uploadSources({ files: [{ name: "a.py", data: "a" }], paths: ["a.py"] });
 export { question, run, timedOut };
+
+// The gateway client: from the root, from its own entry point, and its three side entry points.
+const gw: Gateway = new GatewayFromEntry({ apiKey: "sk-agentcc-x", baseUrl: "http://127.0.0.1:9", maxRetries: 0 });
+const completion: ChatCompletion = await gw.chat.completions.create({ model: "m", messages: [{ role: "user", content: "hi" }] });
+const cost: number | null | undefined = completion.agentcc?.cost;
+const live: Stream = await gw.chat.completions.create({ model: "m", messages: [], stream: true });
+for await (const piece of (await gw.chat.completions.stream({ model: "m", messages: [] })).textStream()) {
+  piece.toUpperCase();
+}
+const scoped: { client: AgentCC; session: gateway.Session; end: () => Promise<void> } = gw.session({ name: "s" });
+const sameClass: Gateway = gw.withOptions({ timeout: 1000 });
+const mock: ChatCompletion = mockCompletion("hi");
+export { cost, live, scoped, sameClass, mock, agentccMiddleware, createAgentCCClient };
 
 // The escape hatches keep their types.
 await c.request("GET", "/x/", { unwrap: null });
