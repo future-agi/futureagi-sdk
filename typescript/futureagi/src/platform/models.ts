@@ -430,6 +430,7 @@ export interface AgentFixRun {
   attempt_of_id?: string | null;
   counted?: boolean | null;
   limited_validation?: boolean | null;
+  held_back_verified_min?: number | null;
   issue?: AgentFixEpochIssue | null;
   from_issue?: boolean | null;
   check_runs?: Array<AgentFixCheckRun | null> | null;
@@ -463,6 +464,7 @@ export interface AgentFixRunDetail {
   attempt_of_id?: string | null;
   counted?: boolean | null;
   limited_validation?: boolean | null;
+  held_back_verified_min?: number | null;
   issue?: AgentFixEpochIssue | null;
   from_issue?: boolean | null;
   check_runs?: Array<AgentFixCheckRun | null> | null;

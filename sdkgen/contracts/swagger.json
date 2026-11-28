@@ -41,8 +41,8 @@
   },
   "x-contract-sources": {
     "sql": {
-      "backend_commit": "554901bf1f88fc1a33721fd5ae0930fea3943260",
-      "openapi_sha256": "4d876758766eff99b874b2a2b9d4b286f2ea02c343e990bc41d96b906d52506d",
+      "backend_commit": "018da02e7ccd733437d63522f29a480d1827172e",
+      "openapi_sha256": "2d4855ac9485aed47615a67c9dfe6b2c24e29628f07ef261a544180c1db6b9db",
       "mcp_sha256": "d094d5ec7a789fec53cf5b963707f56d379d03fa06bfa898c53d4f6138d4d958",
       "tools_yaml_sha256": "9c92b12b1e639de641021ab3d9cdd71a5801d1913eb6da6bc3c2335164ae8c9f",
       "tools": [
@@ -53,8 +53,8 @@
       ]
     },
     "epoch": {
-      "backend_commit": "554901bf1f88fc1a33721fd5ae0930fea3943260",
-      "openapi_sha256": "4d876758766eff99b874b2a2b9d4b286f2ea02c343e990bc41d96b906d52506d",
+      "backend_commit": "018da02e7ccd733437d63522f29a480d1827172e",
+      "openapi_sha256": "2d4855ac9485aed47615a67c9dfe6b2c24e29628f07ef261a544180c1db6b9db",
       "mcp_sha256": "d094d5ec7a789fec53cf5b963707f56d379d03fa06bfa898c53d4f6138d4d958",
       "tools_yaml_sha256": "9c92b12b1e639de641021ab3d9cdd71a5801d1913eb6da6bc3c2335164ae8c9f",
       "tools": [
@@ -80,8 +80,8 @@
       ]
     },
     "skills": {
-      "backend_commit": "554901bf1f88fc1a33721fd5ae0930fea3943260",
-      "openapi_sha256": "4d876758766eff99b874b2a2b9d4b286f2ea02c343e990bc41d96b906d52506d",
+      "backend_commit": "018da02e7ccd733437d63522f29a480d1827172e",
+      "openapi_sha256": "2d4855ac9485aed47615a67c9dfe6b2c24e29628f07ef261a544180c1db6b9db",
       "mcp_sha256": "d094d5ec7a789fec53cf5b963707f56d379d03fa06bfa898c53d4f6138d4d958",
       "tools_yaml_sha256": "9c92b12b1e639de641021ab3d9cdd71a5801d1913eb6da6bc3c2335164ae8c9f",
       "tools": [
@@ -21680,6 +21680,11 @@
           "type": "boolean",
           "readOnly": true
         },
+        "held_back_verified_min": {
+          "title": "Held back verified min",
+          "type": "integer",
+          "readOnly": true
+        },
         "issue": {
           "$ref": "#/definitions/AgentFixEpochIssue"
         },
@@ -21864,6 +21869,11 @@
         "limited_validation": {
           "title": "Limited validation",
           "type": "boolean",
+          "readOnly": true
+        },
+        "held_back_verified_min": {
+          "title": "Held back verified min",
+          "type": "integer",
           "readOnly": true
         },
         "issue": {
