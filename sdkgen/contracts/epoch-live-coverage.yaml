@@ -96,9 +96,9 @@ operations:
   simulation.epochs.candidates.make_default:
     bucket: b
     status: refusal-only until PR2 TH-10732
-    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    asserts: '404 {"error": "not_found"} on an unknown Epoch; with an override_reason from an API key, 403 {"error": "fix_override_needs_person"}'
     needs: "an ended Epoch with a winning candidate (product seeder)"
   simulation.epochs.candidates.open_pull_request:
     bucket: c
-    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    asserts: '404 {"error": "not_found"} on an unknown Epoch; with an override_reason from an API key, 403 {"error": "fix_override_needs_person"}'
     reason: "opening the pull request needs a GitHub App installation and real GitHub writes"

@@ -1071,9 +1071,17 @@ def test_evidence_imports_and_epochs(client):
         lambda: epochs.retry(run),
         lambda: epochs.candidates.patch(run, candidate),
         lambda: epochs.candidates.make_default(run, candidate),
-        lambda: epochs.candidates.open_pull_request(run, candidate, override_reason="sdk live test"),
+        lambda: epochs.candidates.open_pull_request(run, candidate),
     ):
         refused_with(call, 404, error="not_found", message="Not found")
+    # Shipping a candidate its checks refused is a person's decision, made in Future AGI: an
+    # override_reason sent with an API key is refused before the candidate is looked up
+    # (AgentFixRunViewSet._override_reason, simulate/views/agent_fix.py:403-414 at 2aa9ca3).
+    for call in (
+        lambda: epochs.candidates.make_default(run, candidate, override_reason="sdk live test"),
+        lambda: epochs.candidates.open_pull_request(run, candidate, override_reason="sdk live test"),
+    ):
+        refused_with(call, 403, error="fix_override_needs_person")
 
 
 def test_gateway_management(client):
