@@ -9,6 +9,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 import yaml
@@ -53,7 +54,7 @@ class FakeGitHub:
             return self.issues[number]
         number = int(path.split("/")[2].split("?")[0])
         if method == "GET" and "/comments" in path:
-            page = int(path.split("page=")[1])
+            page = int(parse_qs(urlsplit(path).query)["page"][0])
             return [{"body": c} for c in self.comments[number][(page - 1) * 100:page * 100]]
         if method == "POST" and path.endswith("/comments"):
             self.comments[number].append(body["body"])
