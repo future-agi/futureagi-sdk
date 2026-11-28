@@ -460,7 +460,7 @@ contains SQL and Epoch; adding Skills does not change any non-Skills operation.
 From the SDK checkout, with `PRODUCT_REPO` a clean checkout at the product commit:
 
 ```sh
-product_commit=554901bf1f88fc1a33721fd5ae0930fea3943260
+product_commit=018da02e7ccd733437d63522f29a480d1827172e
 sdk_baseline=c3515f6113eb0aaec9fbb28b7ffee198e373e2f9
 catalog="$PRODUCT_REPO/futureagi/mcp_server/catalog"
 python sdkgen/sync_scoped_contract.py "$PRODUCT_REPO" "$product_commit" "$sdk_baseline"

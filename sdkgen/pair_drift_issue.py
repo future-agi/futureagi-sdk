@@ -53,36 +53,33 @@ def drift_problems(record: dict) -> tuple[list[str], list[str]]:
     return [p for p in problems if p not in other], other
 
 
-def _in_scope(entry: dict, rule: dict) -> bool:
-    mcp = (entry.get("surfaces") or {}).get("mcp")
-    if "id_prefix" in rule:
-        return entry["id"].startswith(rule["id_prefix"])
-    return isinstance(mcp, dict) and mcp.get("group") == rule.get("product_group")
-
-
 def drifted(product: Path, sha: str) -> tuple[list[str], list[str]]:
-    """(catalog operations that differ from the product, product tools of a scoped group the
-    catalog has no entry for), read at `sha` the way pair_check.py reads it."""
+    """(catalog operations that differ from the product, product tools of a scope the catalog has
+    no entry for), read at `sha` the way pair_check.py reads it."""
     spec = json.loads(pair_check._git(product, "show", f"{sha}:{pair_check.SWAGGER}"))
     manifest = json.loads(pair_check._git(product, "show", f"{sha}:{pair_check.MCP}"))
     tools_yaml = yaml.safe_load(pair_check._git(product, "show", f"{sha}:{pair_check.TOOLS_YAML}"))
     committed = json.loads(pair_check.SLICE.read_text())
     entries = yaml.safe_load(pair_check.CATALOG.read_text())["operations"]
     described = {tool["name"]: tool.get("description") for tool in (tools_yaml or {}).get("tools", [])}
-    ops, known = set(), set()
-    for scope, rule in sync_scoped_contract.SCOPES.items():
-        for entry in (e for e in entries if _in_scope(e, rule)):
-            name = ((entry.get("surfaces") or {}).get("mcp") or {}).get("name")
-            known.add(name)
-            if pair_check.compare_projection(spec, committed, [entry], scope):
-                ops.add(entry["id"])
-            elif scope in sync_scoped_contract.DESCRIBED_SCOPES and described.get(name) != entry.get("description"):
-                ops.add(entry["id"])
-    groups = {rule["product_group"] for rule in sync_scoped_contract.SCOPES.values() if "product_group" in rule}
-    fixed = set().union(*(rule.get("tools", set()) for rule in sync_scoped_contract.SCOPES.values()))
+    tools = {tool["name"]: tool for tool in manifest.get("tools", []) if "name" in tool}
+    ops: set[str] = set()
+    known: dict[str, set[str]] = {scope: set() for scope in sync_scoped_contract.SCOPES}
+    for entry in entries:
+        scope = sync_scoped_contract.catalog_scope(entry)
+        if scope is None:
+            continue
+        name = ((entry.get("surfaces") or {}).get("mcp") or {}).get("name")
+        if name:
+            known[scope].add(name)
+        if pair_check.compare_projection(spec, committed, [entry], scope):
+            ops.add(entry["id"])
+        elif scope in sync_scoped_contract.DESCRIBED_SCOPES and described.get(name) != entry.get("description"):
+            ops.add(entry["id"])
     new = sorted(
-        tool["name"] for tool in manifest.get("tools", [])
-        if (tool.get("group") in groups or tool["name"] in fixed) and tool["name"] not in known
+        name for scope in sync_scoped_contract.SCOPES
+        for name in sync_scoped_contract.scope_tools(scope, {n: {"group": t.get("group")} for n, t in tools.items()})
+        if name in tools and name not in known[scope]
     )
     return sorted(ops), new
 
@@ -91,12 +88,28 @@ def digest(drift: list[str], ops: list[str], new: list[str]) -> str:
     return hashlib.sha256(json.dumps([sorted(drift), ops, new]).encode()).hexdigest()
 
 
-def synced_from(record: dict) -> str | None:
-    """The product commit the committed scoped slice was synced from: the start of the range."""
+def synced_from(record: dict) -> dict[str, str]:
+    """Per scope, the product commit the committed slice was synced from: where each range starts."""
     sources = record.get("contract_sources") or {}
-    commits = {(sources.get(scope) or {}).get("backend_commit") for scope in sync_scoped_contract.SCOPES}
-    commits.discard(None)
-    return commits.pop() if len(commits) == 1 else None
+    starts = {scope: (sources.get(scope) or {}).get("backend_commit") for scope in sync_scoped_contract.SCOPES}
+    return {scope: commit for scope, commit in starts.items() if commit}
+
+
+def _span(start: str | None, sha: str) -> str:
+    if start and start != sha:
+        return f"`{start[:12]}...{sha[:12]}`: https://github.com/{PRODUCT}/compare/{start}...{sha}"
+    return f"`{sha[:12]}`"
+
+
+def _ranges(record: dict) -> list[str]:
+    sha = record["product"]["sha"]
+    starts = synced_from(record)
+    if len(set(starts.values())) <= 1:
+        start = next(iter(starts.values()), None)
+        return [f"**Product range** (from the commit the scoped slice was synced from): {_span(start, sha)}"]
+    return ["**Product range**, per scope (from the commit each scope was synced from):"] + [
+        f"- {scope}: {_span(start, sha)}" for scope, start in sorted(starts.items())
+    ]
 
 
 def _bullets(items: list[str]) -> str:
@@ -108,16 +121,11 @@ def _bullets(items: list[str]) -> str:
 
 def report_body(record: dict, drift: list[str], ops: list[str], new: list[str], run_url: str) -> str:
     sha = record["product"]["sha"]
-    start = synced_from(record)
-    if start and start != sha:
-        span = f"`{start[:12]}...{sha[:12]}`: https://github.com/{PRODUCT}/compare/{start}...{sha}"
-    else:
-        span = f"`{sha[:12]}`"
     branch = record["product"].get("resolved_branch") or "explicit"
     return "\n".join([
         f"`sdkgen/pair_check.py` on `dev` fails against `{PRODUCT}@{sha}` ({branch}).",
         "",
-        f"**Product range** (from the commit the scoped slice was synced from): {span}",
+        *_ranges(record),
         "",
         "**Operations that differ from the product:**",
         _bullets(ops),

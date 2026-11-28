@@ -1,11 +1,13 @@
 """sdkgen/check_skills_baseline.py --paired: product pairing re-synced only Skills over the paired
 SDK commit, so everything else must equal that commit. Runs on copies of the committed files; Git
-blob reads are served from memory, without Git history. (The default mode, against
-x-contract-sources.other, needs that commit's real slice and runs in the SDK's own CI.)"""
+blob reads are served from memory, without Git history. The default mode (against
+x-contract-sources.other) is exercised the same way, with the committed files standing in for
+that commit's slice: every unscoped operation is pinned, the scoped groups may move."""
 
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import shutil
 import sys
@@ -34,7 +36,8 @@ def baseline(tmp_path, monkeypatch):
         (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(ROOT / name, tmp_path / name)
     committed = {name: (ROOT / name).read_bytes() for name in FILES}
-    blobs = {PAIRED: committed}
+    other = json.loads(committed[FILES[0]])["x-contract-sources"]["other"]["sdk_commit"]
+    blobs = {PAIRED: committed, other: committed}
 
     def show(args, **_):
         commit, path = args[-1].split(":", 1)
@@ -52,7 +55,30 @@ def baseline(tmp_path, monkeypatch):
     def run(*argv):
         check.main(list(argv))
 
-    return SimpleNamespace(run=run, edit=edit, committed=json.loads(committed[FILES[0]]))
+    def as_other(doc):  # the committed slice stands in for x-contract-sources.other's slice
+        doc["x-contract-sources"]["other"]["slice_sha256"] = hashlib.sha256(committed[FILES[0]]).hexdigest()
+
+    return SimpleNamespace(run=run, edit=edit, as_other=as_other, committed=json.loads(committed[FILES[0]]))
+
+
+def _unscoped_route() -> tuple[str, str]:
+    import yaml
+    from sync_scoped_contract import catalog_scope
+
+    entry = next(e for e in yaml.safe_load((ROOT / FILES[1]).read_bytes())["operations"] if catalog_scope(e) is None)
+    return entry["operation"]["path"], entry["operation"]["method"].lower()
+
+
+def _definitions(scoped: bool) -> set:
+    """Definitions the committed catalog's scoped (or unscoped) operations reach."""
+    import sync_contract
+    import yaml
+    from sync_scoped_contract import catalog_scope
+
+    spec = json.loads((ROOT / FILES[0]).read_bytes())
+    entries = [e for e in yaml.safe_load((ROOT / FILES[1]).read_bytes())["operations"]
+               if (catalog_scope(e) is not None) == scoped]
+    return set(sync_contract.project(spec, entries)[1])
 
 
 def _skills_synced_from(product):
@@ -113,3 +139,36 @@ def test_the_committed_slice_records_every_scope_from_one_product_commit(baselin
 
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(pytest.main([__file__]))
+
+
+def test_default_mode_lets_a_scoped_definition_move(baseline):
+    # A re-sync of epoch or sql from the product changes their definitions; the sync's scope check
+    # and pair_check.py compare those with the product, not with the SDK baseline.
+    name = sorted(_definitions(scoped=True) - _definitions(scoped=False))[0]
+
+    def change(doc):
+        baseline.as_other(doc)
+        doc["definitions"][name] = {**doc["definitions"][name], "title": "re-synced from the product"}
+    baseline.edit(change)
+    baseline.run()
+
+
+def test_default_mode_rejects_a_changed_unscoped_route(baseline):
+    def change(doc):
+        baseline.as_other(doc)
+        path, method = _unscoped_route()
+        doc["paths"][path][method] = {**doc["paths"][path][method], "description": "changed"}
+    baseline.edit(change)
+    with pytest.raises(SystemExit, match="changed unscoped public paths"):
+        baseline.run()
+
+
+def test_default_mode_rejects_a_definition_scoped_and_unscoped_operations_share(baseline):
+    name = sorted(_definitions(scoped=True) & _definitions(scoped=False))[0]
+
+    def change(doc):
+        baseline.as_other(doc)
+        doc["definitions"][name] = {**doc["definitions"][name], "title": "changed"}
+    baseline.edit(change)
+    with pytest.raises(SystemExit, match="changed unscoped public schema definitions"):
+        baseline.run()
