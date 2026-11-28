@@ -1,11 +1,14 @@
-import { APIKeyAuth } from '../api/auth';
-import { HttpMethod, RequestConfig } from '../api/types';
+import { legacyFields, bulkFields } from '../_compat-fields';
+import { APIKeyAuth, type APIKeyAuthConfig } from '../api/auth';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { Routes } from '../utils/routes';
 import { SDKException, InvalidAuthError } from '../utils/errors';
+import { ConfigurationError } from '../_core/errors';
 import {
   AnnotationLabel,
   Project,
-  BulkAnnotationResponse,
+  BulkAnnotationResult,
   AnnotationRecord,
   BackendAnnotationRecord,
   AnnotationOptions,
@@ -14,24 +17,27 @@ import {
 export class Annotation extends APIKeyAuth {
   /**
    * SDK client for logging human annotations using flat DataFrame-style format.
-   * 
+   * `customAdapterReceivesKeys` is the HttpClient option of that name.
    */
-  constructor(options: AnnotationOptions = {}) {
+  constructor(options: AnnotationOptions & Pick<APIKeyAuthConfig, 'customAdapterReceivesKeys'> = {}) {
     super({
         fiApiKey: options.fiApiKey,
         fiSecretKey: options.fiSecretKey,
         fiBaseUrl: options.fiBaseUrl,
+        allowInsecureHttp: options.allowInsecureHttp,
+        customAdapterReceivesKeys: options.customAdapterReceivesKeys,
         timeout: options.timeout
     });
   }
 
+  /** Log annotations. Responses expose both spellings; deprecated camelCase access warns once per alias. */
   async logAnnotations(
     records: AnnotationRecord[],
     options: {
       projectName?: string;
       timeout?: number;
     } = {}
-  ): Promise<BulkAnnotationResponse> {
+  ): Promise<BulkAnnotationResult> {
     /**
      * Log annotations using flat DataFrame-style format.
      * 
@@ -92,6 +98,8 @@ export class Annotation extends APIKeyAuth {
       if (error.response?.status === 403) {
         throw new InvalidAuthError();
       }
+      // a refusal of the SDK's own (its code says why) reaches the caller as it is
+      if (error instanceof ConfigurationError) throw error;
       throw new SDKException(
         error.response?.data?.message || 'Bulk annotation request failed'
       );
@@ -134,6 +142,8 @@ export class Annotation extends APIKeyAuth {
       if (error.response?.status === 403) {
         throw new InvalidAuthError();
       }
+      // a refusal of the SDK's own (its code says why) reaches the caller as it is
+      if (error instanceof ConfigurationError) throw error;
       throw new SDKException('Failed to fetch annotation labels');
     }
   }
@@ -187,6 +197,8 @@ export class Annotation extends APIKeyAuth {
       if (error.response?.status === 403) {
         throw new InvalidAuthError();
       }
+      // a refusal of the SDK's own (its code says why) reaches the caller as it is
+      if (error instanceof ConfigurationError) throw error;
       throw new SDKException('Failed to list projects');
     }
   }
@@ -341,22 +353,24 @@ export class Annotation extends APIKeyAuth {
     return matchingLabel?.id || null;
   }
 
-  private _parseBulkAnnotationResponse(data: any): BulkAnnotationResponse {
+  private _parseBulkAnnotationResponse(data: any): BulkAnnotationResult {
     // Handle wrapped response
     if (data.result) {
       data = data.result;
     }
 
-    return {
+    const normalized = legacyFields(data, bulkFields);
+    // Preserve the existing bulk parser's ignore policy for unrelated fields.
+    return legacyFields({
       message: data.message || 'Bulk annotation completed',
-      annotations_created: data.annotations_created || 0,
-      annotations_updated: data.annotations_updated || 0,
-      notes_created: data.notes_created || 0,
-      succeeded_count: data.succeeded_count || 0,
-      errors_count: data.errors_count || 0,
-      warnings_count: data.warnings_count || 0,
+      annotations_created: normalized.annotations_created ?? 0,
+      annotations_updated: normalized.annotations_updated ?? 0,
+      notes_created: normalized.notes_created ?? 0,
+      succeeded_count: normalized.succeeded_count ?? 0,
+      errors_count: normalized.errors_count ?? 0,
+      warnings_count: normalized.warnings_count ?? 0,
       warnings: data.warnings,
       errors: data.errors,
-    };
+    }, bulkFields) as BulkAnnotationResult;
   }
 }

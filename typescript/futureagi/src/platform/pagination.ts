@@ -16,7 +16,7 @@ export interface Page<T> {
   raw: unknown;
 }
 
-const MAX_PAGES = 10_000; // guard against a server that never says "last page"
+const MAX_PAGES = 10_000; // guard against a server that does not say "last page"
 
 export function getPath(data: unknown, dotted: string): unknown {
   let current: unknown = data;

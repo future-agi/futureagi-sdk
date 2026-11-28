@@ -25,12 +25,22 @@ export interface ClientOptions {
   timeout?: number;
   /** Retries for 429 on every call and for timeouts/5xx on calls that are safe to repeat (default 2). */
   maxRetries?: number;
+  /** Allow API keys over http:// to a host that is not loopback (not set by the environment; not for a Future AGI host or a request an HTTP(S) proxy routes). */
+  allowInsecureHttp?: boolean;
   /** Sent with every request. */
   defaultHeaders?: Record<string, string>;
   /** Validate responses from generated operations with a strict wire contract. Default: false. */
   strictResponses?: boolean;
-  /** Replace the global `fetch` (tests, proxies, custom agents). */
+  /** Replace the global `fetch` (tests, proxies, custom agents). Keys go through it only with `customFetchReceivesKeys: true`;
+   * a `globalThis.fetch` other than the runtime's own at the time the SDK loaded counts as a fetch of your own. */
   fetch?: FetchLike;
+  /**
+   * Send API keys through `fetch`: you own the transport, so the proxy rules do not apply to that fetch; the destination
+   * rules do (plain HTTP to a host that is not loopback needs `allowInsecureHttp`, a Future AGI host is refused over
+   * HTTP, and the URL-shape refusals). Without it a call through a supplied `fetch` is refused with code
+   * `custom_fetch_not_opted_in`: a ProxyAgent inside an opaque fetch cannot be inspected.
+   */
+  customFetchReceivesKeys?: boolean;
   /** Replace or add resource classes: `{ datasets: MyDatasets }`. */
   resources?: Partial<ResourceClasses>;
 }
@@ -48,7 +58,9 @@ function resolveConfig(config: ClientConfig): ResolvedConfig {
   if (config.maxRetries !== undefined && config.maxRetries < 0) {
     throw new Error("maxRetries must be >= 0");
   }
-  const fetchImpl = config.fetch ?? (typeof fetch === "function" ? fetch : undefined);
+  // `globalThis.fetch` is read once here: the value checked is the value kept.
+  const global = config.fetch === undefined ? globalThis.fetch : undefined;
+  const fetchImpl = config.fetch ?? (typeof global === "function" ? global : undefined);
   if (!fetchImpl) {
     throw new Error("no global fetch: pass `fetch` in the client config (Node >= 18 has one)");
   }
@@ -60,9 +72,11 @@ function resolveConfig(config: ClientConfig): ResolvedConfig {
     workspaceId: config.auth?.type === "context" ? config.workspaceId : config.workspaceId ?? env.FI_WORKSPACE_ID,
     timeout: config.timeout ?? 60_000,
     maxRetries: config.maxRetries ?? 2,
+    allowInsecureHttp: config.allowInsecureHttp,
     defaultHeaders: config.defaultHeaders,
     strictResponses: config.strictResponses ?? false,
     fetch: fetchImpl,
+    customFetchReceivesKeys: config.customFetchReceivesKeys === true,
   };
 }
 

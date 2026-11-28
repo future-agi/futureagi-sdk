@@ -8,7 +8,7 @@ export class FutureAGIError extends Error {
   }
 }
 
-/** The request never got a response (DNS, TLS, timeout, connection reset). */
+/** The request got no response (DNS, TLS, timeout, connection reset). */
 export class APIConnectionError extends FutureAGIError {}
 
 /**
@@ -45,6 +45,29 @@ export class AuthenticationError extends APIError {}
 /** Feature not on the organization's plan. */
 export class PaymentRequiredError extends APIError {}
 export class PermissionDeniedError extends APIError {}
+
+/** The exact 403 `error: "wrong_region"` response; correction is manual, not automatic. */
+export class WrongRegionError extends PermissionDeniedError {
+  readonly code = "wrong_region";
+
+  constructor() {
+    super(
+      "403 The selected regional base rejected this request (wrong_region). " +
+        "Manually select the intended regional base: US https://api.futureagi.com or " +
+        "EU https://api-eu.futureagi.com using baseUrl / FI_BASE_URL. " +
+        "The SDK does not discover residency and does not probe, redirect or retry against another region.",
+      403, { error: "wrong_region" },
+    );
+  }
+}
+
+/** Only the frozen top-level string envelope at 403 is regional evidence. Do not infer it from a
+ * nested code, wrapper, status alone or response prose; check before any privacy transformation. */
+function isWrongRegionResponse(status: number, body: unknown): boolean {
+  return status === 403 && body !== null && typeof body === "object" && !Array.isArray(body) &&
+    Object.prototype.hasOwnProperty.call(body, "error") && (body as Record<string, unknown>).error === "wrong_region";
+}
+
 export class NotFoundError extends APIError {}
 export class ConflictError extends APIError {}
 export class UnprocessableEntityError extends APIError {}
@@ -73,6 +96,9 @@ export function errorFromResponse(status: number, text: string, requestId: strin
     body = JSON.parse(text);
   } catch {
     // not JSON: keep the text
+  }
+  if (isWrongRegionResponse(status, body)) {
+    return new WrongRegionError();
   }
   let message: string | null = null;
   if (isRecord(body)) {

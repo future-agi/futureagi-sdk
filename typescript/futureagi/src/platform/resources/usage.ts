@@ -10,7 +10,25 @@
 //     }
 //   }
 
-import { UsageResource } from "./base";
+import { NotFoundError } from "../errors";
+import type { UsageOverviewResult } from "../models";
+import type { RequestOptions } from "../transport";
+import { UsageResource, type UsageOverviewParams } from "./base";
+
+/** The deployment does not provide the usage overview endpoint. */
+export class UsageOverviewUnavailableError extends NotFoundError {}
 
 /** `client.usage`: every generated `usage.*` method, plus the hand-written additions in this file. */
-export class Usage extends UsageResource {}
+export class Usage extends UsageResource {
+  async overview(params: UsageOverviewParams = {}, options?: RequestOptions): Promise<UsageOverviewResult> {
+    try {
+      return await super.overview(params, options);
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) throw error;
+      throw new UsageOverviewUnavailableError(
+        "This deployment does not provide the usage overview endpoint (GET /usage/v2/usage-overview/).",
+        error.status, error.body, error.requestId,
+      );
+    }
+  }
+}

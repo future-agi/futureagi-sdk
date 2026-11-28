@@ -4,7 +4,7 @@ import { Client } from "../client";
 import { conversationBusy, openQuestion, WaitTimeoutError } from "../index";
 import type { FetchLike } from "../transport";
 
-const BASE = "http://backend.test";
+const BASE = "https://backend.test";
 const JOB = "/simulate/api/harness-jobs/j1/";
 const VERSIONS = "/simulate/api/harness-environments/e1/versions/";
 const FAST = { pollIntervalMs: 1 };
@@ -25,7 +25,7 @@ function scripted(routes: Record<string, unknown[]>): { fetch: FetchLike; seen: 
   return { fetch, seen };
 }
 
-const client = (fetch: FetchLike) => new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, maxRetries: 0 });
+const client = (fetch: FetchLike) => new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, customFetchReceivesKeys: true, maxRetries: 0 });
 
 describe("simulation wait helpers", () => {
   test("waitForJob polls until a terminal state", async () => {

@@ -3,7 +3,7 @@
 import { Client } from "../client";
 import type { FetchLike } from "../transport";
 
-const BASE = "http://backend.test";
+const BASE = "https://backend.test";
 const ENV = "11111111-1111-4111-8111-11111111111a";
 const H = `/simulate/api/harness-environments/${ENV}/`;
 
@@ -20,7 +20,7 @@ function recording(result: unknown = {}, status = 200): { fetch: FetchLike; seen
   return { fetch, seen };
 }
 
-const client = (fetch: FetchLike) => new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, maxRetries: 0 });
+const client = (fetch: FetchLike) => new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, customFetchReceivesKeys: true, maxRetries: 0 });
 
 describe("scenario lifecycle", () => {
   test("validate, follow, archive, restore, revisions and records", async () => {

@@ -9,7 +9,7 @@ import { APIConnectionError, APIError, BadRequestError, InternalServerError, Not
 import { OP_DATASETS_CREATE } from "../_operations";
 import type { FetchLike } from "../transport";
 
-const BASE = "http://backend.test";
+const BASE = "https://backend.test";
 
 interface Seen {
   url: string;
@@ -42,7 +42,7 @@ function fake(...responses: Array<Response | Error | ((seen: Seen) => Response |
 }
 
 function client(fetch: FetchLike, extra: Omit<ConstructorParameters<typeof Client>[0], "auth"> = {}): Client {
-  return new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, maxRetries: 0, ...extra });
+  return new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, customFetchReceivesKeys: true, maxRetries: 0, ...extra });
 }
 
 describe("requests", () => {
@@ -108,44 +108,50 @@ describe("errors", () => {
     expect(error.detail).toEqual({ new_dataset_name: ["This field may not be blank."] });
   });
 
-  test("a redirect without a target is an error, not an empty result", async () => {
+  test("a redirect without a target is refused as a redirect, not read as a result", async () => {
     const { fetch } = fake(new Response(null, { status: 301 }));
     const error = await client(fetch).datasets.list().firstPage().catch((e) => e);
-    expect(error).toBeInstanceOf(APIError);
-    expect(error.status).toBe(301);
+    expect(error).toBeInstanceOf(APIConnectionError);
+    expect(error.message).toMatch(/not followed/);
   });
 });
 
 describe("redirects", () => {
-  const page = () => json(200, { status: true, result: { datasets: [], total_pages: 1 } });
-
-  test("one within the client's origin is followed, credentials included", async () => {
-    const { fetch, calls } = fake(new Response(null, { status: 307, headers: { location: "/model-hub/develops/get-datasets/" } }), page());
-    await client(fetch, { workspaceId: "w1" }).datasets.list().firstPage();
-    expect(calls.map((c) => c.url)).toEqual([`${BASE}/model-hub/develops/get-datasets/?page=0`, `${BASE}/model-hub/develops/get-datasets/`]);
-    expect(calls[1].headers).toMatchObject({ "X-Api-Key": "k", "X-Secret-Key": "s", "X-Workspace-Id": "w1" });
-    expect(calls[0].signal).toBeInstanceOf(AbortSignal);
+  test.each([301, 302, 303, 307, 308])("a %i within the client's origin is refused: the request is not sent again", async (status) => {
+    const { fetch, calls } = fake(new Response(null, { status, headers: { location: "/model-hub/develops/get-datasets/" } }));
+    const error = await client(fetch, { workspaceId: "w1" }).datasets.list().firstPage().catch((e) => e);
+    expect(error).toBeInstanceOf(APIConnectionError);
+    expect(error.message).toMatch(new RegExp(`not followed.*${status}`, "u"));
+    expect(calls).toHaveLength(1);
   });
 
-  test("a 303 re-issues the request as a GET without its body", async () => {
+  test("a 303 to a write is refused without a second request", async () => {
     const { fetch, calls } = fake(new Response(null, { status: 303, headers: { location: `${BASE}/done/` } }), json(200, { status: true, result: { message: "ok", dataset_id: "d1", dataset_name: "x" } }));
-    await client(fetch).datasets.create({ new_dataset_name: "x" });
-    expect(calls.map((c) => [c.method, c.url])).toEqual([["POST", `${BASE}/model-hub/develops/create-empty-dataset/`], ["GET", `${BASE}/done/`]]);
-    expect(calls[1].body).toBeUndefined();
+    await expect(client(fetch).datasets.create({ new_dataset_name: "x" })).rejects.toBeInstanceOf(APIConnectionError);
+    expect(calls).toHaveLength(1);
   });
 
-  test("one that leaves the origin is refused, so the API keys never travel", async () => {
-    const { fetch, calls } = fake(new Response(null, { status: 302, headers: { location: "https://evil.example/collect" } }));
+  test("a redirect that leaves the origin is refused and does not name its target", async () => {
+    const { fetch, calls } = fake(new Response(null, { status: 302, headers: { location: "https://other.example/collect?token=abc" } }));
     const error = await client(fetch).datasets.list().firstPage().catch((e) => e);
     expect(error).toBeInstanceOf(APIConnectionError);
-    expect(error.message).toMatch(/not followed/);
+    expect(error.message).not.toContain("other.example");
+    expect(error.message).not.toContain("/collect");
+    expect(error.message).not.toContain("abc");
     expect(calls).toHaveLength(1); // nothing was sent to the other host
   });
 
-  test("a loop stops after five hops", async () => {
+  test("an opaque redirect answer is refused whatever its status", async () => {
+    const opaque = (): Response => Object.defineProperty(new Response(null, { status: 200 }), "type", { value: "opaqueredirect" });
+    const { fetch, calls } = fake(opaque);
+    await expect(client(fetch).datasets.list().firstPage()).rejects.toBeInstanceOf(APIConnectionError);
+    expect(calls).toHaveLength(1);
+  });
+
+  test("a redirect loop stops at the first answer", async () => {
     const { fetch, calls } = fake(new Response(null, { status: 302, headers: { location: `${BASE}/again/` } }));
-    await expect(client(fetch).datasets.list().firstPage()).rejects.toThrow(/more than 5 redirects/);
-    expect(calls).toHaveLength(6);
+    await expect(client(fetch).datasets.list().firstPage()).rejects.toBeInstanceOf(APIConnectionError);
+    expect(calls).toHaveLength(1);
   });
 });
 

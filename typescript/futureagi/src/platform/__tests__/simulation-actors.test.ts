@@ -3,7 +3,7 @@
 import { Client } from "../client";
 import type { FetchLike } from "../transport";
 
-const BASE = "http://backend.test";
+const BASE = "https://backend.test";
 const ENV = "11111111-1111-4111-8111-11111111111a";
 const H = `/simulate/api/harness-environments/${ENV}/`;
 const ACTORS = { status: true, result: { actors: [], limits: {}, revision: 3 } };
@@ -22,7 +22,7 @@ function recording(): { fetch: FetchLike; seen: Seen[] } {
   return { fetch, seen };
 }
 
-const client = (fetch: FetchLike) => new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, maxRetries: 0 });
+const client = (fetch: FetchLike) => new Client({ apiKey: "k", secretKey: "s", baseUrl: BASE, fetch, customFetchReceivesKeys: true, maxRetries: 0 });
 
 describe("simulation environment actors", () => {
   test("list, get and validate read; create and update write the draft", async () => {

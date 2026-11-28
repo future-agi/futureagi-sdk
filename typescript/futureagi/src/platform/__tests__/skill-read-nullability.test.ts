@@ -3,7 +3,7 @@ import { ResponseValidationError } from "../errors";
 import type { RequestOptions } from "../transport";
 
 function client(data: unknown, strictResponses = true): Client {
-  return new Client({ apiKey: "fixture", secretKey: "fixture", strictResponses,
+  return new Client({ apiKey: "fixture", secretKey: "fixture", strictResponses, customFetchReceivesKeys: true,
     fetch: async () => new Response(JSON.stringify({status: true, result: data}), {
       status: 200, headers: {"content-type": "application/json"},
     }),
@@ -67,7 +67,7 @@ describe.each(reads)("$name", ({ key, partial, read }) => {
     let respond!: (response: Response) => void;
     const started = new Promise<void>(resolve => { notifyStarted = resolve; });
     const response = new Promise<Response>(resolve => { respond = resolve; });
-    const sdk = new Client({ apiKey: "fixture", secretKey: "fixture", fetch: () => {
+    const sdk = new Client({ apiKey: "fixture", secretKey: "fixture", customFetchReceivesKeys: true, fetch: () => {
       notifyStarted();
       return response;
     } });
