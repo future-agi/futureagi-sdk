@@ -17,7 +17,7 @@ def _name(prefix: str) -> str:
     return f"sdk-{prefix}-{uuid.uuid4().hex[:8]}"
 
 
-def test_context_set_create_publish_and_release_preview(client):
+def test_context_set_create_publish_and_release_preview(client, requires_skills):
     from fi.context import authoring, release
 
     skill = _name("set-skill")

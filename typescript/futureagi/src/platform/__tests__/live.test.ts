@@ -363,6 +363,17 @@ live("platform client against a live backend", () => {
     client = new Client({ strictResponses: true, timeout: 60_000 });
   });
 
+  // A product release from before Skills serves none of its routes. Only Django's own HTML 404
+  // page for GET /model-hub/skills/ means that; any other 404 fails, and any other answer runs
+  // the Skills cases (python/tests/platform/_skills_routes.py applies the same rule).
+  let skillsServed: Promise<boolean> | undefined;
+  const skillsRoutesServed = () => (skillsServed ??= client.request("GET", "/model-hub/skills/").then(() => true, (error: unknown) => {
+    if (!(error instanceof APIError)) throw error;
+    if (error.status !== 404) return true;
+    if (typeof error.body === "string" && /<(!doctype\s+html|html)[\s>]/i.test(error.body)) return false;
+    throw new Error(`GET /model-hub/skills/ answered a 404 that is not Django's page: ${JSON.stringify(error.body)}`);
+  }));
+
   test("context", async () => {
     const me = await client.account.whoami();
     expect(me.email).toBeTruthy();
@@ -617,6 +628,10 @@ live("platform client against a live backend", () => {
   });
 
   test.each(["skill", "agent_context"] as const)("%s: verified snapshot pagination, Unicode chunks and revocation", async (kind) => {
+    if (!(await skillsRoutesServed())) {
+      console.warn("SKILLS NOT SERVED: GET /model-hub/skills/ answered Django's 404 page; this product release has no Skills routes, so this Skills case is not exercised");
+      return;
+    }
     const resourceName = name("consume");
     const entrypoint = kind === "skill" ? "SKILL.md" : "AGENTS.md";
     const text = kind === "skill"

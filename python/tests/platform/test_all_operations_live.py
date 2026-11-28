@@ -14,6 +14,7 @@ import decimal
 import json
 import os
 import re
+import sys
 import time
 import unicodedata
 import uuid
@@ -29,6 +30,10 @@ import pytest
 import yaml
 
 CATALOG = Path(__file__).resolve().parents[3] / "sdkgen" / "catalog" / "operations.yaml"
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # the shared helper, under any import mode
+from _skills_routes import SKILLS_OPERATION_PREFIXES, skills_served  # noqa: E402
+
 SQL_TOTAL_TIMEOUT = 150.0
 SQL_CLEANUP_TIMEOUT = 10.0
 TERMINAL_SQL_STATES = {"succeeded", "failed", "cancelled"}
@@ -1195,7 +1200,7 @@ def _publish_context_fixture(client, name, files):
     return created["context_id"], published["version"]
 
 
-def test_skills_catalog_lifecycle(client):
+def test_skills_catalog_lifecycle(client, requires_skills):
     name = _name("skill")
     text = f"---\nname: {name}\ndescription: Use for SDK lifecycle validation.\n---\nRead the approved policy.\n"
     published = client.skills.publish(
@@ -1233,7 +1238,7 @@ def _assert_workspace_reads(client, kind, resource_id, name, version):
 
 
 @pytest.mark.parametrize("kind", ["skill", "agent_context"])
-def test_scoped_consumption_lifecycle(client, kind):
+def test_scoped_consumption_lifecycle(client, kind, requires_skills):
     """Real issuance, paged immutable reads, label movement, and revocation.
 
     No mocked transport or blanket error allowance: a missing facade fails this
@@ -1368,9 +1373,9 @@ def test_scoped_consumption_lifecycle(client, kind):
             client.context_credentials.revoke(issued.id)
 
 
-def test_context_catalog_operations_succeeded(client, record_calls):
+def test_context_catalog_operations_succeeded(client, record_calls, requires_skills):
     """The new lifecycle slice requires success, not just recorded HTTP errors."""
-    prefixes = ("contexts.", "skill_consumption.", "context_credentials.", "skills.")
+    prefixes = SKILLS_OPERATION_PREFIXES
     operations = [entry["id"] for entry in yaml.safe_load(CATALOG.read_text())["operations"]
                   if entry["id"].startswith(prefixes) and entry["surfaces"].get("sdk") is not False]
     missing = [operation for operation in operations if "ok" not in record_calls.get(operation, [])]
@@ -1385,6 +1390,10 @@ def test_every_operation_was_called(client, record_calls):
     if not record_calls:
         pytest.skip("run the whole module to check coverage")
     ops = [e["id"] for e in yaml.safe_load(CATALOG.read_text())["operations"] if e["surfaces"].get("sdk") is not False]
+    if not skills_served(client):
+        skipped = [op for op in ops if op.startswith(SKILLS_OPERATION_PREFIXES)]
+        print(f"SKILLS NOT SERVED: {len(skipped)} Skills operations are not required on this product release")
+        ops = [op for op in ops if op not in skipped]
     for op_id in ops:
         outcomes = record_calls.get(op_id, [])
         print(f"{op_id:44} {'ok' if 'ok' in outcomes else ','.join(sorted(set(outcomes))) or 'NOT CALLED'}")
