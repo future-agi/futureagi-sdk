@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/future-agi/futureagi-sdk/compare/typescript-v0.3.0...typescript-v0.3.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **typescript:** send keys only to the configured address, and through a proxy only inside a tunnel ([e43dd6e](https://github.com/future-agi/futureagi-sdk/commit/e43dd6eead842ced3020a2f506ac2b15bce24c13))
+
 ## 0.3.1
 
 ### Changed
