@@ -206,6 +206,9 @@ def _params_interface(op: Op) -> tuple[str, list[Param]]:
             and not op.rejects_optional_null(p)
         )
         out.append(f"{desc}  {prop_key(param_key(p))}{'' if p.required else '?'}: {ts + ' | null' if nullable else ts};\n")
+    if op.surfaces["sdk"].get("idempotency_key"):
+        out.append("  /** Sent as the Idempotency-Key header; a new one when left out. The same key gets the same result back. */\n")
+        out.append("  idempotencyKey?: string;\n")
     out.append("}\n\n")
     return "".join(out), fields
 
@@ -277,6 +280,8 @@ def _method(op: Op, fields: list[Param]) -> str:
             lines.append(f"      {prop},\n")
         lines.append("    } satisfies Record<keyof RequestOptions, unknown>;\n")
         options_arg = "callOptions"
+    if op.surfaces["sdk"].get("idempotency_key"):
+        options_arg = f"withIdempotencyKey({options_arg}, params.idempotencyKey)"
     lines.append(f"    return this._t.{call}<{generic}>(ops.{op_constant(op)}, {{ {', '.join(parts)} }}, {options_arg});\n")
     lines.append("  }\n")
     return "".join(lines)
@@ -315,7 +320,8 @@ def emit_resources(ops: list[Op]) -> str:
         "import { Pager } from \"../pagination\";\n",
         "import { Resource } from \"../resource\";\n",
         "import { warnStability } from \"../stability\";\n",
-        "import type { FileInput, JsonValue, RequestOptions, Transport } from \"../transport\";\n\n",
+        "import type { FileInput, JsonValue, RequestOptions, Transport } from \"../transport\";\n"
+        "import { withIdempotencyKey } from \"../transport\";\n\n",
     ]
     if any(op.params_in("header") for op in sdk_ops(ops)):
         out.append('import { operationOptions } from "../transport";\n\n')

@@ -13,8 +13,8 @@
 #   pagination: how the SDK auto-paginates (page param, size param, first page,
 #               where the items are, and `next` or `total_pages` to know when to stop)
 #
-# MCP names follow future-agi/futureagi/mcp_server/catalog/tools.yaml: all 141 tools of the
-# product commit recorded in contracts/swagger.json x-contract-sources.skills. Check with
+# MCP names follow future-agi/futureagi/mcp_server/catalog/tools.yaml: all 143 tools of the
+# product commit recorded in contracts/swagger.json x-contract-sources.skills and .epoch. Check with
 # `sdkgen/check_mcp_parity.py --ref <that commit>` (its default is BACKEND_VERSION).
 
 version: 1
@@ -1465,7 +1465,8 @@ operations:
 # Simulation, environment era: parity with the futureagi-cli `fi api` agents and
 # simulation groups (its catalog/extensions.yaml and cli.yaml). SDK-only: these
 # are not MCP tools. Deletes are deliberately left out (persona delete, draft
-# discard, evaluation remove), as is discarding an agent version; verify
+# discard, evaluation remove), as is discarding an agent version; an actor's
+# delete is in, since it edits the draft and nothing changes until it is saved; verify
 # (/harness-environments/{id}/verify/) waits for a backend release that has it.
 # ---------------------------------------------------------------------------
 
@@ -1522,9 +1523,9 @@ operations:
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.run
-  description: Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). Send the same Idempotency-Key header (options headers) to get the same run back on a retry.
+  description: Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. idempotency_key is sent as the Idempotency-Key header the run needs (a new one when left out); the same key gets the same run back on a retry.
   operation: {method: POST, path: '/simulate/api/harness-environments/{id}/run/', response_status: 202}
-  surfaces: {sdk: {}, mcp: false}
+  surfaces: {sdk: {idempotency_key: true}, mcp: false}
 
 - id: simulation.environments.versions.list
   description: List an environment's saved agent, environment and suite versions, and which of each is the default.
@@ -1556,14 +1557,138 @@ operations:
   operation: {method: GET, path: '/simulate/api/harness-environments/{id}/versions/{piece}/{version_id}/diff/'}
   surfaces: {sdk: {}, mcp: false}
 
+- id: simulation.environments.actors.list
+  description: List an environment's actors (the people, systems and tools the agent works with) and its actor limits, as the next run would use them, the draft's when there is one.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/actors/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.get
+  description: Return what one actor sees and may do, optionally in one scenario (scenario_key), and what it never sees.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/actors/{actor_id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.validate
+  description: Check a create, replace or removal (op) of one actor without writing anything; returns its problems, the actions it would share that share_actions does not confirm, and the id a create would get (new_id asks for one).
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/actor-validation/'}
+  contract_fix:
+    body_fields: {id: {type: string, as: new_id}}
+    note: the body's `id` (the id a created actor takes) shares its name with the environment's path `id`
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.create
+  description: Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. Returns every actor.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/actors/'}
+  contract_fix:
+    body_fields: {id: {type: string, as: new_id}}
+    note: the body's `id` (the id a created actor takes) shares its name with the environment's path `id`
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.update
+  description: Replace one actor in the environment's draft, as a whole record (actor) or as changes to it (changes); its id never changes. Returns every actor.
+  operation: {method: PUT, path: '/simulate/api/harness-environments/{id}/actors/{actor_id}/'}
+  contract_fix:
+    body_fields: {id: {type: string, as: new_id}}
+    note: the body's `id` (the id a created actor takes) shares its name with the environment's path `id`
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.delete
+  description: Take one actor out of the environment's draft; refused while a scenario includes it. expected_revision refuses a draft that changed since you read it. Returns every actor.
+  operation: {method: DELETE, path: '/simulate/api/harness-environments/{id}/actors/{actor_id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.set_limits
+  description: Replace the environment's actor limits in its draft (each a positive number, or None for no limit) and its actors' model; a limit left out takes the channel's default. Returns every actor.
+  operation: {method: PUT, path: '/simulate/api/harness-environments/{id}/actor-limits/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.accept_unresolved
+  description: Accept the cast as written for one policy point the builder could not model (policy, exactly as actors.list returns it under unresolved), in the environment's draft. Returns every actor.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/actor-unresolved/accept/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.versions.source_changes
+  description: Return the rules and files an environment version changed that scenarios cite, with the scenarios citing each.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/versions/environment/{version_id}/source-changes/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.scenarios.validate
+  description: Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Returns a job_id to follow with validation_status.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/scenarios/validate/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.scenarios.validation_status
+  description: Return where one scenario validation (job_id) got to, and whether it recorded its proofs.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/scenarios/validate/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.scenarios.running_validation
+  description: Return the validation still running for the environment's default versions, if any, and how many scenarios a validation of those not yet proved would prove.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/scenarios/validate/running/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.scenarios.archive
+  description: Take one scenario (key) out of future runs, with an optional reason; its identity, runs and evidence are kept, and restore brings it back.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/scenarios/{key}/archive/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.scenarios.restore
+  description: Bring an archived scenario (key) back, at once when the saved suite still holds it, otherwise as a draft to save.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/scenarios/{key}/restore/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.scenarios.records
+  description: Return the seeded rows of one table of the world, to pick a real record for a scenario (key) whose starting record is missing. Writes nothing.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/scenarios/{key}/records/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.scenarios.revisions
+  description: List each distinct content of one scenario (key) across the environment's saved suite versions, newest first.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/scenarios/{key}/revisions/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.readiness.get
+  description: Return the run readiness of a pairing of agent, environment and suite versions (absent ones are the defaults), computed now, with its blockers and the selected scenarios it holds back; keys narrows the selection and trials is the trial count planned. Writes nothing.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/capabilities/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.readiness.get_for_scenarios
+  description: Return the same run readiness report as readiness.get for a selection of scenarios too long for a query string (scenario_ids, more than 200 keys). Writes nothing.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/capabilities/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.readiness.cases
+  description: List one page, by scenario number, of the selected scenarios in one readiness bucket (eligible, blocked, stale or untested) or held back by one readiness row; pass the previous page's next as cursor. Writes nothing.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/capabilities/cases/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.readiness.recheck
+  description: Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/capabilities/recheck/', response_status: 202}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.readiness.history
+  description: List the version pairings certified on an environment, newest first, with the exact agent, environment and suite versions of each; pass the returned cursor for the next page.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/capabilities/history/'}
+  surfaces: {sdk: {}, mcp: false}
+
 - id: simulation.environments.drafts.list
   description: Return an environment's unsaved environment and suite drafts (with parent_id and revision for a save) and the drafts a rebuild set aside.
   operation: {method: GET, path: '/simulate/api/harness-environments/{id}/drafts/'}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.drafts.save
-  description: Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
+  description: Save the named drafts together as new default versions (each needs expected_parent_id), or the candidates drafts.validate built once its validation is ready; where drafts.list says validation_required, a plain save is refused. The body's idempotency_key replays an earlier save.
   operation: {method: POST, path: '/simulate/api/harness-environments/{id}/drafts/save/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.drafts.review
+  description: Return every change the open drafts make, with the decision on each, and the review_digest that drafts.validate needs. Writes nothing.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/drafts/review/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.drafts.validate
+  description: Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list. While it is validating, read it again; on ready or check_unavailable, save the candidates with drafts.save; on retry, outdated or superseded, validate again; failed means the agent failed the check; unavailable means this environment cannot validate, so save the drafts themselves.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/drafts/validate/'}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.nudges.list
@@ -1685,10 +1810,10 @@ operations:
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.jobs.scenarios.list
-  description: List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list).
+  description: List one page of an environment's (or run's) authored scenarios, by number, each with its lifecycle; group_by defaults to goal when omitted (empty for a flat list), and lifecycle keeps one state (draft, validated, active, archived, source_changed or kept_as_written).
   operation: {method: GET, path: '/simulate/api/harness-jobs/{id}/scenarios/'}
   contract_fix:
-    query: {page: integer, limit: integer, search: string, ordering: string, group_by: string}
+    query: {page: integer, limit: integer, search: string, ordering: string, group_by: string, lifecycle: string}
     untyped: true
     note: contract declares neither the view's query parameters nor its response
   surfaces: {sdk: {}, mcp: false}
@@ -1735,6 +1860,11 @@ operations:
   contract_fix:
     untyped: true
     note: contract types evaluations[].value as an object and function_calls[] with fixed fields; the server returns strings and numbers and the recorded tool trace
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.calls.workers
+  description: For one trial (call) of a multi-agent app, return which of the app's participants (workers) did what, read from the traces the app sent. While the traces are still being collected it returns only pending and next_read_at (read again then); it returns None when the trial handed nothing to another agent.
+  operation: {method: GET, path: '/simulate/v3/call-executions/{call_execution_id}/workers/'}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.personas.list
@@ -1802,7 +1932,7 @@ operations:
     mcp: {name: get_debug_failures, group: epoch, access: read}
 
 - id: simulation.executions.insights.start
-  description: Start Debug failures on a finished run (test execution), one analysis job per call. It may incur usage charges. A run that has not finished is refused; poll get_debug_failures for the diagnosis.
+  description: "Start Debug failures on a finished run (test execution), one analysis job per call. It may incur usage charges. Starting a diagnosis needs a finished run with at least 15 connected calls and a failing call; a run below that is refused with the reason. On a run below that rule, a diagnosis already made is returned unchanged. On an eligible run, asking again reads again only the calls whose analysis failed or was cancelled, which may incur charges; calls in progress or already read are kept. Poll get_debug_failures for the diagnosis."
   operation: {method: POST, path: '/simulate/test-executions/{test_execution_id}/debug-analysis/', response_status: 202}
   surfaces:
     sdk: {}
@@ -1857,6 +1987,20 @@ operations:
     sdk: {}
     mcp: {name: get_epoch_launch_options, group: epoch, access: read}
 
+- id: simulation.epochs.coding_agent_brief
+  description: "Return what your coding agent needs to fix a finished run itself, with source_run_id the run's test execution ID. It lists the failing cases, the agent's files, the rules for a change, the attempts left, and instructions to follow. Submit the change with `fagi epoch submit`, then read get_epoch_attempt_verdict."
+  operation: {method: GET, path: /simulate/api/agent-fix-runs/coding-agent-brief/}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_epoch_coding_agent_brief, group: epoch, access: read}
+
+- id: simulation.epochs.attempt_verdict
+  description: "Return the verdict on a fix your coding agent submitted, by the attempt's Epoch ID. It gives its state, each check's status, the detail of the static and target checks, and its must-pass regressions. Poll it until the attempt has ended."
+  operation: {method: GET, path: '/simulate/api/agent-fix-runs/{id}/verdict/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_epoch_attempt_verdict, group: epoch, access: read}
+
 - id: simulation.epochs.list
   description: List the Epochs of one environment, newest first, with each Epoch's state and limits. Supply environment_id.
   operation: {method: GET, path: /simulate/api/agent-fix-runs/}
@@ -1901,14 +2045,14 @@ operations:
     mcp: {name: get_epoch_candidate_patch, group: epoch, access: read}
 
 - id: simulation.epochs.candidates.make_default
-  description: Make an Epoch candidate the environment's default agent version, so later runs use it. To ship a candidate that only its must-pass check refused, give override_reason.
+  description: "Make an Epoch's winning candidate the environment's default agent version, so later runs use it. A candidate its checks refused is shipped only by a person, in Future AGI."
   operation: {method: POST, path: '/simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/make-default/'}
   surfaces:
     sdk: {}
     mcp: {name: make_epoch_candidate_default, group: epoch, access: write}
 
 - id: simulation.epochs.candidates.open_pull_request
-  description: Open a pull request with an Epoch candidate's change on a GitHub agent's repository. It is opened once. To ship a candidate that only its must-pass check refused, give override_reason.
+  description: "Open a pull request with an Epoch's winning candidate on a GitHub agent's repository. It is opened once. A candidate its checks refused is shipped only by a person, in Future AGI."
   operation: {method: POST, path: '/simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/pull-request/'}
   surfaces:
     sdk: {}

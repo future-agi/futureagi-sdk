@@ -14,8 +14,10 @@ operations:
     bucket: a
     asserts: "not_requested on a real run; 404 in the product's error envelope for an unknown run"
   simulation.executions.insights.start:
-    bucket: a
-    asserts: "202 pending, or exactly 409 execution_not_completed while the run has not finished"
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: "202 pending, or 409 with exactly one eligibility code (execution_not_completed, execution_calls_unfinished, investigation_too_few_calls, investigation_nothing_failed)"
+    needs: "a finished run with at least 15 connected calls and a failing call"
   simulation.environments.evidence_imports.list:
     bucket: b
     status: refusal-only until PR2 TH-10732
@@ -51,6 +53,16 @@ operations:
     status: refusal-only until PR2 TH-10732
     asserts: '404 {"error": "not_found"} on an unknown run'
     needs: "a finished run job on an environment (product seeder)"
+  simulation.epochs.coding_agent_brief:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"}: the route is off on the stack (AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED unset)'
+    needs: "AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED=true on the stack, then a finished run job on an environment (product seeder)"
+  simulation.epochs.attempt_verdict:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"}: the route is off on the stack (AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED unset)'
+    needs: "AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED=true on the stack, then an attempt submitted by a coding agent (product seeder)"
   simulation.epochs.list:
     bucket: b
     status: refusal-only until PR2 TH-10732
@@ -84,9 +96,9 @@ operations:
   simulation.epochs.candidates.make_default:
     bucket: b
     status: refusal-only until PR2 TH-10732
-    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    asserts: '404 {"error": "not_found"} on an unknown Epoch; with an override_reason from an API key, 403 {"error": "fix_override_needs_person"}'
     needs: "an ended Epoch with a winning candidate (product seeder)"
   simulation.epochs.candidates.open_pull_request:
     bucket: c
-    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    asserts: '404 {"error": "not_found"} on an unknown Epoch; with an override_reason from an API key, 403 {"error": "fix_override_needs_person"}'
     reason: "opening the pull request needs a GitHub App installation and real GitHub writes"

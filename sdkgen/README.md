@@ -2,7 +2,7 @@
 
 `sdkgen` generates the platform client for both SDKs (`fi.Client` in Python, `new Client()` in TypeScript) from the backend's API contract plus a small catalog. The catalog records, for each operation, the MCP tool it corresponds to in the monorepo (`futureagi/mcp_server/catalog/tools.yaml`), so an operation has the same name in the SDKs and in MCP; the MCP server itself is generated and served from the monorepo, not here.
 
-It covers the paired product's 141 MCP tools (same names), the
+It covers the paired product's 143 MCP tools (same names), the
 SDK-only dataset/prompt/KB/queue/annotation surface, and F12 isolated context/leaf
 consumption. The catalog parity gate checks exact MCP tool-name agreement; snapshot,
 installer and runtime adapters reuse these generated operations and the shared transport.
@@ -449,7 +449,7 @@ The one-time setup is required before automatic releases work. Missing app crede
 ### Reproduce the scoped contract
 
 The mixed slice in `sdkgen/contracts/swagger.json` has four `x-contract-sources`
-records. `sql` (4 tools), `epoch` (17 tools), and `skills` (13 tools plus 11
+records. `sql` (4 tools), `epoch` (19 tools), and `skills` (13 tools plus 11
 SDK-only consumption and credential operations) share one immutable product commit.
 Each record fingerprints the product OpenAPI, generated MCP manifest and `tools.yaml`.
 `other` identifies the SDK baseline slice, its byte hash, and the OpenAPI digest
@@ -460,8 +460,8 @@ contains SQL and Epoch; adding Skills does not change any non-Skills operation.
 From the SDK checkout, with `PRODUCT_REPO` a clean checkout at the product commit:
 
 ```sh
-product_commit=0703ba32c94186b14eeb0d58f43aa08bd8c027f8
-sdk_baseline=f40bddba45e637d2009040b9d95132357b5d95ae
+product_commit=554901bf1f88fc1a33721fd5ae0930fea3943260
+sdk_baseline=c3515f6113eb0aaec9fbb28b7ffee198e373e2f9
 catalog="$PRODUCT_REPO/futureagi/mcp_server/catalog"
 python sdkgen/sync_scoped_contract.py "$PRODUCT_REPO" "$product_commit" "$sdk_baseline"
 python sdkgen/generate.py
@@ -475,11 +475,11 @@ python sdkgen/pair_check.py --product "$PRODUCT_REPO" --sha "$product_commit" --
 The sync reads Git blobs, verifies all scoped MCP mappings and Epoch descriptions,
 and projects routes and transitive definitions, including SDK-only Skills routes.
 Pairing repeats the checks against the selected product and compares the projections
-and auth schemes. Exact MCP name parity covers **all 141 tools** in both directions;
+and auth schemes. Exact MCP name parity covers **all 143 tools** in both directions;
 `check_skills_baseline.py` also compares non-Skills catalog rows, auth, paths,
 definitions, tool names and emitted Python/TypeScript operation records to the SDK
 baseline. These checks qualify the preview contract, not a release image. The
-unchanged `BACKEND_VERSION` pin (`v1.59.0`) serves 111 of the 141 tool names.
+unchanged `BACKEND_VERSION` pin (`v1.59.0`) serves 111 of the 143 tool names.
 Before promotion to `main`, sync the full slice with `sync_contract.py` from a
 published backend release with exact MCP parity, update the pin to that release,
 and pass the pinned-image E2E job. A passing paired build is not a substitute.

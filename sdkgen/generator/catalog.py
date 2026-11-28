@@ -480,6 +480,10 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
     path_params = {p.name for p in params if p.location == "path"}
     if placeholders != path_params:
         raise CatalogError(f"{op_id}: path placeholders {placeholders} != path params {path_params}")
+    arguments = [p.arg_name or p.name for p in params]
+    clashing = sorted({name for name in arguments if arguments.count(name) > 1})
+    if clashing:
+        raise CatalogError(f"{op_id}: two parameters become the argument {clashing}; rename one with contract_fix `as`")
 
     # What the caller gets back: unwrap the {status, result} envelope, then the page items.
     # A 202 Accepted body (an async receipt: a SQL job, a run, a queued grading) is read only when

@@ -7,6 +7,7 @@ import functools
 import os
 import random
 import time
+import uuid
 import warnings
 from dataclasses import dataclass, field, replace
 from typing import IO, Any, Dict, List, Mapping, Optional, Tuple, Union
@@ -156,6 +157,16 @@ def operation_options(options: RequestOptions | None, headers: Mapping[str, Any]
             raise ValueError(f"conflicting {name} values")
         merged = _merge_headers(merged, {name: value})
     return replace(options or RequestOptions(), headers=merged)
+
+
+def with_idempotency_key(options: RequestOptions | None, key: str | None) -> RequestOptions:
+    """The call's options with an `Idempotency-Key` header: the key given, else one already in the
+    headers, else a new one. Set once per call, so every retry of it sends the same key."""
+    headers = dict((options.headers if options else None) or {})
+    given = next((value for name, value in headers.items() if name.lower() == "idempotency-key"), None)
+    headers = {name: value for name, value in headers.items() if name.lower() != "idempotency-key"}
+    headers["Idempotency-Key"] = key or given or str(uuid.uuid4())
+    return replace(options or RequestOptions(), headers=headers)
 
 
 # What a caller may pass for a file parameter: a path, raw bytes, an open binary
@@ -318,6 +329,9 @@ def raw_operation(method: str, path: str, *, unwrap: str | None = "result", mult
 def _url(op: Operation, path: dict | None) -> str:
     url = op.path
     for name, value in (path or {}).items():
+        # An empty value drops a path segment, which reaches another route (often a list) instead of failing.
+        if not str(value if value is not None else "").strip():
+            raise ValueError(f"{op.id}: {name} is empty")
         url = url.replace("{" + name + "}", quote(str(value), safe=""))
     return url
 

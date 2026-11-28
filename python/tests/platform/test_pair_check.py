@@ -160,11 +160,10 @@ def test_the_live_coverage_table_names_every_epoch_operation_once():
     coverage, problems = pc.live_coverage(entries)
     assert problems == []
     assert coverage["tracking"] == "TH-10732"
-    assert sum(coverage["counts"].values()) == 17
+    assert sum(coverage["counts"].values()) == 19
     rows = coverage["operations"]
-    # Only Debug failures succeeds live today; the rest wait for PR2 or cannot succeed.
-    assert {op for op, row in rows.items() if row["bucket"] == "a"} == {
-        "simulation.executions.insights.get", "simulation.executions.insights.start"}
+    # Only reading Debug failures succeeds live today; the rest wait for PR2 or cannot succeed.
+    assert {op for op, row in rows.items() if row["bucket"] == "a"} == {"simulation.executions.insights.get"}
     assert {op for op, row in rows.items() if row["bucket"] == "c"} == {
         "simulation.epochs.candidates.open_pull_request"}
     assert all(row["status"] == "refusal-only until PR2 TH-10732" for row in rows.values() if row["bucket"] == "b")
@@ -174,7 +173,7 @@ def test_the_record_carries_the_live_coverage_table(tmp_path, product):
     path, built = product
     code, record = _run(tmp_path, path, _commit(path, built))
     assert code == 0, record["problems"]
-    assert record["live_coverage"]["counts"] == {"a": 2, "b": 14, "c": 1}
+    assert record["live_coverage"]["counts"] == {"a": 1, "b": 17, "c": 1}
 
 
 @pytest.mark.parametrize("edit, message", [
