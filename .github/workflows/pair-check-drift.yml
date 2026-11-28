@@ -1,0 +1,86 @@
+name: Pair check drift
+
+# Keeps one issue (label pair-check-drift) open while SDK dev's scoped contract no longer
+# matches product dev, and closes it when the two match again (sdkgen/pair_drift_issue.py).
+# ci.yml already fails a push whose slice drifts; this workflow also catches a product dev
+# change that lands while the SDK is quiet. It runs on every push to dev, on a schedule, and
+# by hand. A scheduled run reads the workflow file on the default branch, so the schedule
+# takes effect once this file is on main; until then, dispatch it with `--ref dev`.
+#
+# Only product drift opens or updates the issue. A failure to read the inputs fails this run
+# and touches no issue.
+
+on:
+  push:
+    branches: [dev]
+  schedule:
+    - cron: "41 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: pair-check-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    name: SDK dev against product dev
+    if: github.repository == 'future-agi/futureagi-sdk'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # A scheduled run checks out the default branch; the slice that matters is dev's.
+          ref: dev
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the checker's dependencies
+        run: python -m pip install --quiet pyyaml
+      - name: Pick product dev
+        id: product
+        # The resolver's explicit mode: product dev must exist and hold every file the pairing
+        # reads, or the run fails.
+        run: |
+          python - <<'EOF' >> "$GITHUB_OUTPUT"
+          import sys, tempfile
+          from pathlib import Path
+          sys.path.insert(0, ".github/scripts")
+          import resolve_product_ref as resolver
+          with tempfile.TemporaryDirectory() as directory:
+              sha, _ = resolver.choose_ref("dev", "", "", resolver.GitProbe(Path(directory)))
+          print(f"sha={sha}")
+          EOF
+      - name: Check out product dev (contract and MCP catalog only)
+        uses: actions/checkout@v4
+        with:
+          repository: future-agi/future-agi
+          ref: ${{ steps.product.outputs.sha }}
+          path: future-agi
+          sparse-checkout: |
+            api_contracts/openapi
+            futureagi/mcp_server/catalog
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Compare the scoped slice with product dev
+        # pair_check.py writes pair.json whether or not the slice matches; the next step decides.
+        env:
+          PRODUCT_SHA: ${{ steps.product.outputs.sha }}
+        run: python sdkgen/pair_check.py --product future-agi --sha "$PRODUCT_SHA" --branch dev --out "$RUNNER_TEMP/pair/pair.json" || true
+      - name: Open, update or close the drift issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python sdkgen/pair_drift_issue.py --pair "$RUNNER_TEMP/pair/pair.json" --product future-agi --repo "$GITHUB_REPOSITORY" --run-url "$RUN_URL"
+      - name: Upload the pairing record
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pair-drift
+          path: ${{ runner.temp }}/pair/pair.json
+          if-no-files-found: error
