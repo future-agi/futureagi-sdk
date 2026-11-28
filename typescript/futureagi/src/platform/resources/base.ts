@@ -1494,6 +1494,33 @@ export interface SimulationEnvironmentsEvaluationsUpdateParams {
   name?: string | null;
 }
 
+export interface SimulationEnvironmentsEvidenceImportsAddCasesParams {
+  case_ids: Array<string>;
+  expected_drafts: Record<string, unknown>;
+  /** Idempotency key */
+  idempotency_key: string;
+}
+
+export interface SimulationEnvironmentsEvidenceImportsCreateParams {
+  /** Source kind */
+  source_kind: "session" | "call" | "trace" | "transcript" | "dataset";
+  /** Project id */
+  project_id?: string | null;
+  ids?: Array<string> | null;
+  /** Dataset id */
+  dataset_id?: string | null;
+  columns?: Record<string, unknown> | null;
+  transcripts?: Array<Record<string, unknown>> | null;
+  /** Production */
+  production?: boolean | null;
+}
+
+export interface SimulationEnvironmentsEvidenceImportsDraftParams {
+  case_ids: Array<string>;
+  /** Shows */
+  shows?: Record<string, unknown> | null;
+}
+
 export interface SimulationEnvironmentsNudgesAnswerParams {
   /** Answer */
   answer: "yes" | "no";
@@ -1605,6 +1632,51 @@ export interface SimulationEnvironmentsVersionsDiffParams {
 export interface SimulationEnvironmentsVersionsSetDefaultParams {
   /** Expected default id */
   expected_default_id: string | null;
+}
+
+export interface SimulationEpochsCodingAgentBriefParams {
+  source_run_id: string;
+}
+
+export interface SimulationEpochsLaunchParams {
+  /** Source run id */
+  source_run_id: string;
+  target_scenario_keys: Array<string>;
+  surfaces: Array<"prompt" | "tools" | "settings" | "code">;
+  /** Budget credits */
+  budget_credits: number;
+  protected_scenario_keys?: Array<string> | null;
+  locked_paths?: Array<string> | null;
+  /** Max minutes */
+  max_minutes?: number | null;
+  allowed_models?: Array<string> | null;
+  /** Reply latency margin pct */
+  reply_latency_margin_pct?: number | null;
+  /** Cost margin pct */
+  cost_margin_pct?: number | null;
+  /** Cost limit usd */
+  cost_limit_usd?: number | null;
+}
+
+export interface SimulationEpochsLaunchOptionsParams {
+  source_run_id: string;
+}
+
+export interface SimulationEpochsListParams {
+  environment_id: string;
+  limit?: number | null;
+  /** Comma-separated fix states to list, any of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases. */
+  state?: string | null;
+}
+
+export interface SimulationEpochsCandidatesMakeDefaultParams {
+  /** Override reason */
+  override_reason?: string | null;
+}
+
+export interface SimulationEpochsCandidatesOpenPullRequestParams {
+  /** Override reason */
+  override_reason?: string | null;
 }
 
 export interface SimulationExecutionsGetParams {
@@ -2268,6 +2340,66 @@ export class SimulationEnvironmentsEvaluationsResource extends Resource {
 }
 
 /**
+ * `client.simulation.environments.evidenceImports`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsEvidenceImportsResource extends Resource {
+
+  /**
+   * Add the reviewed, drafted cases of an evidence import to the environment's suite. Reuse the same idempotency_key to repeat a call safely.
+   *
+   * POST /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/add/
+   */
+  addCases(id: string, importId: string, params: SimulationEnvironmentsEvidenceImportsAddCasesParams, options?: RequestOptions): Promise<models.EvidenceImportAddResponse> {
+    return this._t.call<models.EvidenceImportAddResponse>(ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_ADD_CASES, { path: { id: id, import_id: importId }, query: {}, body: { case_ids: params.case_ids, expected_drafts: params.expected_drafts, idempotency_key: params.idempotency_key } }, options);
+  }
+
+  /**
+   * Import evidence for an environment's tests from Observe sessions or calls, dataset rows, or transcripts. Returns what each case holds and lacks. Draft its cases with draft_evidence_import.
+   *
+   * POST /simulate/api/harness-environments/{id}/evidence-imports/
+   */
+  create(id: string, params: SimulationEnvironmentsEvidenceImportsCreateParams, options?: RequestOptions): Promise<models.EvidenceImport> {
+    return this._t.call<models.EvidenceImport>(ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_CREATE, { path: { id: id }, query: {}, body: { source_kind: params.source_kind, project_id: params.project_id, ids: params.ids, dataset_id: params.dataset_id, columns: params.columns, transcripts: params.transcripts, production: params.production } }, options);
+  }
+
+  /**
+   * Discard an evidence import that was never added, with a transcript's stored text. Of an import with added cases, only the cases not added are discarded.
+   *
+   * DELETE /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/
+   */
+  discard(id: string, importId: string, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_DISCARD, { path: { id: id, import_id: importId }, query: {}, body: {} }, options);
+  }
+
+  /**
+   * Ask the environment's builder to draft a scenario for each waiting case of an evidence import. The builder calls models, so it may incur usage charges. Poll get_evidence_import to review the drafts.
+   *
+   * POST /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/draft/
+   */
+  draft(id: string, importId: string, params: SimulationEnvironmentsEvidenceImportsDraftParams, options?: RequestOptions): Promise<models.EvidenceImport> {
+    return this._t.call<models.EvidenceImport>(ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_DRAFT, { path: { id: id, import_id: importId }, query: {}, body: { case_ids: params.case_ids, shows: params.shows } }, options);
+  }
+
+  /**
+   * Return one evidence import and its cases, read again from their sources, to review the drafted scenarios.
+   *
+   * GET /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/
+   */
+  get(id: string, importId: string, options?: RequestOptions): Promise<models.EvidenceImport> {
+    return this._t.call<models.EvidenceImport>(ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_GET, { path: { id: id, import_id: importId }, query: {} }, options);
+  }
+
+  /**
+   * List the evidence imports of an environment that a person can still finish, newest first.
+   *
+   * GET /simulate/api/harness-environments/{id}/evidence-imports/
+   */
+  list(id: string, options?: RequestOptions): Promise<Array<models.EvidenceImportListItem>> {
+    return this._t.call<Array<models.EvidenceImportListItem>>(ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_LIST, { path: { id: id }, query: {} }, options);
+  }
+}
+
+/**
  * `client.simulation.environments.nudges`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class SimulationEnvironmentsNudgesResource extends Resource {
@@ -2514,12 +2646,45 @@ export class SimulationEnvironmentsVersionsResource extends Resource {
 }
 
 /**
+ * `client.simulation.epochs.candidates`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEpochsCandidatesResource extends Resource {
+
+  /**
+   * Make an Epoch's winning candidate the environment's default agent version, so later runs use it. A candidate its checks refused is shipped only by a person, in Future AGI.
+   *
+   * POST /simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/make-default/
+   */
+  makeDefault(id: string, candidateId: string, params: SimulationEpochsCandidatesMakeDefaultParams = {}, options?: RequestOptions): Promise<models.AgentFixMakeDefault> {
+    return this._t.call<models.AgentFixMakeDefault>(ops.OP_SIMULATION_EPOCHS_CANDIDATES_MAKE_DEFAULT, { path: { id: id, candidate_id: candidateId }, query: {}, body: { override_reason: params.override_reason } }, options);
+  }
+
+  /**
+   * Open a pull request with an Epoch's winning candidate on a GitHub agent's repository. It is opened once. A candidate its checks refused is shipped only by a person, in Future AGI.
+   *
+   * POST /simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/pull-request/
+   */
+  openPullRequest(id: string, candidateId: string, params: SimulationEpochsCandidatesOpenPullRequestParams = {}, options?: RequestOptions): Promise<models.AgentFixPullRequest> {
+    return this._t.call<models.AgentFixPullRequest>(ops.OP_SIMULATION_EPOCHS_CANDIDATES_OPEN_PULL_REQUEST, { path: { id: id, candidate_id: candidateId }, query: {}, body: { override_reason: params.override_reason } }, options);
+  }
+
+  /**
+   * Return an Epoch candidate's change as a git patch on the base agent version, to apply by hand.
+   *
+   * GET /simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/patch/
+   */
+  patch(id: string, candidateId: string, options?: RequestOptions): Promise<string> {
+    return this._t.call<string>(ops.OP_SIMULATION_EPOCHS_CANDIDATES_PATCH, { path: { id: id, candidate_id: candidateId }, query: {} }, options);
+  }
+}
+
+/**
  * `client.simulation.executions.insights`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class SimulationExecutionsInsightsResource extends Resource {
 
   /**
-   * Return a run's Insights (debug analysis) state and findings; status is not_requested until one is requested.
+   * Return the Debug failures diagnosis of a finished run (test execution), or its progress while it runs.
    *
    * GET /simulate/test-executions/{test_execution_id}/debug-analysis/
    */
@@ -2528,7 +2693,7 @@ export class SimulationExecutionsInsightsResource extends Resource {
   }
 
   /**
-   * Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
+   * Start Debug failures on a finished run (test execution), one analysis job per call. It may incur usage charges. Starting a diagnosis needs a finished run with at least 15 connected calls and a failing call; a run below that is refused with the reason. On a run below that rule, a diagnosis already made is returned unchanged. On an eligible run, asking again reads again only the calls whose analysis failed or was cancelled, which may incur charges; calls in progress or already read are kept. Poll get_debug_failures for the diagnosis.
    *
    * POST /simulate/test-executions/{test_execution_id}/debug-analysis/
    */
@@ -3344,6 +3509,7 @@ export class SimulationEnvironmentsResource extends Resource {
   actors: SimulationEnvironmentsActorsResource;
   drafts: SimulationEnvironmentsDraftsResource;
   evaluations: SimulationEnvironmentsEvaluationsResource;
+  evidenceImports: SimulationEnvironmentsEvidenceImportsResource;
   nudges: SimulationEnvironmentsNudgesResource;
   readiness: SimulationEnvironmentsReadinessResource;
   runs: SimulationEnvironmentsRunsResource;
@@ -3355,6 +3521,7 @@ export class SimulationEnvironmentsResource extends Resource {
     this.actors = new SimulationEnvironmentsActorsResource(transport);
     this.drafts = new SimulationEnvironmentsDraftsResource(transport);
     this.evaluations = new SimulationEnvironmentsEvaluationsResource(transport);
+    this.evidenceImports = new SimulationEnvironmentsEvidenceImportsResource(transport);
     this.nudges = new SimulationEnvironmentsNudgesResource(transport);
     this.readiness = new SimulationEnvironmentsReadinessResource(transport);
     this.runs = new SimulationEnvironmentsRunsResource(transport);
@@ -3405,6 +3572,90 @@ export class SimulationEnvironmentsResource extends Resource {
    */
   runPlan(id: string, params: SimulationEnvironmentsRunPlanParams = {}, options?: RequestOptions): Promise<models.HarnessRunPlan> {
     return this._t.call<models.HarnessRunPlan>(ops.OP_SIMULATION_ENVIRONMENTS_RUN_PLAN, { path: { id: id }, query: { agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id, scenario_keys: params.scenario_keys } }, options);
+  }
+}
+
+/**
+ * `client.simulation.epochs`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEpochsResource extends Resource {
+  candidates: SimulationEpochsCandidatesResource;
+
+  constructor(transport: Transport) {
+    super(transport);
+    this.candidates = new SimulationEpochsCandidatesResource(transport);
+  }
+
+  /**
+   * Return the verdict on a fix your coding agent submitted, by the attempt's Epoch ID. It gives its state, each check's status, the detail of the static and target checks, and its must-pass regressions. Poll it until the attempt has ended.
+   *
+   * GET /simulate/api/agent-fix-runs/{id}/verdict/
+   */
+  attemptVerdict(id: string, options?: RequestOptions): Promise<models.AgentFixAttemptVerdict> {
+    return this._t.call<models.AgentFixAttemptVerdict>(ops.OP_SIMULATION_EPOCHS_ATTEMPT_VERDICT, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Return what your coding agent needs to fix a finished run itself, with source_run_id the run's test execution ID. It lists the failing cases, the agent's files, the rules for a change, the attempts left, and instructions to follow. Submit the change with `fagi epoch submit`, then read get_epoch_attempt_verdict.
+   *
+   * GET /simulate/api/agent-fix-runs/coding-agent-brief/
+   */
+  codingAgentBrief(params: SimulationEpochsCodingAgentBriefParams, options?: RequestOptions): Promise<models.AgentFixCodingAgentBrief> {
+    return this._t.call<models.AgentFixCodingAgentBrief>(ops.OP_SIMULATION_EPOCHS_CODING_AGENT_BRIEF, { path: {}, query: { source_run_id: params.source_run_id } }, options);
+  }
+
+  /**
+   * Return one Epoch, with its state and step, the limits it holds to, its candidates, and its result once it has ended.
+   *
+   * GET /simulate/api/agent-fix-runs/{id}/
+   */
+  get(id: string, options?: RequestOptions): Promise<models.AgentFixRunDetail> {
+    return this._t.call<models.AgentFixRunDetail>(ops.OP_SIMULATION_EPOCHS_GET, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Start an Epoch on a finished run. It spends credits up to budget_credits and calls models, so it may incur usage charges. Take the scenarios, surfaces, budget and time cap from get_epoch_launch_options; allowed_models, reply_latency_margin_pct, cost_margin_pct and cost_limit_usd are its model lock and limits. Poll get_epoch.
+   *
+   * POST /simulate/api/agent-fix-runs/
+   */
+  launch(params: SimulationEpochsLaunchParams, options?: RequestOptions): Promise<models.AgentFixRun> {
+    return this._t.call<models.AgentFixRun>(ops.OP_SIMULATION_EPOCHS_LAUNCH, { path: {}, query: {}, body: { source_run_id: params.source_run_id, target_scenario_keys: params.target_scenario_keys, surfaces: params.surfaces, budget_credits: params.budget_credits, protected_scenario_keys: params.protected_scenario_keys, locked_paths: params.locked_paths, max_minutes: params.max_minutes, allowed_models: params.allowed_models, reply_latency_margin_pct: params.reply_latency_margin_pct, cost_margin_pct: params.cost_margin_pct, cost_limit_usd: params.cost_limit_usd } }, options);
+  }
+
+  /**
+   * Return what an Epoch on a finished run starts with, the launch form's default for each limit, and why a launch would be refused now. Supply source_run_id, the run's test execution ID. Read it before launch_epoch.
+   *
+   * GET /simulate/api/agent-fix-runs/launch-options/
+   */
+  launchOptions(params: SimulationEpochsLaunchOptionsParams, options?: RequestOptions): Promise<models.AgentFixLaunchOptions> {
+    return this._t.call<models.AgentFixLaunchOptions>(ops.OP_SIMULATION_EPOCHS_LAUNCH_OPTIONS, { path: {}, query: { source_run_id: params.source_run_id } }, options);
+  }
+
+  /**
+   * List the Epochs of one environment, newest first, with each Epoch's state and limits. Supply environment_id.
+   *
+   * GET /simulate/api/agent-fix-runs/
+   */
+  list(params: SimulationEpochsListParams, options?: RequestOptions): Pager<models.AgentFixRun> {
+    return this._t.paginate<models.AgentFixRun>(ops.OP_SIMULATION_EPOCHS_LIST, { path: {}, query: { environment_id: params.environment_id, limit: params.limit, state: params.state } }, options);
+  }
+
+  /**
+   * Start a failed Epoch again as a new Epoch with the same request. Check runs it finished are reused and not paid twice; the rest may incur usage charges. An Epoch can be retried once.
+   *
+   * POST /simulate/api/agent-fix-runs/{id}/retry/
+   */
+  retry(id: string, options?: RequestOptions): Promise<models.AgentFixRun> {
+    return this._t.call<models.AgentFixRun>(ops.OP_SIMULATION_EPOCHS_RETRY, { path: { id: id }, query: {}, body: {} }, options);
+  }
+
+  /**
+   * Stop a running Epoch. It ends as Stopped, and the environment does not change.
+   *
+   * POST /simulate/api/agent-fix-runs/{id}/stop/
+   */
+  stop(id: string, options?: RequestOptions): Promise<models.AgentFixRun> {
+    return this._t.call<models.AgentFixRun>(ops.OP_SIMULATION_EPOCHS_STOP, { path: { id: id }, query: {}, body: {} }, options);
   }
 }
 
@@ -4667,6 +4918,7 @@ export class SessionsResource extends Resource {
 export class SimulationResource extends Resource {
   calls: SimulationCallsResource;
   environments: SimulationEnvironmentsResource;
+  epochs: SimulationEpochsResource;
   executions: SimulationExecutionsResource;
   jobs: SimulationJobsResource;
   personas: SimulationPersonasResource;
@@ -4677,6 +4929,7 @@ export class SimulationResource extends Resource {
     super(transport);
     this.calls = new SimulationCallsResource(transport);
     this.environments = new SimulationEnvironmentsResource(transport);
+    this.epochs = new SimulationEpochsResource(transport);
     this.executions = new SimulationExecutionsResource(transport);
     this.jobs = new SimulationJobsResource(transport);
     this.personas = new SimulationPersonasResource(transport);

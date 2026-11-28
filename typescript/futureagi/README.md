@@ -86,7 +86,7 @@ const ds = await Dataset.open('my-dataset', {
 
 ### 0. The platform client (every API, one object)
 
-`Client` covers the whole platform (158 operations across datasets, prompts, evals, traces, annotation
+`Client` covers the whole platform (259 operations across datasets, prompts, evals, traces, annotation
 queues, knowledge bases, gateways, dashboards, ...). It is generated from the API contract, so method
 names match the Python SDK and the MCP tools; see `sdkgen/README.md` in the repository.
 

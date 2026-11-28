@@ -2,7 +2,7 @@
 
 `sdkgen` generates the platform client for both SDKs (`fi.Client` in Python, `new Client()` in TypeScript) from the backend's API contract plus a small catalog. The catalog records, for each operation, the MCP tool it corresponds to in the monorepo (`futureagi/mcp_server/catalog/tools.yaml`), so an operation has the same name in the SDKs and in MCP; the MCP server itself is generated and served from the monorepo, not here.
 
-It covers the operations behind **all 105 MCP tools** (same names) plus **53 SDK-only operations** that give the clients everything the hand-written `fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues` and `fi.annotations` modules can do: 158 operations across 24 resources. The monorepo's E2E CI checks that the catalog's MCP names still match the monorepo's tool list.
+It covers the operations behind **all 130 MCP tools** (same names) plus **129 SDK-only operations**, among them everything the hand-written `fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues` and `fi.annotations` modules can do: 259 operations across 26 resources. The monorepo's E2E CI checks that the catalog's MCP names still match the monorepo's tool list.
 
 ```
 future-agi/api_contracts/openapi/swagger.json ──sync_contract.py──▶ sdkgen/contracts/swagger.json
@@ -184,8 +184,8 @@ By default, a Python response that still doesn't match gives you the raw JSON an
 `python/tests/platform/test_all_operations_live.py` calls **every** catalog operation against a live backend. Its last test fails if any operation was never called, and prints what each one returned.
 
 Against a local `bin/install` backend:
-- **145 of 158** operations succeed, and their responses validate strictly.
-- **13** return the backend's typed error: plan-gated features (`402`); `usage.overview`, which self-hosted installs don't serve (`404`); trace, span and session reads, which wait on ClickHouse indexing; simulation runs, which wait on scenario generation; `evals.test`, which needs a model provider; `datasets.create_from_huggingface`, which needs outbound access to huggingface.co; lookups of ids that don't exist on a fresh install.
+- Most operations succeed, and their responses validate strictly.
+- The rest return the backend's typed error: plan-gated features (`402`); `usage.overview`, which self-hosted installs don't serve (`404`); trace, span and session reads, which wait on ClickHouse indexing; simulation runs, which wait on scenario generation; `evals.test`, which needs a model provider; `datasets.create_from_huggingface`, which needs outbound access to huggingface.co; the evidence-import and Epoch operations, which need an environment that a fresh install cannot build (each asserts its view's exact refusal); lookups of ids that don't exist on a fresh install.
 
 `typescript/futureagi/src/platform/__tests__/` covers the TypeScript transport and generated code against an injected `fetch` (bodies, encoding, every pagination style, retries, errors, uploads, per-call options, resource overrides) and, with `pnpm test:live`, the same flows against the backend: datasets, uploads, prompts with drafts and labels, the hand-written `spans.ingest`, annotation labels and queues, knowledge bases, typed errors.
 
@@ -219,25 +219,40 @@ The one-time setup is required before automatic releases work. Missing app crede
 - Move `operations.yaml` into the monorepo next to the MCP catalog (`tools.yaml`), so one file drives MCP and the SDKs and the sync workflow copies it here with the contract.
 - Deprecate the hand-written modules (`fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues`, `fi.annotations`, and their TypeScript counterparts) in favour of the generated client, then remove them in a major release.
 
-### Reproduce the four SQL mappings before the next backend sync
+### Reproduce the scoped SQL and Epoch mappings before the next backend sync
 
-The four SQL mappings were sourced from the product dev commit below. The SDK
-tests against the v1.59.0 release pinned in `BACKEND_VERSION`; other operations
-keep the existing SDK dev contract.
-The two input commits and byte hashes are recorded in `x-contract-sources` in
-the committed Swagger slice. From the SDK checkout:
+Two groups of operations come from one product dev commit, ahead of a backend
+release: the four SQL tools and the 19 tools of the product's MCP group `epoch`
+(Debug failures, evidence imports and Epoch). Every other operation keeps the
+contract of the SDK `dev` slice it was composed on (`x-contract-sources.other`).
+The SDK still pins the v1.59.0
+release in `BACKEND_VERSION`. That release already serves Debug failures and most
+Epoch (`agent-fix-runs`) routes, though four of them have an older contract there.
+It has no evidence-imports routes, no coding-agent brief or attempt verdict
+routes, and no MCP group `epoch`.
+`sdkgen/sync_scoped_contract.py` writes the mixed slice and records both input
+commits and the byte hashes of the product's OpenAPI, `tools.generated.json`
+and `tools.yaml` in `x-contract-sources` (`sql`, `epoch` and `other`). Before
+writing it checks each scoped catalog entry against the product MCP tool it
+names: the scope's whole tool set, group, access and open-world hints, method,
+path and operationId, each input's placement, requiredness and wire schema,
+page caps, response unwrapping, and, for `epoch`, the description byte for
+byte. From the SDK checkout:
 
 ```sh
-product_commit=6fc655b986f862ccbdd475bfc87fc09c4ef459e9
-sdk_baseline=198f1f8bf23836072d5016976a9a6c235c52ee2b
-python sdkgen/sync_sql_contract.py "$PRODUCT_REPO" "$product_commit" "$sdk_baseline"
+product_commit=2aa9ca36dcdcaf5e2177be287b4dc03bc689cd8b
+sdk_baseline=2c8a5061c5818e29a6aaf5486b09f8268c625a78
+python sdkgen/sync_scoped_contract.py "$PRODUCT_REPO" "$product_commit" "$sdk_baseline"
 python sdkgen/generate.py
 python sdkgen/check_mcp_parity.py --ref "$product_commit"
+python sdkgen/check_mcp_descriptions.py
 ```
 
-The parity command checks the **entire** MCP name list of that commit. It does
-not qualify a later product ref, the release image, or a combined Skills build.
-The normal release sync replaces this scoped slice; no release pin changes here.
+The parity command checks the **entire** MCP name list of that commit (130
+tools), in both directions. It does not qualify a later product ref or the
+release image. `check_mcp_descriptions.py` reads `tools.yaml` at the commit in
+`x-contract-sources` and checks its sha256 before comparing. The normal release
+sync replaces this scoped slice; no release pin changes here.
 
 The four SQL calls opt in to `surfaces.sdk.declared_optional_nullability`. An
 optional request field may be omitted; it accepts null only if its Swagger

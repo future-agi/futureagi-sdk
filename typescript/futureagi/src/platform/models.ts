@@ -117,6 +117,395 @@ export interface AgentDefinitionResponse {
   livekit_max_concurrency?: unknown | null;
 }
 
+export interface AgentFixAgent {
+  name?: string | null;
+  kind?: string | null;
+  version_id?: string | null;
+  version_number?: number | null;
+  ref?: string | null;
+}
+
+export interface AgentFixAttemptTier {
+  name?: string | null;
+  status?: string | null; // one of: passed, failed, pending, skipped
+  detail?: string | null;
+}
+
+export interface AgentFixAttemptVerdict {
+  id?: string | null;
+  number?: number | null;
+  state?: string | null; // one of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases
+  step?: string | null; // one of: variations, reproduce, search, verify, done
+  ending?: string | null; // one of: ready, no_improvement, not_reproduced, out_of_budget, failed
+  failure?: AgentFixFailure | null;
+  summary?: string | null;
+  tiers?: Array<AgentFixAttemptTier | null> | null;
+  counted?: boolean | null;
+  must_pass_regressions?: Array<string | null> | null;
+  patch_available?: boolean | null;
+  pull_request_url?: string | null;
+}
+
+export interface AgentFixCandidate {
+  id?: string | null;
+  attempt?: number | null;
+  agent_version_id?: string | null;
+  version_number?: number | null;
+  summary?: string | null;
+  outcome?: string | null; // one of: pending, rejected, finalist, winner
+  verdict?: AgentFixVerdict | null;
+  check_runs?: Array<AgentFixCheckRun | null> | null;
+  override?: AgentFixOverride | null;
+  pull_request_url?: string | null;
+  created_at?: string | null;
+}
+
+export interface AgentFixCandidateDetail {
+  id?: string | null;
+  attempt?: number | null;
+  agent_version_id?: string | null;
+  version_number?: number | null;
+  summary?: string | null;
+  outcome?: string | null; // one of: pending, rejected, finalist, winner
+  verdict?: AgentFixVerdict | null;
+  check_runs?: Array<AgentFixCheckRun | null> | null;
+  override?: AgentFixOverride | null;
+  pull_request_url?: string | null;
+  created_at?: string | null;
+  wording?: AgentFixCandidateWording | null;
+}
+
+export interface AgentFixCandidateWording {
+  headline?: string | null;
+  must_pass?: string | null;
+  must_pass_broken?: number | null;
+  changes?: string | null;
+  caveats?: Array<string | null> | null;
+}
+
+export interface AgentFixCeilingNumbers {
+  baseline?: number | null;
+  candidate?: number | null;
+  allowed?: number | null;
+  limit?: number | null;
+}
+
+export interface AgentFixCheckRun {
+  run_id?: string | null;
+  test_execution_id?: string | null;
+  label?: string | null;
+  state?: string | null;
+}
+
+export interface AgentFixCodingAgentBrief {
+  source_run?: AgentFixLaunchSourceRun | null;
+  environment?: AgentFixLaunchEnvironment | null;
+  agent?: AgentFixAgent | null;
+  base_commit?: string | null;
+  files?: Array<string | null> | null;
+  targets?: Array<AgentFixCodingAgentTarget | null> | null;
+  protected_scenario_keys?: Array<string | null> | null;
+  locked_paths?: Array<string | null> | null;
+  failures?: Array<AgentFixCodingAgentFailure | null> | null;
+  attempts?: AgentFixOutsideAttempts | null;
+  blocked?: AgentFixFailure | null;
+  instructions?: string | null;
+}
+
+export interface AgentFixCodingAgentFailure {
+  scenario_key?: string | null;
+  trial?: number | null;
+  sub_goals?: unknown | null;
+  reasons?: unknown | null;
+  transcript?: string | null;
+}
+
+export interface AgentFixCodingAgentTarget {
+  key?: string | null;
+  name?: string | null;
+  failing_sub_goals?: Array<string | null> | null;
+}
+
+export interface AgentFixDiagnosis {
+  causes?: Array<string | null> | null;
+}
+
+export interface AgentFixEnvironment {
+  name?: string | null;
+  version?: number | null;
+  default_agent_version_id?: string | null;
+}
+
+export interface AgentFixEpochIssue {
+  job_id?: string | null;
+  cluster_id?: string | null;
+  project_id?: string | null;
+  title?: string | null;
+}
+
+export interface AgentFixEvalWarning {
+  name?: string | null;
+  pass_rate?: number | null;
+  base_pass_rate?: number | null;
+  trials?: number | null;
+  base_trials?: number | null;
+}
+
+export interface AgentFixFailure {
+  code?: string | null;
+  message?: string | null;
+}
+
+export interface AgentFixFlakyProtected {
+  key?: string | null;
+  name?: string | null;
+  sub_goal?: string | null;
+  passed?: number | null;
+  runs?: number | null;
+}
+
+export interface AgentFixLaunchBlocked {
+  code?: string | null;
+  message?: string | null;
+  cluster_id?: string | null;
+}
+
+export interface AgentFixLaunchDefaults {
+  surfaces?: Array<string | null> | null;
+  budget_credits?: number | null;
+  max_minutes?: number | null;
+  allowed_models?: Array<string | null> | null;
+  agent_cost_metered?: boolean | null;
+  agent_calls_unmeasured?: boolean | null;
+  reply_latency_margin_pct?: number | null;
+  cost_margin_pct?: number | null;
+}
+
+export interface AgentFixLaunchEnvironment {
+  id?: string | null;
+  name?: string | null;
+  version?: number | null;
+}
+
+export interface AgentFixLaunchLimits {
+  budget_credits_max?: number | null;
+  max_minutes_max?: number | null;
+  scenarios_min?: number | null;
+  cases_min?: number | null;
+  variations_per_case?: number | null;
+  verified_cases_min?: number | null;
+  scenarios_max?: number | null;
+}
+
+export interface AgentFixLaunchOptions {
+  source_run?: AgentFixLaunchSourceRun | null;
+  environment?: AgentFixLaunchEnvironment | null;
+  agent?: AgentFixAgent | null;
+  scenarios?: Array<AgentFixLaunchScenario | null> | null;
+  suggested?: AgentFixLaunchSuggested | null;
+  surfaces?: Array<AgentFixLaunchSurface | null> | null;
+  defaults?: AgentFixLaunchDefaults | null;
+  limits?: AgentFixLaunchLimits | null;
+  blocked?: AgentFixLaunchBlocked | null;
+  variations_blocked?: AgentFixFailure | null;
+  held_back_scenario_keys?: Array<string | null> | null;
+  ship?: AgentFixShipReadiness | null;
+  held_back_from?: string | null; // one of: locked_version, sample
+  locked_version_label?: string | null;
+}
+
+export interface AgentFixLaunchScenario {
+  key?: string | null;
+  name?: string | null;
+  passed?: boolean | null;
+  failing_sub_goals?: Array<string | null> | null;
+  evidence_import_id?: string | null;
+  split?: string | null; // one of: train, test
+}
+
+export interface AgentFixLaunchSourceRun {
+  id?: string | null;
+  number?: number | null;
+  state?: string | null;
+  finished_at?: string | null;
+}
+
+export interface AgentFixLaunchSuggested {
+  target_scenario_keys?: Array<string | null> | null;
+  protected_scenario_keys?: Array<string | null> | null;
+}
+
+export interface AgentFixLaunchSurface {
+  id?: string | null; // one of: prompt, tools, settings, code
+  label?: string | null;
+  allowed?: boolean | null;
+  reason?: string | null;
+}
+
+export interface AgentFixMakeDefault {
+  outcome?: string | null;
+}
+
+export interface AgentFixOutsideAttempts {
+  used?: number | null;
+  max?: number | null;
+}
+
+export interface AgentFixOutsideCandidate {
+  summary?: string | null;
+  number?: number | null;
+}
+
+export interface AgentFixOverride {
+  allowed?: boolean | null;
+  regressions?: Array<string | null> | null;
+  reason?: string | null;
+  by?: HarnessVersionPerson | null;
+  at?: string | null;
+}
+
+export interface AgentFixPlan {
+  target?: number | null;
+  held_back?: number | null;
+  must_pass?: number | null;
+  protected?: number | null;
+  max_candidates?: number | null;
+  repeats?: number | null;
+  baseline_spread_pts?: number | null;
+}
+
+export interface AgentFixPullRequest {
+  pull_request_url?: string | null;
+}
+
+export interface AgentFixReport {
+  ending?: string | null;
+  summary?: string | null;
+  winner_candidate_id?: string | null;
+  flaky_protected?: Array<AgentFixFlakyProtected | null> | null;
+}
+
+export interface AgentFixRequest {
+  target_scenario_keys?: Array<string | null> | null;
+  protected_scenario_keys?: Array<string | null> | null;
+  held_back_scenario_keys?: Array<string | null> | null;
+  failing_sub_goals?: Array<string | null> | null;
+  surfaces?: Array<string | null> | null;
+  locked_paths?: Array<string | null> | null;
+  budget_credits?: number | null;
+  max_minutes?: number | null;
+  variations_pending?: boolean | null;
+  variation_parents?: unknown | null;
+  allowed_models?: Array<string | null> | null;
+  reply_latency_margin_pct?: number | null;
+  cost_margin_pct?: number | null;
+  cost_limit_usd?: number | null;
+  observes_models?: boolean | null;
+  meters_agent_cost?: boolean | null;
+  measured_automatically?: boolean | null;
+  outside_candidate?: AgentFixOutsideCandidate | null;
+}
+
+export interface AgentFixRun {
+  id?: string | null;
+  number?: number | null;
+  environment_id?: string | null;
+  environment?: AgentFixEnvironment | null;
+  source_run_id?: string | null;
+  source_run_number?: number | null;
+  base_agent_version_id?: string | null;
+  agent?: AgentFixAgent | null;
+  state?: string | null; // one of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases
+  stage?: string | null;
+  step?: string | null; // one of: variations, reproduce, search, verify, done
+  plan?: AgentFixPlan | null;
+  diagnosis?: AgentFixDiagnosis | null;
+  request?: AgentFixRequest | null;
+  spent_credits?: number | null;
+  committed_credits?: number | null;
+  report?: AgentFixReport | null;
+  failure?: AgentFixFailure | null;
+  retried_from_id?: string | null;
+  retryable?: boolean | null;
+  attempt_of_id?: string | null;
+  counted?: boolean | null;
+  limited_validation?: boolean | null;
+  issue?: AgentFixEpochIssue | null;
+  from_issue?: boolean | null;
+  check_runs?: Array<AgentFixCheckRun | null> | null;
+  candidates?: Array<AgentFixCandidate | null> | null;
+  started_at?: string | null;
+  finished_at?: string | null;
+  created_at?: string | null;
+}
+
+export interface AgentFixRunDetail {
+  id?: string | null;
+  number?: number | null;
+  environment_id?: string | null;
+  environment?: AgentFixEnvironment | null;
+  source_run_id?: string | null;
+  source_run_number?: number | null;
+  base_agent_version_id?: string | null;
+  agent?: AgentFixAgent | null;
+  state?: string | null; // one of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases
+  stage?: string | null;
+  step?: string | null; // one of: variations, reproduce, search, verify, done
+  plan?: AgentFixPlan | null;
+  diagnosis?: AgentFixDiagnosis | null;
+  request?: AgentFixRequest | null;
+  spent_credits?: number | null;
+  committed_credits?: number | null;
+  report?: AgentFixReport | null;
+  failure?: AgentFixFailure | null;
+  retried_from_id?: string | null;
+  retryable?: boolean | null;
+  attempt_of_id?: string | null;
+  counted?: boolean | null;
+  limited_validation?: boolean | null;
+  issue?: AgentFixEpochIssue | null;
+  from_issue?: boolean | null;
+  check_runs?: Array<AgentFixCheckRun | null> | null;
+  candidates?: Array<AgentFixCandidateDetail | null> | null;
+  started_at?: string | null;
+  finished_at?: string | null;
+  created_at?: string | null;
+  eval_warnings?: Array<AgentFixEvalWarning | null> | null;
+  eval_grading?: string | null; // one of: none, pending, done, incomplete
+  flaky_protected_text?: Array<string | null> | null;
+  scenario_names?: unknown | null;
+}
+
+export interface AgentFixShipReadiness {
+  path?: string | null; // one of: pull_request, make_default
+  blocked?: AgentFixFailure | null;
+}
+
+export interface AgentFixVerdict {
+  accepted?: boolean | null;
+  reason?: string | null;
+  target_pass_rate?: Array<number | null> | null;
+  held_back_pass_rate?: Array<number | null> | null;
+  must_pass_regressions?: Array<string | null> | null;
+  must_pass_within_noise?: Array<string | null> | null;
+  tiers?: Array<AgentFixVerdictTier | null> | null;
+}
+
+export interface AgentFixVerdictTier {
+  name?: string | null;
+  status?: string | null; // one of: passed, failed, pending, skipped
+  detail?: string | null;
+  parts?: Array<AgentFixVerdictTierPart | null> | null;
+  latency?: AgentFixCeilingNumbers | null;
+  cost?: AgentFixCeilingNumbers | null;
+}
+
+export interface AgentFixVerdictTierPart {
+  name?: string | null;
+  status?: string | null; // one of: passed, failed, skipped
+  detail?: string | null;
+}
+
 export interface AgentFlowGraph {
   nodes?: Array<unknown | null> | null;
   edges?: Array<unknown | null> | null;
@@ -1115,6 +1504,151 @@ export interface EventsOverTimePoint {
   errors?: number | null;
   passing?: number | null;
   users?: number | null;
+}
+
+export interface EvidenceDuplicateOf {
+  import_id?: string | null;
+  case_id?: string | null;
+  scenario_name?: string | null;
+}
+
+export interface EvidenceExpectedOutcome {
+  status?: string | null; // one of: present, partial, truncated, missing, unreadable
+  reason?: string | null;
+  text?: string | null;
+}
+
+export interface EvidenceImport {
+  id?: string | null;
+  environment_id?: string | null;
+  project_id?: string | null;
+  dataset_id?: string | null;
+  agent_version_id?: string | null;
+  source_kind?: string | null; // one of: session, call, trace, transcript, dataset
+  created_at?: string | null;
+  simulated?: boolean | null;
+  production?: boolean | null;
+  drafting?: boolean | null;
+  cases?: Array<EvidenceImportCase | null> | null;
+  redaction?: EvidenceRedaction | null;
+}
+
+export interface EvidenceImportAddResponse {
+  saved?: boolean | null;
+  evidence_import?: EvidenceImport | null;
+}
+
+export interface EvidenceImportCase {
+  id?: string | null;
+  source_id?: string | null;
+  name?: string | null;
+  status?: string | null; // one of: pending, unavailable, drafted, blocked, added, discarded, duplicate
+  reason?: string | null;
+  source_available?: boolean | null;
+  scenario_key?: string | null;
+  scenario_name?: string | null;
+  new_checks?: Array<EvidenceNewCheck | null> | null;
+  changed_since_import?: boolean | null;
+  also_from?: number | null;
+  duplicate_of?: EvidenceDuplicateOf | null;
+  trace_ids?: Array<string | null> | null;
+  started_at?: string | null;
+  ended_at?: string | null;
+  transcript?: EvidenceTranscript | null;
+  tool_calls?: EvidenceToolCalls | null;
+  tool_inputs?: EvidencePart | null;
+  tool_outputs?: EvidencePart | null;
+  starting_state?: EvidencePart | null;
+  labels?: EvidenceLabels | null;
+  expected_outcome?: EvidenceExpectedOutcome | null;
+}
+
+export interface EvidenceImportListItem {
+  id?: string | null;
+  source_kind?: string | null; // one of: session, call, trace, transcript, dataset
+  source_name?: string | null;
+  source_available?: boolean | null;
+  case_count?: number | null;
+  added_count?: number | null;
+  status?: string | null; // one of: waiting, drafting, drafted, partly_added, blocked
+  created_at?: string | null;
+  can_discard?: boolean | null;
+}
+
+export interface EvidenceLabel {
+  name?: string | null;
+  kind?: string | null;
+  value?: unknown | null;
+  notes?: string | null;
+  target?: string | null; // one of: session, trace, span, row
+}
+
+export interface EvidenceLabels {
+  status?: string | null; // one of: present, partial, truncated, missing, unreadable
+  reason?: string | null;
+  labels?: Array<EvidenceLabel | null> | null;
+}
+
+export interface EvidenceNewCheck {
+  name?: string | null;
+  what?: string | null;
+}
+
+export interface EvidencePart {
+  status?: string | null; // one of: present, partial, truncated, missing, unreadable
+  reason?: string | null;
+}
+
+export interface EvidenceRedaction {
+  method?: string | null; // one of: presidio, basic
+  reason?: string | null;
+  findings?: Array<EvidenceRedactionFinding | null> | null;
+  total?: number | null;
+}
+
+export interface EvidenceRedactionFinding {
+  case_id?: string | null;
+  part?: string | null; // one of: transcript, tool_calls, labels, expected_outcome
+  index?: number | null;
+  field?: string | null; // one of: text, input, output, error, notes, value, name
+  entity?: string | null;
+  start?: number | null;
+  end?: number | null;
+  value?: string | null;
+  replacement?: string | null;
+}
+
+export interface EvidenceToolCall {
+  span_id?: string | null;
+  trace_id?: string | null;
+  name?: string | null;
+  at?: string | null;
+  failed?: boolean | null;
+  error?: string | null;
+  input?: string | null;
+  output?: string | null;
+  input_truncated?: boolean | null;
+  output_truncated?: boolean | null;
+}
+
+export interface EvidenceToolCalls {
+  status?: string | null; // one of: present, partial, truncated, missing, unreadable
+  reason?: string | null;
+  calls?: Array<EvidenceToolCall | null> | null;
+}
+
+export interface EvidenceTranscript {
+  status?: string | null; // one of: present, partial, truncated, missing, unreadable
+  reason?: string | null;
+  turns?: Array<EvidenceTurn | null> | null;
+}
+
+export interface EvidenceTurn {
+  role?: string | null; // one of: user, agent
+  text?: string | null;
+  truncated?: boolean | null;
+  trace_id?: string | null;
+  at?: string | null;
 }
 
 export interface ExperimentDetailV2 {

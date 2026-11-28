@@ -11,6 +11,7 @@ JOB = yaml.safe_load((ROOT / ".github/workflows/e2e.yml").read_text())["jobs"]["
 STEPS = JOB["steps"]
 SELECT = next(s for s in STEPS if s.get("name", "").startswith("Pick the backend"))
 BOOT = next(s for s in STEPS if s.get("id") == "boot")
+BOOT_PAIRED = next(s for s in STEPS if s.get("id") == "boot_paired")
 SQL = next(s for s in STEPS if s.get("name") == "Provision the standalone SQL fixture")
 PIN = (ROOT / "sdkgen/contracts/BACKEND_VERSION").read_text().strip()
 
@@ -59,10 +60,15 @@ def test_refuses_unapproved_helper_or_wrong_explicit_commit(tmp_path, ref):
 @pytest.mark.parametrize("version", [PIN, "latest", "v1.60.0"])
 def test_provision_is_unconditional_and_ordered(tmp_path, version):
     live = next(s for s in STEPS if s.get("name", "").startswith("Python live suite"))
-    assert not any("if" in s for s in (JOB, BOOT, SQL, live))
-    assert STEPS.index(BOOT) < STEPS.index(SQL) < STEPS.index(live)
-    assert 'curl -fsS "$FI_BASE_URL/health/"' in BOOT["run"]
-    assert "FUTURE_AGI_E2E_FIXTURE=" not in BOOT["run"]
+    # Exactly one boot runs, chosen by the pairing mode alone; provisioning and the live suite
+    # always run after it, whichever it was.
+    assert not any("if" in s for s in (JOB, SQL, live))
+    assert BOOT["if"] == "steps.product.outputs.mode == 'pinned' || steps.product.outputs.mode == 'latest'"
+    assert BOOT_PAIRED["if"] == "steps.product.outputs.mode == 'paired'"
+    assert STEPS.index(BOOT) < STEPS.index(BOOT_PAIRED) < STEPS.index(SQL) < STEPS.index(live)
+    for boot in (BOOT, BOOT_PAIRED):
+        assert 'curl -fsS "$FI_BASE_URL/health/"' in boot["run"]
+        assert "FUTURE_AGI_E2E_FIXTURE=" not in boot["run"]
     # Capture argv only. Never emulate the helper, account, SDK or backend.
     (tmp_path / "sdk-bootstrap-sql.py").touch()
     proc = shell('docker() { printf "%s\\n" "$*"; };\n' + SQL["run"], tmp_path,

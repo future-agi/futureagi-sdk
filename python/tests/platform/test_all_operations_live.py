@@ -50,6 +50,30 @@ def allow(fn, *statuses: int):
         raise
 
 
+# run_debug_failures refuses a run it cannot diagnose with 409 and one of these eligibility codes
+# (debug_failures_refusal, product tracer/services/simulation_investigation.py:159-189).
+DEBUG_FAILURES_INELIGIBLE = {
+    "execution_not_completed",
+    "execution_calls_unfinished",
+    "investigation_too_few_calls",
+    "investigation_nothing_failed",
+}
+
+
+def refused_with(fn, http_status: int, **body) -> fi.APIError:
+    """Call fn, which must fail with exactly `http_status` and a JSON body whose listed fields equal `body`.
+
+    Unlike allow(), this proves which view answered: a route the backend lacks gets Django's own
+    404 page, never the view's error body."""
+    with pytest.raises(fi.APIError) as caught:
+        fn()
+    error = caught.value
+    assert error.status_code == http_status, (error.status_code, error.body)
+    assert isinstance(error.body, dict), error.body
+    assert {key: error.body.get(key) for key in body} == body, error.body
+    return error
+
+
 def wait_until(predicate, timeout: float = 20.0, every: float = 0.25) -> bool:
     """Poll a backend state change made by a background worker."""
     deadline = time.monotonic() + timeout
@@ -860,8 +884,28 @@ def test_agents_and_simulation(client, request):
     # Empty lists are refused before anything is created (no judge credits).
     allow(lambda: client.simulation.tests.add_eval_configs(test.id, evaluations_config=[]), 400)
     allow(lambda: client.simulation.executions.list_calls(execution_id).first_page(), 404)
-    allow(lambda: client.simulation.executions.insights.get(execution_id), 404)
-    allow(lambda: client.simulation.executions.insights.start(execution_id), 400, 404, 409)
+    # Debug failures (MCP get_debug_failures / run_debug_failures). Product 2aa9ca3,
+    # simulate/views/debug_analysis.py: a run never analysed reads not_requested. Start answers
+    # 202 (pending while its jobs wait for the Error Feed worker, which a standalone stack does not
+    # run) only for a finished run with at least 15 connected calls and a failing call; any other
+    # run is refused with 409 and one of the eligibility codes in
+    # tracer/services/simulation_investigation.py:159-189. An unknown run is a 404 in the product's
+    # error envelope {status: false, ...}, where a missing route would get Django's 404 page.
+    insights = client.simulation.executions.insights
+    if execution:
+        state = insights.get(execution_id)
+        assert (state.test_execution_id, state.status) == (execution_id, "not_requested")
+        try:
+            started = insights.start(execution_id)
+        except fi.ConflictError as conflict:
+            assert conflict.code in DEBUG_FAILURES_INELIGIBLE, conflict.body
+            print(f"run_debug_failures refused: {conflict.code}")
+        else:
+            assert started.status == "pending" and insights.get(execution_id).status == "pending"
+            print("run_debug_failures accepted: pending")
+    else:
+        refused_with(lambda: insights.get(execution_id), 404, status=False)
+        refused_with(lambda: insights.start(execution_id), 404, status=False)
     allow(lambda: client.simulation.executions.rerun_calls(execution_id, rerun_type="eval_only", call_execution_ids=[str(uuid.uuid4())]), 400, 404)
     allow(lambda: client.simulation.calls.get(str(uuid.uuid4())), 404)
 
@@ -971,6 +1015,73 @@ def test_simulation_environments_and_jobs(client):
     with pytest.raises(fi.APIError) as refused:
         jobs.upload_secret_file(file=("creds.json", b"{}"), environment_name="NOT_A_SUPPORTED_NAME")
     assert refused.value.status_code in (400, 422)
+
+
+def test_evidence_imports_and_epochs(client):
+    """Evidence imports and Epoch (the product's MCP group `epoch`), against the views of product
+    2dcb8dc. A fresh standalone stack has no environment: the product makes one only through a
+    builder build, which needs the simulation runner and a sandbox that the stack does not start
+    (product e2e/lib/environment-seed.ts seeds one through internal services instead). So it has no
+    environment run to launch an Epoch from, and no Epoch or candidate either. Every call names
+    ids that do not exist and asserts the refusal body of the view that answers it:
+
+    - evidence imports: HarnessEnvironmentViewSet._not_found, 404 {"detail": "Environment not
+      found"} (simulate/views/harness_environment.py:329-333; create 921, list 985, get 1005,
+      discard 1022, draft 1048 and add 1084, the last two after require_versioning, which the
+      standalone overlay enables with HARNESS_VERSIONING_ENABLED);
+    - Epochs and candidates: agent_fix._not_found, 404 {"error": "not_found", "message": "Not
+      found"} (simulate/views/agent_fix.py:96-99, HostedHarnessError.as_dict in
+      simulate/services/hosted_harness.py:115-121; list 154, launch_options 183, launch 202,
+      get 226, retry 239, stop 254, make_default 283, open_pull_request 306, patch 332). These
+      views first check the fix_my_agent entitlement (AgentFixRunViewSet.initial, 112-116; a
+      denial is a 402 entitlement_error from accounts/authentication.py custom_exception_handler),
+      so this body also shows the entitlement allowed. It is on a self-hosted stack:
+      fix_my_agent requires a licence but is not oss_locked (tfc/capabilities/registry.py:195-201),
+      and self-hosted allows every such feature (tfc/capabilities/service.py:156-161), unlike
+      instant_eval and insights, which are oss_locked;
+    - a coding agent's brief and attempt verdict (product 2aa9ca3): the same 404 body, but from
+      AgentFixRunViewSet.initial before the entitlement check, because the stack leaves
+      AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED off (simulate/views/agent_fix.py:143-148,
+      tfc/settings/settings.py:1166-1170). Their 404 says nothing about the entitlement.
+
+    Request bodies are valid, so the serializer passes and the view itself refuses."""
+    env, import_id, run, candidate = (str(uuid.uuid4()) for _ in range(4))
+    imports = client.simulation.environments.evidence_imports
+    transcript = [{"name": "refund.txt", "format": "text", "text": "User: I want a refund.\nAgent: Done."}]
+    expected_drafts = {"environment": {"id": None, "revision": 0}, "suite": {"id": None, "revision": 0}}
+    for call in (
+        lambda: imports.list(env),
+        lambda: imports.create(env, source_kind="transcript", transcripts=transcript),
+        lambda: imports.get(env, import_id),
+        lambda: imports.draft(env, import_id, case_ids=[candidate]),
+        lambda: imports.add_cases(env, import_id, case_ids=[candidate], expected_drafts=expected_drafts, idempotency_key=_name("add")),
+        lambda: imports.discard(env, import_id),
+    ):
+        refused_with(call, 404, detail="Environment not found")
+
+    epochs = client.simulation.epochs
+    for call in (
+        lambda: epochs.list(environment_id=env, limit=1).first_page(),
+        lambda: epochs.launch_options(source_run_id=run),
+        lambda: epochs.coding_agent_brief(source_run_id=run),
+        lambda: epochs.attempt_verdict(run),
+        lambda: epochs.launch(source_run_id=run, target_scenario_keys=["scenario-1"], surfaces=["prompt"], budget_credits=1),
+        lambda: epochs.get(run),
+        lambda: epochs.stop(run),
+        lambda: epochs.retry(run),
+        lambda: epochs.candidates.patch(run, candidate),
+        lambda: epochs.candidates.make_default(run, candidate),
+        lambda: epochs.candidates.open_pull_request(run, candidate),
+    ):
+        refused_with(call, 404, error="not_found", message="Not found")
+    # Shipping a candidate its checks refused is a person's decision, made in Future AGI: an
+    # override_reason sent with an API key is refused before the candidate is looked up
+    # (AgentFixRunViewSet._override_reason, simulate/views/agent_fix.py:403-414 at 2aa9ca3).
+    for call in (
+        lambda: epochs.candidates.make_default(run, candidate, override_reason="sdk live test"),
+        lambda: epochs.candidates.open_pull_request(run, candidate, override_reason="sdk live test"),
+    ):
+        refused_with(call, 403, error="fix_override_needs_person")
 
 
 def test_gateway_management(client):
